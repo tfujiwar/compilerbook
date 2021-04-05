@@ -7,6 +7,7 @@
 
 typedef enum {
   TK_RESERVED,
+  TK_IDENT,
   TK_NUM,
   TK_EOF,
 } TokenKind;
@@ -16,6 +17,8 @@ typedef enum {
   ND_SUB,
   ND_MUL,
   ND_DIV,
+  ND_ASSIGN,
+  ND_LVAR,
   ND_NUM,
   ND_EQ,
   ND_NE,
@@ -40,8 +43,10 @@ struct Node {
   Node *lhs;
   Node *rhs;
   int val;
+  int offset;
 };
 
+void debug(char *fmt, ...);
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
@@ -55,7 +60,10 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 
+void program();
+Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -64,6 +72,8 @@ Node *unary();
 Node *primary();
 
 void gen(Node *node);
+void gen_lval(Node *node);
 
 extern Token *token;
 extern char *user_input;
+extern Node *code[];
