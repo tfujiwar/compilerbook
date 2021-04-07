@@ -43,4 +43,6 @@ assert 1 "1>=1;"
 assert 1 "a = 1;"
 assert 2 "a = 1+2; a = a*2; a/3;"
 
+assert 2 "var = 1+2; var = var*2; var/3;"
+
 echo OK
