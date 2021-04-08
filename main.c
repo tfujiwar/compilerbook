@@ -25,13 +25,8 @@ int main(int argc, char **argv) {
   printf("  mov rbp, rsp\n");
   printf("  sub rsp, 208\n");
 
-  for (int i = 0; code[i]; i++) {
+  for (int i = 0; code[i]; i++)
     gen(code[i]);
-    printf("  pop rax\n");
-  }
 
-  printf("  mov rsp, rbp\n");
-  printf("  pop rbp\n");
-  printf("  ret\n");
   return 0;
 }

@@ -5,7 +5,7 @@
 #include "9cc.h"
 
 bool consume(char *op) {
-  if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
+  if ((token->kind != TK_RESERVED && token->kind != TK_RETURN) || strlen(op) != token->len || memcmp(token->str, op, token->len))
     return false;
 
   token = token->next;
@@ -13,7 +13,7 @@ bool consume(char *op) {
 }
 
 Token *consume_ident() {
-  if (token->kind != TK_IDENT || token->str[0] < 'a' || 'z' < token->str[0])
+  if (token->kind != TK_IDENT || !is_token_char(token->str[0]))
     return NULL;
 
   Token *tok = token;
@@ -29,7 +29,7 @@ LVar *find_lvar(Token *tok) {
 }
 
 void expect(char *op) {
-  if (token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len))
+  if ((token->kind != TK_RESERVED && token->kind != TK_RETURN) || strlen(op) != token->len || memcmp(token->str, op, token->len))
     error_at(token->str, "not a '%s'", op);
   token = token->next;
 }
@@ -44,6 +44,13 @@ int expect_number() {
 
 bool at_eof() {
   return token->kind == TK_EOF;
+}
+
+bool is_token_char(char c) {
+  return ('a' <= c && c <= 'z') ||
+         ('A' <= c && c <= 'Z') ||
+         ('0' <= c && c <= '9') ||
+         (c == '_');
 }
 
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
@@ -86,9 +93,15 @@ Token *tokenize() {
       continue;
     }
 
-    if ('a' <= *p &&  *p <= 'z') {
+    if (memcmp(p, "return", 6) == 0 && !is_token_char(p[6])) {
+      cur = new_token(TK_RETURN, cur, p, 6);
+      p += 6;
+      continue;
+    }
+
+    if (is_token_char(*p)) {
       cur = new_token(TK_IDENT, cur, p, 0);
-      while ('a' <= *p &&  *p <= 'z') {
+      while (is_token_char(*p)) {
         p++;
         cur->len++;
       }
@@ -125,6 +138,11 @@ void program() {
 }
 
 Node *stmt() {
+  if (consume("return")) {
+    Node *node = new_node(ND_RETURN, expr(), NULL);
+    expect(";");
+    return node;
+  }
   Node *node = expr();
   expect(";");
   return node;
