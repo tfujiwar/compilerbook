@@ -188,6 +188,25 @@ Node *stmt() {
     return node;
   }
 
+  if (consume_token(TK_FOR)) {
+    Node *node = new_node(ND_FOR, NULL, NULL);
+    expect("(");
+    if (!consume(";")) {
+      node->init = expr();
+      expect(";");
+    }
+    if (!consume(";")) {
+      node->cond = expr();
+      expect(";");
+    }
+    if (!consume(")")) {
+      node->inc = expr();
+      expect(")");
+    }
+    node->body = stmt();
+    return node;
+  }
+
   Node *node = expr();
   expect(";");
   return node;
