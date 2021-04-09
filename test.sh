@@ -44,4 +44,9 @@ assert 1 "a = 1; return a;"
 assert 2 "a = 1+2; a = a*2; return a/3;"
 assert 3 "returnx = 1+2; return returnx;"
 
+assert 1 "a = 1; if (a > 0) return 1; return 0;"
+assert 0 "a = 0; if (a > 0) return 1; return 0;"
+assert 1 "a = 1; if (a > 0) return 1; else return 0;"
+assert 0 "a = 0; if (a > 0) return 1; else return 0;"
+
 echo OK

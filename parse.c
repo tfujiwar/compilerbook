@@ -4,8 +4,16 @@
 #include <string.h>
 #include "9cc.h"
 
+bool consume_token(int kind) {
+  if (token->kind != kind)
+    return false;
+
+  token = token->next;
+  return true;
+}
+
 bool consume(char *op) {
-  if ((token->kind != TK_RESERVED && token->kind != TK_RETURN) || strlen(op) != token->len || memcmp(token->str, op, token->len))
+  if ((token->kind != TK_RESERVED) || strlen(op) != token->len || memcmp(token->str, op, token->len))
     return false;
 
   token = token->next;
@@ -29,7 +37,7 @@ LVar *find_lvar(Token *tok) {
 }
 
 void expect(char *op) {
-  if ((token->kind != TK_RESERVED && token->kind != TK_RETURN) || strlen(op) != token->len || memcmp(token->str, op, token->len))
+  if ((token->kind != TK_RESERVED) || strlen(op) != token->len || memcmp(token->str, op, token->len))
     error_at(token->str, "not a '%s'", op);
   token = token->next;
 }
@@ -99,6 +107,30 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "if", 2) == 0 && !is_token_char(p[2])) {
+      cur = new_token(TK_IF, cur, p, 2);
+      p += 2;
+      continue;
+    }
+
+    if (memcmp(p, "else", 4) == 0 && !is_token_char(p[4])) {
+      cur = new_token(TK_ELSE, cur, p, 4);
+      p += 4;
+      continue;
+    }
+
+    if (memcmp(p, "for", 3) == 0 && !is_token_char(p[3])) {
+      cur = new_token(TK_FOR, cur, p, 3);
+      p += 3;
+      continue;
+    }
+
+    if (memcmp(p, "while", 5) == 0 && !is_token_char(p[5])) {
+      cur = new_token(TK_WHILE, cur, p, 5);
+      p += 5;
+      continue;
+    }
+
     if (is_token_char(*p)) {
       cur = new_token(TK_IDENT, cur, p, 0);
       while (is_token_char(*p)) {
@@ -138,11 +170,24 @@ void program() {
 }
 
 Node *stmt() {
-  if (consume("return")) {
+  if (consume_token(TK_RETURN)) {
     Node *node = new_node(ND_RETURN, expr(), NULL);
     expect(";");
     return node;
   }
+
+  if (consume_token(TK_IF)) {
+    Node *node = new_node(ND_IF, NULL, NULL);
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->body = stmt();
+    if (consume_token(TK_ELSE)) {
+      node->els = stmt();
+    }
+    return node;
+  }
+
   Node *node = expr();
   expect(";");
   return node;
