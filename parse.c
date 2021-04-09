@@ -207,6 +207,15 @@ Node *stmt() {
     return node;
   }
 
+  if (consume_token(TK_WHILE)) {
+    Node *node = new_node(ND_WHILE, NULL, NULL);
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->body = stmt();
+    return node;
+  }
+
   Node *node = expr();
   expect(";");
   return node;
