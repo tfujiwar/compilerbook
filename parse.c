@@ -88,7 +88,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=') {
+    if (strchr("+-*/()<>{}=;", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
@@ -213,6 +213,16 @@ Node *stmt() {
     node->cond = expr();
     expect(")");
     node->body = stmt();
+    return node;
+  }
+
+  if (consume("{")) {
+    Node *node = new_node(ND_BLOCK, NULL, NULL);
+    Node *cur = node;
+    while (!consume("}")) {
+      cur->next = stmt();
+      cur = cur->next;
+    }
     return node;
   }
 

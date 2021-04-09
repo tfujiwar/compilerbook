@@ -55,4 +55,8 @@ assert 10 "a=0; for (;;a=a+1) if (a>=10) return a;"
 assert 10 "a=0; while (a<10) a=a+1; return a;"
 assert 10 "a=0; while (a=a+1) if (a>=10) return a;"
 
+assert 2 "{ a=1; a=a+1; } return a;"
+assert 1 "a=1; if (a==1) { return 1; } else { return 0; }"
+assert 0 "a=0; if (a==1) { return 1; } else { return 0; }"
+
 echo OK

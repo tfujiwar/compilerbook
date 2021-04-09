@@ -96,6 +96,17 @@ void gen(Node *node) {
     printf(".Lend%03d:\n", l);
     printf("  push 0\n");  // dummy
     return;
+
+  Node *cur;
+  case ND_BLOCK:
+    cur = node;
+    while (cur->next) {
+      gen(cur->next);
+      printf("  pop rax\n");
+      cur = cur->next;
+    }
+    printf("  push 0\n");  // dummy
+    return;
   }
 
   gen(node->lhs);
