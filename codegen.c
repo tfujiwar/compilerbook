@@ -10,7 +10,9 @@ void gen_lval(Node *node) {
 }
 
 void gen(Node *node) {
-  int l;
+  int l, num;
+  Node *cur;
+  char name[64];
 
   switch (node->kind) {
   case ND_NUM:
@@ -97,15 +99,37 @@ void gen(Node *node) {
     printf("  push 0\n");  // dummy
     return;
 
-  Node *cur;
   case ND_BLOCK:
-    cur = node;
-    while (cur->next) {
-      gen(cur->next);
+    cur = node->child;
+    while (cur) {
+      gen(cur);
       printf("  pop rax\n");
       cur = cur->next;
     }
     printf("  push 0\n");  // dummy
+    return;
+
+  case ND_FUNC:
+    strncpy(name, node->name, node->len);
+    name[node->len] = '\x0';
+
+    num = 0;
+    cur = node->child;
+    while (cur) {
+      gen(cur);
+      cur = cur->next;
+      num++;
+    }
+
+    if (num >= 6) printf("  pop r9\n");
+    if (num >= 5) printf("  pop r8\n");
+    if (num >= 4) printf("  pop rcx\n");
+    if (num >= 3) printf("  pop rdx\n");
+    if (num >= 2) printf("  pop rsi\n");
+    if (num >= 1) printf("  pop rdi\n");
+
+    printf("  call %s\n", name);
+    printf("  push rax\n");
     return;
   }
 

@@ -34,6 +34,7 @@ typedef enum {
   ND_FOR,
   ND_WHILE,
   ND_BLOCK,
+  ND_FUNC,
 } NodeKind;
 
 typedef struct Token Token;
@@ -57,9 +58,12 @@ struct Node {
   Node *inc;
   Node *body;
   Node *els;
+  Node *child;
   Node *next;
   int val;
   int offset;
+  char *name;
+  int len;
 };
 
 typedef struct LVar LVar;

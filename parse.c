@@ -88,7 +88,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (strchr("+-*/()<>{}=;", *p)) {
+    if (strchr("+-*/()<>{}=;,", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
@@ -218,7 +218,13 @@ Node *stmt() {
 
   if (consume("{")) {
     Node *node = new_node(ND_BLOCK, NULL, NULL);
-    Node *cur = node;
+
+    Node *cur;
+    if (!consume("}")) {
+      node->child = stmt();
+      cur = node->child;
+    }
+
     while (!consume("}")) {
       cur->next = stmt();
       cur = cur->next;
@@ -313,11 +319,33 @@ Node *primary() {
   Token *tok = consume_ident();
   if (tok) {
     Node *node = calloc(1, sizeof(Node));
-    node->kind = ND_LVAR;
+    char *name = tok->str;
+    int len = tok->len;
 
+    if (consume("(")) {
+      node->kind = ND_FUNC;
+      node->name = name;
+      node->len = len;
+
+      if (consume(")")) return node;
+      node->child = expr();
+      Node *cur = node->child;
+
+      while (!consume(")")) {
+        expect(",");
+        cur->next = expr();
+        cur = cur->next;
+      }
+
+      return node;
+    }
+
+    node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);
+
     if (lvar) {
       node->offset = lvar->offset;
+
     } else {
       lvar = calloc(1, sizeof(LVar));
       lvar->next = locals;
