@@ -112,6 +112,33 @@ void gen(Node *node) {
   case ND_FUNC:
     strncpy(name, node->name, node->len);
     name[node->len] = '\x0';
+    printf("%s:\n", name);
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, 160\n");
+
+    num = 0;
+    cur = node->child;
+
+    while (cur) {
+      gen_lval(cur);
+      printf("  pop rax\n");
+      if (num == 0) printf("  mov [rax], rdi\n");
+      if (num == 1) printf("  mov [rax], rsi\n");
+      if (num == 2) printf("  mov [rax], rdx\n");
+      if (num == 3) printf("  mov [rax], rcx\n");
+      if (num == 4) printf("  mov [rax], r8\n");
+      if (num == 5) printf("  mov [rax], r9\n");
+      cur = cur->next;
+      num++;
+    }
+
+    gen(node->next);
+    return;
+
+  case ND_CALL:
+    strncpy(name, node->name, node->len);
+    name[node->len] = '\x0';
 
     num = 0;
     cur = node->child;

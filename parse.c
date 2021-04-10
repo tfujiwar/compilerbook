@@ -165,8 +165,66 @@ Node *new_node_num(int val) {
 void program() {
   int i = 0;
   while (!at_eof())
-    code[i++] = stmt();
+    code[i++] = function();
   code[i] = NULL;
+}
+
+Node *function() {
+  Node *node = new_node(ND_FUNC, NULL, NULL);
+  Token *tok = consume_ident();
+  if (!tok) error_at(token->str, "identifier expected");
+
+  node->name = tok->str;
+  node->len = tok->len;
+
+  Node *cur;
+  cur = node;
+
+  expect("(");
+  while (tok = consume_ident()) {
+    Node *arg = new_node(ND_LVAR, NULL, NULL);
+    LVar *lvar = find_lvar(tok);
+
+    if (lvar) {
+      arg->offset = lvar->offset;
+
+    } else {
+      lvar = calloc(1, sizeof(LVar));
+      lvar->next = locals;
+      lvar->name = tok->str;
+      lvar->len = tok->len;
+      lvar->offset = locals->offset + 8;
+      arg->offset = lvar->offset;
+      locals = lvar;
+    }
+
+    if (cur == node) {
+      cur->child = arg;
+      cur = cur->child;
+    } else {
+      cur->next = arg;
+      cur = cur->next;
+    }
+
+    if (!consume(",")) break;
+  }
+  expect(")");
+
+  if (!consume("{")) error_at(token->str, "block expected");
+  Node *block = new_node(ND_BLOCK, NULL, NULL);
+
+  if (!consume("}")) {
+    block->child = stmt();
+    cur = block->child;
+  }
+
+  while (!consume("}")) {
+    cur->next = stmt();
+    cur = cur->next;
+  }
+
+  node->next = block;
+  return node;
 }
 
 Node *stmt() {
@@ -323,7 +381,7 @@ Node *primary() {
     int len = tok->len;
 
     if (consume("(")) {
-      node->kind = ND_FUNC;
+      node->kind = ND_CALL;
       node->name = name;
       node->len = len;
 

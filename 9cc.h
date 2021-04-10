@@ -35,6 +35,7 @@ typedef enum {
   ND_WHILE,
   ND_BLOCK,
   ND_FUNC,
+  ND_CALL,
 } NodeKind;
 
 typedef struct Token Token;
@@ -91,6 +92,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 
 void program();
+Node *function();
 Node *stmt();
 Node *expr();
 Node *assign();
