@@ -16,6 +16,7 @@ typedef enum {
   TK_WHILE,
   TK_EOF,
   TK_INT,
+  TK_SIZEOF,
 } TokenKind;
 
 typedef enum {
@@ -76,6 +77,7 @@ struct Node {
   int offset;
   char *name;
   int len;
+  Type *type;
 };
 
 typedef struct LVar LVar;

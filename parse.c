@@ -143,6 +143,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "sizeof", 6) == 0 && !is_token_char(p[6])) {
+      cur = new_token(TK_SIZEOF, cur, p, 6);
+      p += 6;
+      continue;
+    }
+
     if (is_token_char(*p)) {
       cur = new_token(TK_IDENT, cur, p, 0);
       while (is_token_char(*p)) {
@@ -167,10 +173,24 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   return node;
 }
 
+Node *new_expr(NodeKind kind, Node *lhs, Node *rhs) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  node->lhs = lhs;
+  node->rhs = rhs;
+  if (lhs && rhs) {
+    if (lhs) node->type = lhs->type;
+    else if (rhs) node->type = lhs->type;
+  }
+  return node;
+}
+
 Node *new_node_num(int val) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_NUM;
   node->val = val;
+  node->type = calloc(1, sizeof(Type));
+  node->type->ty = INT;
   return node;
 }
 
@@ -229,6 +249,7 @@ Node *function() {
       lvar->offset = locals->offset + 8;
       lvar->type = ty;
       arg->offset = lvar->offset;
+      arg->type = lvar->type;
       locals = lvar;
     }
 
@@ -357,7 +378,7 @@ Node *expr() {
 Node *assign() {
   Node *node = equality();
   if (consume("="))
-    node = new_node(ND_ASSIGN, node, assign());
+    node = new_expr(ND_ASSIGN, node, assign());
   return node;
 }
 
@@ -365,9 +386,9 @@ Node *equality() {
   Node *node = relational();
   while (true) {
     if (consume("=="))
-      node = new_node(ND_EQ, node, relational());
+      node = new_expr(ND_EQ, node, relational());
     else if (consume("!="))
-      node = new_node(ND_NE, node, relational());
+      node = new_expr(ND_NE, node, relational());
     else
       return node;
   }
@@ -377,13 +398,13 @@ Node *relational() {
   Node *node = add();
   while (true) {
     if (consume("<="))
-      node = new_node(ND_LE, node, add());
+      node = new_expr(ND_LE, node, add());
     else if (consume(">="))
-      node = new_node(ND_LE, add(), node);
+      node = new_expr(ND_LE, add(), node);
     else if (consume("<"))
-      node = new_node(ND_LT, node, add());
+      node = new_expr(ND_LT, node, add());
     else if (consume(">"))
-      node = new_node(ND_LT, add(), node);
+      node = new_expr(ND_LT, add(), node);
     else
       return node;
   }
@@ -393,9 +414,9 @@ Node *add() {
   Node *node = mul();
   while (true) {
     if (consume("+"))
-      node = new_node(ND_ADD, node, mul());
+      node = new_expr(ND_ADD, node, mul());
     else if (consume("-"))
-      node = new_node(ND_SUB, node, mul());
+      node = new_expr(ND_SUB, node, mul());
     else
       return node;
   }
@@ -405,9 +426,9 @@ Node *mul() {
   Node *node = unary();
   while (true) {
     if (consume("*"))
-      node = new_node(ND_MUL, node, unary());
+      node = new_expr(ND_MUL, node, unary());
     else if (consume("/"))
-      node = new_node(ND_DIV, node, unary());
+      node = new_expr(ND_DIV, node, unary());
     else
       return node;
   }
@@ -416,12 +437,22 @@ Node *mul() {
 Node *unary() {
   if (consume("+"))
     return primary();
+
   if (consume("-"))
-    return new_node(ND_SUB, new_node_num(0), primary());
+    return new_expr(ND_SUB, new_node_num(0), primary());
+
   if (consume("*"))
-    return new_node(ND_DEREF, unary(), NULL);
+    return new_expr(ND_DEREF, unary(), NULL);
+
   if (consume("&"))
-    return new_node(ND_ADDR, unary(), NULL);
+    return new_expr(ND_ADDR, unary(), NULL);
+
+  if (consume_token(TK_SIZEOF)) {
+    Node *node = unary();
+    if (node->type->ty == INT) return new_node_num(4);
+    if (node->type->ty == PTR) return new_node_num(8);
+  }
+
   return primary();
 }
 
@@ -442,6 +473,7 @@ Node *primary() {
       node->kind = ND_CALL;
       node->name = name;
       node->len = len;
+      node->type = NULL;  // TODO
 
       if (consume(")")) return node;
       node->child = expr();
@@ -461,6 +493,7 @@ Node *primary() {
     if (!lvar) error_at(tok->str, "not declared");
 
     node->offset = lvar->offset;
+    node->type = lvar->type;
     return node;
   }
 

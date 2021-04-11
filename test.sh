@@ -70,4 +70,11 @@ assert 3 "int main() { int x; int y; int z; x=3; y=5; z=&y+8; return *z; }"
 assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"
 assert 3 "int main() { int x; int *y; int **z; y=&x; z=&y; **z=3; return x; }"
 
+assert 4 "int main() { int x; return sizeof(x); }"
+assert 4 "int main() { int x; return sizeof(x+1); }"
+assert 4 "int main() { int x; return sizeof(1+x); }"
+assert 8 "int main() { int *x; return sizeof(x); }"
+assert 8 "int main() { int *x; return sizeof(x+1); }"
+assert 8 "int main() { int *x; return sizeof(1+x); }"
+
 echo OK
