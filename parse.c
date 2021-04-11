@@ -36,6 +36,12 @@ LVar *find_lvar(Token *tok) {
   return NULL;
 }
 
+bool expect_token(int kind) {
+  if (token->kind != kind)
+    error_at(token->str, "expected %d, but got %d", kind, token->kind);
+  token = token->next;
+}
+
 void expect(char *op) {
   if ((token->kind != TK_RESERVED) || strlen(op) != token->len || memcmp(token->str, op, token->len))
     error_at(token->str, "not a '%s'", op);
@@ -79,6 +85,12 @@ Token *tokenize() {
   while (*p) {
     if (isspace(*p)) {
       p++;
+      continue;
+    }
+
+    if (memcmp(p, "int", 3) == 0) {
+      cur = new_token(TK_INT, cur, p, 3);
+      p += 3;
       continue;
     }
 
@@ -170,6 +182,8 @@ void program() {
 }
 
 Node *function() {
+  expect_token(TK_INT);
+
   Node *node = new_node(ND_FUNC, NULL, NULL);
   Token *tok = consume_ident();
   if (!tok) error_at(token->str, "identifier expected");
@@ -181,7 +195,9 @@ Node *function() {
   cur = node;
 
   expect("(");
-  while (tok = consume_ident()) {
+
+  while (consume_token(TK_INT)) {
+    tok = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
     LVar *lvar = find_lvar(tok);
 
@@ -208,6 +224,7 @@ Node *function() {
 
     if (!consume(",")) break;
   }
+
   expect(")");
 
   if (!consume("{")) error_at(token->str, "block expected");
@@ -287,6 +304,22 @@ Node *stmt() {
       cur->next = stmt();
       cur = cur->next;
     }
+    return node;
+  }
+
+  if (consume_token(TK_INT)) {
+    LVar *lvar = find_lvar(token);
+    if (lvar) error_at(token->str, "already declared");
+
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals;
+    lvar->name = token->str;
+    lvar->len = token->len;
+    lvar->offset = locals->offset + 8;
+    locals = lvar;
+
+    Node *node = new_node(ND_LVAR, NULL, NULL);
+    node->offset = lvar->offset;
     return node;
   }
 
@@ -403,20 +436,9 @@ Node *primary() {
 
     node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);
+    if (!lvar) error_at(tok->str, "not declared");
 
-    if (lvar) {
-      node->offset = lvar->offset;
-
-    } else {
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
-      lvar->name = tok->str;
-      lvar->len = tok->len;
-      lvar->offset = locals->offset + 8;
-      node->offset = lvar->offset;
-      locals = lvar;
-    }
-
+    node->offset = lvar->offset;
     return node;
   }
 
