@@ -64,4 +64,7 @@ assert 0 "main() { return foo(); }"
 assert 10 "main() { return bar(bar(1, 2), bar(3, 4)); }"
 assert 10 "f(a,b) { return a+b; } main() { return f(f(1,2), bar(3,4)); }"
 
+assert 3 "main() { x=3; y=&x; return *y; }"
+assert 3 "main() { x=3; y=5; z=&y+8; return *z; }"
+
 echo OK
