@@ -48,6 +48,7 @@ typedef struct Type Type;
 struct Type {
   enum { INT, PTR } ty;
   struct Type *ptr_to;
+  int size;
 };
 
 typedef struct Token Token;

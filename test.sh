@@ -65,8 +65,6 @@ assert 10 "int main() { return bar(bar(1, 2), bar(3, 4)); }"
 assert 10 "int f(int a, int b) { return a+b; } int main() { return f(f(1,2), bar(3,4)); }"
 
 assert 3 "int main() { int x; int y; x=3; y=&x; return *y; }"
-assert 3 "int main() { int x; int y; int z; x=3; y=5; z=&y+8; return *z; }"
-
 assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"
 assert 3 "int main() { int x; int *y; int **z; y=&x; z=&y; **z=3; return x; }"
 
@@ -76,5 +74,9 @@ assert 4 "int main() { int x; return sizeof(1+x); }"
 assert 8 "int main() { int *x; return sizeof(x); }"
 assert 8 "int main() { int *x; return sizeof(x+1); }"
 assert 8 "int main() { int *x; return sizeof(1+x); }"
+
+assert 1 "int main() { int *p; alloc4(&p, 1, 2, 4, 8); return *p; }"
+assert 4 "int main() { int *p; alloc4(&p, 1, 2, 4, 8); return *(p+2); }"
+assert 4 "int main() { int *p; alloc4(&p, 1, 2, 4, 8); return *(2+p); }"
 
 echo OK

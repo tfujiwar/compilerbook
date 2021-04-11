@@ -178,10 +178,23 @@ Node *new_expr(NodeKind kind, Node *lhs, Node *rhs) {
   node->kind = kind;
   node->lhs = lhs;
   node->rhs = rhs;
+
   if (lhs && rhs) {
     if (lhs) node->type = lhs->type;
     else if (rhs) node->type = lhs->type;
   }
+
+  if (kind == ND_DEREF) {
+    node->type = lhs->type->ptr_to;
+  }
+
+  if (kind == ND_ADDR) {
+    node->type = calloc(1, sizeof(Type));
+    node->type->ty = PTR,
+    node->type->size = 8;
+    node->type->ptr_to = lhs->type;
+  }
+
   return node;
 }
 
@@ -191,6 +204,7 @@ Node *new_node_num(int val) {
   node->val = val;
   node->type = calloc(1, sizeof(Type));
   node->type->ty = INT;
+  node->type->size = 4;
   return node;
 }
 
@@ -204,12 +218,17 @@ void program() {
 Type *type() {
   Type *ty = calloc(1, sizeof(Type));
 
-  if (consume_token(TK_INT)) ty->ty = INT;
-  else return NULL;
+  if (consume_token(TK_INT)) {
+    ty->ty = INT;
+    ty->size = 4;
+  } else {
+    return NULL;
+  }
 
   while (consume("*")) {
     Type *ptr = calloc(1, sizeof(Type));
     ptr->ty = PTR;
+    ptr->size = 8;
     ptr->ptr_to = ty;
     ty = ptr;
   }
@@ -413,12 +432,23 @@ Node *relational() {
 Node *add() {
   Node *node = mul();
   while (true) {
-    if (consume("+"))
+    if (consume("+")) {
       node = new_expr(ND_ADD, node, mul());
-    else if (consume("-"))
+      if (node->lhs->type->ty == PTR) {
+        if (node->rhs->kind != ND_NUM) error_at(token->str, "not supported");
+        node->type = node->lhs->type;
+        node->rhs->val *= node->type->ptr_to->size;
+      }
+      if (node->rhs->type->ty == PTR) {
+        if (node->lhs->kind != ND_NUM) error_at(token->str, "not supported");
+        node->type = node->rhs->type;
+        node->lhs->val *= node->type->ptr_to->size;
+      }
+    } else if (consume("-")) {
       node = new_expr(ND_SUB, node, mul());
-    else
+    } else {
       return node;
+    }
   }
 }
 
@@ -449,8 +479,7 @@ Node *unary() {
 
   if (consume_token(TK_SIZEOF)) {
     Node *node = unary();
-    if (node->type->ty == INT) return new_node_num(4);
-    if (node->type->ty == PTR) return new_node_num(8);
+    return new_node_num(node->type->size);
   }
 
   return primary();
