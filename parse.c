@@ -181,8 +181,24 @@ void program() {
   code[i] = NULL;
 }
 
+Type *type() {
+  Type *ty = calloc(1, sizeof(Type));
+
+  if (consume_token(TK_INT)) ty->ty = INT;
+  else return NULL;
+
+  while (consume("*")) {
+    Type *ptr = calloc(1, sizeof(Type));
+    ptr->ty = PTR;
+    ptr->ptr_to = ty;
+    ty = ptr;
+  }
+
+  return ty;
+}
+
 Node *function() {
-  expect_token(TK_INT);
+  if (!type()) error_at(token->str, "type expected");
 
   Node *node = new_node(ND_FUNC, NULL, NULL);
   Token *tok = consume_ident();
@@ -196,7 +212,8 @@ Node *function() {
 
   expect("(");
 
-  while (consume_token(TK_INT)) {
+  Type *ty;
+  while (ty = type()) {
     tok = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
     LVar *lvar = find_lvar(tok);
@@ -210,6 +227,7 @@ Node *function() {
       lvar->name = tok->str;
       lvar->len = tok->len;
       lvar->offset = locals->offset + 8;
+      lvar->type = ty;
       arg->offset = lvar->offset;
       locals = lvar;
     }
@@ -307,19 +325,23 @@ Node *stmt() {
     return node;
   }
 
-  if (consume_token(TK_INT)) {
-    LVar *lvar = find_lvar(token);
+  Type *ty;
+  if (ty = type()) {
+    Token *tok = consume_ident();
+    expect(";");
+
+    LVar *lvar = find_lvar(tok);
     if (lvar) error_at(token->str, "already declared");
 
     lvar = calloc(1, sizeof(LVar));
     lvar->next = locals;
-    lvar->name = token->str;
-    lvar->len = token->len;
+    lvar->name = tok->str;
+    lvar->len = tok->len;
     lvar->offset = locals->offset + 8;
+    lvar->type = ty;
     locals = lvar;
 
-    Node *node = new_node(ND_LVAR, NULL, NULL);
-    node->offset = lvar->offset;
+    Node *node = new_node(ND_DECLARE, NULL, NULL);
     return node;
   }
 

@@ -67,4 +67,7 @@ assert 10 "int f(int a, int b) { return a+b; } int main() { return f(f(1,2), bar
 assert 3 "int main() { int x; int y; x=3; y=&x; return *y; }"
 assert 3 "int main() { int x; int y; int z; x=3; y=5; z=&y+8; return *z; }"
 
+assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"
+assert 3 "int main() { int x; int *y; int **z; y=&x; z=&y; **z=3; return x; }"
+
 echo OK

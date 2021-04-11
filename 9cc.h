@@ -39,7 +39,15 @@ typedef enum {
   ND_CALL,
   ND_ADDR,
   ND_DEREF,
+  ND_DECLARE,
 } NodeKind;
+
+typedef struct Type Type;
+
+struct Type {
+  enum { INT, PTR } ty;
+  struct Type *ptr_to;
+};
 
 typedef struct Token Token;
 
@@ -77,6 +85,7 @@ struct LVar {
   char *name;
   int len;
   int offset;
+  Type *type;
 };
 
 void debug(char *fmt, ...);
