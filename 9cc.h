@@ -5,6 +5,28 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Vector Vector;
+
+struct Vector {
+  void **data;
+  int capacity;
+  int len;
+};
+
+Vector *new_vec();
+void vec_push(Vector *vec, void *elem);
+
+typedef struct Map Map;
+
+struct Map {
+  Vector *keys;
+  Vector *vals;
+};
+
+Map *new_map();
+void map_put(Map *map, char *key, void *val);
+void *map_get(Map *map, char *key);
+
 typedef enum {
   TK_RESERVED,
   TK_IDENT,
