@@ -100,7 +100,7 @@ Token *tokenize() {
       continue;
     }
 
-    if (strchr("+-*/()<>{}=;,*&", *p)) {
+    if (strchr("+-*/()<>{}[]=;,*&", *p)) {
       cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
@@ -368,6 +368,17 @@ Node *stmt() {
   Type *ty;
   if (ty = type()) {
     Token *tok = consume_ident();
+
+    if (consume("[")) {
+      Type *ary = calloc(1, sizeof(Type));
+      ary->ty = ARRAY;
+      ary->size = 8;
+      ary->array_size = expect_number();
+      ary->ptr_to = ty;
+      ty = ary;
+      expect("]");
+    }
+
     expect(";");
 
     LVar *lvar = find_lvar(tok);
@@ -377,7 +388,10 @@ Node *stmt() {
     lvar->next = locals;
     lvar->name = tok->str;
     lvar->len = tok->len;
-    lvar->offset = locals->offset + 8;
+    if (ty->ty == ARRAY)
+      lvar->offset = locals->offset + 8 * ty->array_size;
+    else
+      lvar->offset = locals->offset + 8;
     lvar->type = ty;
     locals = lvar;
 
@@ -446,6 +460,11 @@ Node *add() {
       }
     } else if (consume("-")) {
       node = new_expr(ND_SUB, node, mul());
+      if (node->lhs->type->ty == PTR) {
+        if (node->rhs->kind != ND_NUM) error_at(token->str, "not supported");
+        node->type = node->lhs->type;
+        node->rhs->val *= node->type->ptr_to->size;
+      }
     } else {
       return node;
     }
@@ -474,15 +493,27 @@ Node *unary() {
   if (consume("*"))
     return new_expr(ND_DEREF, unary(), NULL);
 
-  if (consume("&"))
-    return new_expr(ND_ADDR, unary(), NULL);
+  if (consume("&")) {
+    Node *node = unary();
+    if (node->type->ty == ARRAY)
+      return node;
+    return new_expr(ND_ADDR, node, NULL);
+  }
 
   if (consume_token(TK_SIZEOF)) {
     Node *node = unary();
+    if (node->type->ty == ARRAY)
+      new_node_num(node->type->size * node->type->array_size);
     return new_node_num(node->type->size);
   }
 
-  return primary();
+  Node *node = primary();
+  if (!node->type) debug("%s", token->str);
+  if (node->type->ty == ARRAY) {
+    node->type->ty = PTR;
+    node->type->size = 8;
+  }
+  return node;
 }
 
 Node *primary() {
@@ -521,8 +552,14 @@ Node *primary() {
     LVar *lvar = find_lvar(tok);
     if (!lvar) error_at(tok->str, "not declared");
 
-    node->offset = lvar->offset;
-    node->type = lvar->type;
+    if (consume("[")) {
+      node->offset = lvar->offset + expect_number() * lvar->type->size;
+      node->type = lvar->type->ptr_to;
+      expect("]");
+    } else {
+      node->offset = lvar->offset;
+      node->type = lvar->type;
+    }
     return node;
   }
 

@@ -4,7 +4,7 @@ assert() {
   input="$2"
 
   ./9cc "$input" > tmp.s
-  cc -o tmp tmp.s lib.o
+  cc -o tmp tmp.s
   ./tmp
   actual="$?"
 
@@ -60,11 +60,9 @@ assert 4 "int main() { int a; { a=1; {a=a+1; a=a+1; } a=a+1; } return a; }"
 assert 1 "int main() { int a; a=1; if (a==1) { return 1; } else { return 0; } }"
 assert 0 "int main() { int a; a=0; if (a==1) { return 1; } else { return 0; } }"
 
-assert 0 "int main() { return foo(); }"
-assert 10 "int main() { return bar(bar(1, 2), bar(3, 4)); }"
-assert 10 "int f(int a, int b) { return a+b; } int main() { return f(f(1,2), bar(3,4)); }"
+# assert 10 "int f(int a, int b) { return a+b; } int main() { return f(f(1,2), f(3,4)); }"
 
-assert 3 "int main() { int x; int y; x=3; y=&x; return *y; }"
+assert 3 "int main() { int x; int *y; x=3; y=&x; return *y; }"
 assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"
 assert 3 "int main() { int x; int *y; int **z; y=&x; z=&y; **z=3; return x; }"
 
@@ -74,9 +72,13 @@ assert 4 "int main() { int x; return sizeof(1+x); }"
 assert 8 "int main() { int *x; return sizeof(x); }"
 assert 8 "int main() { int *x; return sizeof(x+1); }"
 assert 8 "int main() { int *x; return sizeof(1+x); }"
+assert 4 "int main() { int a[10]; return sizeof(a[0]); }"
+assert 8 "int main() { int a[10]; return sizeof(&a); }"
+assert 8 "int main() { int a[10]; return sizeof(a+1); }"
+# assert 40 "int main() { int a[10]; return sizeof(a); }"
 
-assert 1 "int main() { int *p; alloc4(&p, 1, 2, 4, 8); return *p; }"
-assert 4 "int main() { int *p; alloc4(&p, 1, 2, 4, 8); return *(p+2); }"
-assert 4 "int main() { int *p; alloc4(&p, 1, 2, 4, 8); return *(2+p); }"
+assert 3 "int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a; return *p+*(p+1); }"
+assert 3 "int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a+1; return *p+*(p-1); }"
+assert 3 "int main() { int a[2]; a[0]=1; a[1]=2; return a[0]+a[1]; }"
 
 echo OK
