@@ -48,6 +48,7 @@ typedef enum {
   ND_DIV,
   ND_ASSIGN,
   ND_LVAR,
+  ND_GVAR,
   ND_NUM,
   ND_EQ,
   ND_NE,
@@ -63,6 +64,7 @@ typedef enum {
   ND_ADDR,
   ND_DEREF,
   ND_DECLARE,
+  ND_DECLARE_GVAR,
 } NodeKind;
 
 typedef struct Type Type;
@@ -149,3 +151,4 @@ extern char *user_input;
 extern Node *code[];
 extern LVar *locals;
 extern int labels;
+extern Map *globals;

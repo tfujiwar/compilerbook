@@ -4,6 +4,7 @@ Token *token;
 char *user_input;
 Node *code[100];
 LVar *locals;
+Map *globals;
 int labels = 0;
 
 int main(int argc, char **argv) {
@@ -16,13 +17,21 @@ int main(int argc, char **argv) {
 
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
+  globals = new_map();
   program();
 
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("\n");
 
-  for (int i = 0; code[i]; i++) {
+  int i = 0;
+  printf("  .bss");
+  for (; code[i]->kind == ND_DECLARE_GVAR; i++) {
+    gen(code[i]);
+  }
+  printf("\n");
+  printf("  .text");
+  for (; code[i]; i++) {
     gen(code[i]);
   }
 

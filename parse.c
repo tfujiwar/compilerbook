@@ -237,21 +237,43 @@ Type *type() {
 }
 
 Node *function() {
-  if (!type()) error_at(token->str, "type expected");
+  Type *ty = type();
+  if (!ty) error_at(token->str, "type expected");
 
   Node *node = new_node(ND_FUNC, NULL, NULL);
   Token *tok = consume_ident();
   if (!tok) error_at(token->str, "identifier expected");
 
+  if (!consume("(")) {
+    LVar *lvar = calloc(1, sizeof(LVar));
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    lvar->type = ty;
+    if (ty->ty == ARRAY)
+      lvar->offset = ty->size * ty->array_size;
+    else
+      lvar->offset = ty->size;
+
+    char *name = malloc(sizeof(char) * 64);
+    strncpy(name, lvar->name, lvar->len);
+    name[lvar->len] = '\x0';
+    map_put(globals, name, lvar);
+
+    Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
+    node->name = tok->str;
+    node->len = tok->len;
+    node->offset = lvar->offset;
+    expect(";");
+    return node;
+  }
+
+  node = new_node(ND_FUNC, NULL, NULL);
   node->name = tok->str;
   node->len = tok->len;
 
   Node *cur;
   cur = node;
 
-  expect("(");
-
-  Type *ty;
   while (ty = type()) {
     tok = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
@@ -508,7 +530,6 @@ Node *unary() {
   }
 
   Node *node = primary();
-  if (!node->type) debug("%s", token->str);
   if (node->type->ty == ARRAY) {
     node->type->ty = PTR;
     node->type->size = 8;
@@ -548,9 +569,20 @@ Node *primary() {
       return node;
     }
 
-    node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);
-    if (!lvar) error_at(tok->str, "not declared");
+    if (lvar) {
+      node->kind = ND_LVAR;
+    } else {
+      char name[64];
+      strncpy(name, tok->str, tok->len);
+      name[tok->len] = '\x0';
+      lvar = map_get(globals, name);
+      if (!lvar) error_at(tok->str, "not declared");
+      node->kind = ND_GVAR;
+    }
+
+    node->name = lvar->name;
+    node->len = lvar->len;
 
     if (consume("[")) {
       node->offset = lvar->offset + expect_number() * lvar->type->size;

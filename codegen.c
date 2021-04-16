@@ -6,7 +6,6 @@ void gen_lval(Node *node) {
   printf("  mov rax, rbp\n");
   printf("  sub rax, %d\n", node->offset);
   printf("  push rax\n");
-
 }
 
 void gen(Node *node) {
@@ -28,8 +27,27 @@ void gen(Node *node) {
     printf("  push rax\n");
     return;
 
+  case ND_GVAR:
+    strncpy(name, node->name, node->len);
+    name[node->len] = '\x0';
+    printf("  # ND_GVAR\n");
+    printf("  lea rax, [%s]\n", name);
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    return;
+
   case ND_ASSIGN:
     printf("  # ND_ASSIGN\n");
+    if (node->lhs->kind == ND_GVAR) {
+      strncpy(name, node->lhs->name, node->lhs->len);
+      name[node->lhs->len] = '\x0';
+      gen(node->rhs);
+      printf("  pop rdi\n");
+      printf("  lea rax, [%s]\n", name);
+      printf("  mov [rax], rdi\n");
+      printf("  push rdi\n");
+      return;
+    }
     if (node->lhs->kind == ND_DEREF) gen(node->lhs->lhs);
     else gen_lval(node->lhs);
     gen(node->rhs);
@@ -185,6 +203,15 @@ void gen(Node *node) {
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
+    return;
+
+  case ND_DECLARE_GVAR:
+    strncpy(name, node->name, node->len);
+    name[node->len] = '\x0';
+    printf("# ND_DECLARE_GVAR\n");
+    printf("%s:\n", name);
+    printf("  .zero %d\n", 4);
+    printf("\n");
     return;
   }
 
