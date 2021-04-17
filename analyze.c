@@ -33,6 +33,14 @@ Type *deref(Type *from) {
   return from->ptr_to;
 }
 
+Type *array_to_ptr(Type *array) {
+  Type *type = calloc(1, sizeof(Type));
+  type->ty = PTR;
+  type->size = 8;
+  type->ptr_to = array->ptr_to;
+  return type;
+}
+
 Node *add_ptr_node(Node *ptr, Node *num) {
   Node *size = calloc(1, sizeof(Node));
   size->kind = ND_NUM;
@@ -54,23 +62,23 @@ Node *add_ptr_node(Node *ptr, Node *num) {
   return add;
 }
 
-Node *sub_ptr_node(Node *ptr1, Node *ptr2) {
+Node *sub_ptr_node(Node *ptr, Node *num) {
   Node *size = calloc(1, sizeof(Node));
   size->kind = ND_NUM;
-  size->val = ptr1->type->size;
+  size->val = ptr->type->size;
   size->type = type_int();
+
+  Node *mul = calloc(1, sizeof(Node));
+  mul->kind = ND_MUL;
+  mul->lhs = num;
+  mul->rhs = size;
+  mul->type = type_int();
 
   Node *sub = calloc(1, sizeof(Node));
   sub->kind = ND_SUB;
-  sub->lhs = ptr1;
-  sub->rhs = ptr2;
-  sub->type = ptr1->type;
-
-  Node *div = calloc(1, sizeof(Node));
-  div->kind = ND_DIV;
-  div->lhs = sub;
-  div->rhs = size;
-  div->type = type_int();
+  sub->lhs = ptr;
+  sub->rhs = mul;
+  sub->type = ptr->type;
 
   return sub;
 }
@@ -140,7 +148,10 @@ Node *analyze(Node *node, char* msg) {
 
   case ND_LVAR:
   case ND_GVAR:
-    node->type = node->lvar->type;
+    if (node->lvar->type->ty == ARRAY)
+      node->type = array_to_ptr(node->lvar->type);
+    else
+      node->type = node->lvar->type;
     return node;
 
   case ND_NUM:

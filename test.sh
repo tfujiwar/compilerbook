@@ -62,9 +62,9 @@ assert 0 "int main() { int a; a=0; if (a==1) { return 1; } else { return 0; } }"
 
 # assert 10 "int f(int a, int b) { return a+b; } int main() { return f(f(1,2), f(3,4)); }"
 
-# assert 3 "int main() { int x; int *y; x=3; y=&x; return *y; }"
-# assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"
-# assert 3 "int main() { int x; int *y; int **z; y=&x; z=&y; **z=3; return x; }"
+assert 3 "int main() { int x; int *y; x=3; y=&x; return *y; }"
+assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"
+assert 3 "int main() { int x; int *y; int **z; y=&x; z=&y; **z=3; return x; }"
 
 # assert 4 "int main() { int x; return sizeof(x); }"
 # assert 4 "int main() { int x; return sizeof(x+1); }"
@@ -77,9 +77,12 @@ assert 0 "int main() { int a; a=0; if (a==1) { return 1; } else { return 0; } }"
 # assert 8 "int main() { int a[10]; return sizeof(a+1); }"
 # assert 40 "int main() { int a[10]; return sizeof(a); }"
 
-# assert 3 "int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a; return *p+*(p+1); }"
-# assert 3 "int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a+1; return *p+*(p-1); }"
-# assert 3 "int main() { int a[2]; a[0]=1; a[1]=2; return a[0]+a[1]; }"
+assert 3 "int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a; return *p+*(p+1); }"
+assert 3 "int main() { int a[2]; *a=1; *(a+1)=2; int *p; p=a+1; return *p+*(p-1); }"
+assert 3 "int main() { int a[2]; a[0]=1; a[1]=2; return a[0]+a[1]; }"
+
+assert 3 "int main() { int a[2]; *(a+1)=1; return 3; }"
+assert 3 "int main() { int a[2]; a[1]=1; return 3; }"
 
 assert 0 "int a; int main() { return a; }"
 assert 2 "int a; int main() { a=1; return 2; }"

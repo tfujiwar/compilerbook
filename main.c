@@ -27,13 +27,13 @@ int main(int argc, char **argv) {
   printf("\n");
 
   int i = 0;
-  printf("  .bss");
+  printf("  .bss\n\n");
   for (; code[i]->kind == ND_DECLARE_GVAR; i++) {
     code[i] = analyze(code[i]);
     gen(code[i]);
   }
-  printf("\n");
-  printf("  .text");
+
+  printf("  .text\n\n");
   for (; code[i]; i++) {
     debug_node(code[i], "", "");
     code[i] = analyze(code[i]);
