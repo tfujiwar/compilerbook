@@ -165,7 +165,7 @@ void gen(Node *node) {
       num++;
     }
 
-    gen(node->next);
+    gen(node->body);
     return;
 
   case ND_CALL:

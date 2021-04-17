@@ -86,6 +86,16 @@ struct Token {
   int len;
 };
 
+typedef struct LVar LVar;
+
+struct LVar {
+  LVar *next;
+  char *name;
+  int len;
+  int offset;
+  Type *type;
+};
+
 typedef struct Node Node;
 
 struct Node {
@@ -104,16 +114,7 @@ struct Node {
   char *name;
   int len;
   Type *type;
-};
-
-typedef struct LVar LVar;
-
-struct LVar {
-  LVar *next;
-  char *name;
-  int len;
-  int offset;
-  Type *type;
+  LVar *lvar;
 };
 
 void debug(char *fmt, ...);
@@ -142,6 +143,8 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+
+Node *analyze();
 
 void gen(Node *node);
 void gen_lval(Node *node);

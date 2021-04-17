@@ -69,23 +69,6 @@ Node *new_expr(NodeKind kind, Node *lhs, Node *rhs) {
   node->kind = kind;
   node->lhs = lhs;
   node->rhs = rhs;
-
-  if (lhs && rhs) {
-    if (lhs) node->type = lhs->type;
-    else if (rhs) node->type = lhs->type;
-  }
-
-  if (kind == ND_DEREF) {
-    node->type = lhs->type->ptr_to;
-  }
-
-  if (kind == ND_ADDR) {
-    node->type = calloc(1, sizeof(Type));
-    node->type->ty = PTR,
-    node->type->size = 8;
-    node->type->ptr_to = lhs->type;
-  }
-
   return node;
 }
 
@@ -93,9 +76,6 @@ Node *new_node_num(int val) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_NUM;
   node->val = val;
-  node->type = calloc(1, sizeof(Type));
-  node->type->ty = INT;
-  node->type->size = 4;
   return node;
 }
 
@@ -182,6 +162,7 @@ Node *function() {
       lvar->type = ty;
       arg->offset = lvar->offset;
       arg->type = lvar->type;
+      arg->lvar = lvar;
       locals = lvar;
     }
 
@@ -211,7 +192,7 @@ Node *function() {
     cur = cur->next;
   }
 
-  node->next = block;
+  node->body = block;
   return node;
 }
 
@@ -361,23 +342,8 @@ Node *add() {
   while (true) {
     if (consume("+")) {
       node = new_expr(ND_ADD, node, mul());
-      if (node->lhs->type->ty == PTR) {
-        if (node->rhs->kind != ND_NUM) error_at(token->str, "not supported");
-        node->type = node->lhs->type;
-        node->rhs->val *= node->type->ptr_to->size;
-      }
-      if (node->rhs->type->ty == PTR) {
-        if (node->lhs->kind != ND_NUM) error_at(token->str, "not supported");
-        node->type = node->rhs->type;
-        node->lhs->val *= node->type->ptr_to->size;
-      }
     } else if (consume("-")) {
       node = new_expr(ND_SUB, node, mul());
-      if (node->lhs->type->ty == PTR) {
-        if (node->rhs->kind != ND_NUM) error_at(token->str, "not supported");
-        node->type = node->lhs->type;
-        node->rhs->val *= node->type->ptr_to->size;
-      }
     } else {
       return node;
     }
@@ -408,23 +374,13 @@ Node *unary() {
 
   if (consume("&")) {
     Node *node = unary();
-    if (node->type->ty == ARRAY)
-      return node;
-    return new_expr(ND_ADDR, node, NULL);
   }
 
   if (consume_token(TK_SIZEOF)) {
     Node *node = unary();
-    if (node->type->ty == ARRAY)
-      new_node_num(node->type->size * node->type->array_size);
-    return new_node_num(node->type->size);
   }
 
   Node *node = primary();
-  if (node->type->ty == ARRAY) {
-    node->type->ty = PTR;
-    node->type->size = 8;
-  }
   return node;
 }
 
@@ -445,7 +401,6 @@ Node *primary() {
       node->kind = ND_CALL;
       node->name = name;
       node->len = len;
-      node->type = NULL;  // TODO
 
       if (consume(")")) return node;
       node->child = expr();
@@ -463,6 +418,7 @@ Node *primary() {
     LVar *lvar = find_lvar(tok);
     if (lvar) {
       node->kind = ND_LVAR;
+      node->lvar = lvar;
     } else {
       char name[64];
       strncpy(name, tok->str, tok->len);
@@ -470,18 +426,17 @@ Node *primary() {
       lvar = map_get(globals, name);
       if (!lvar) error_at(tok->str, "not declared");
       node->kind = ND_GVAR;
+      node->lvar = lvar;
     }
 
     node->name = lvar->name;
     node->len = lvar->len;
 
     if (consume("[")) {
-      node->offset = lvar->offset + expect_number() * lvar->type->size;
-      node->type = lvar->type->ptr_to;
+      node = new_expr(ND_DEREF, new_expr(ND_ADD, node, expr()), NULL);
       expect("]");
     } else {
       node->offset = lvar->offset;
-      node->type = lvar->type;
     }
     return node;
   }
