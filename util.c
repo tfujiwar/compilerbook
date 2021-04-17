@@ -66,7 +66,7 @@ void *map_get(Map *map, char *key) {
   return NULL;
 }
 
-char *substr(char *str, int len) {
+char *substring(char *str, int len) {
   char *sub = malloc(sizeof(char) * (len + 1));
   strncpy(sub, str, len);
   sub[len] = '\x0';
@@ -78,10 +78,10 @@ void debug_token(Token *token) {
   while (tok) {
     switch (tok->kind) {
     case TK_RESERVED:
-      fprintf(stderr, "%s ", substr(tok->str, tok->len));
+      fprintf(stderr, "%s ", tok->str);
       break;
     case TK_IDENT:
-      fprintf(stderr, "IDENT(%s) ", substr(tok->str, tok->len));
+      fprintf(stderr, "IDENT(%s) ", tok->str);
       break;
     case TK_NUM:
       fprintf(stderr, "NUM(%d) ", tok->val);
@@ -144,11 +144,11 @@ void debug_node(Node *node, char *pre1, char *pre2) {
 
   switch (node->kind) {
   case ND_LVAR:
-    fprintf(stderr, "%s%s(%s)\n", pre1, substr(node->name, node->len), type);
+    fprintf(stderr, "%s%s(%s)\n", pre1, node->lvar->name, type);
     return;
 
   case ND_GVAR:
-    fprintf(stderr, "%s%s(%s)\n", pre1, substr(node->name, node->len), type);
+    fprintf(stderr, "%s%s(%s)\n", pre1, node->lvar->name, type);
     return;
 
   case ND_NUM:

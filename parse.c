@@ -9,7 +9,7 @@ bool consume_token(int kind) {
 }
 
 bool consume(char *op) {
-  if ((token->kind != TK_RESERVED) || strlen(op) != token->len || memcmp(token->str, op, token->len))
+  if ((token->kind != TK_RESERVED) || strcmp(token->str, op) != 0)
     return false;
 
   token = token->next;
@@ -26,27 +26,27 @@ Token *consume_ident() {
 }
 
 LVar *find_lvar(Token *tok) {
-  for (LVar *var = locals; var; var = var->next)
-    if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
-      return var;
+  for (LVar *var = locals; var; var = var->next) {
+    if (var->name && strcmp(tok->str, var->name) == 0) return var;
+  }
   return NULL;
 }
 
 bool expect_token(int kind) {
   if (token->kind != kind)
-    error_at(token->str, "expected %d, but got %d", kind, token->kind);
+    error_at(token->at, "expected %d, but got %d", kind, token->kind);
   token = token->next;
 }
 
 void expect(char *op) {
-  if ((token->kind != TK_RESERVED) || strlen(op) != token->len || memcmp(token->str, op, token->len))
-    error_at(token->str, "not a '%s'", op);
+  if ((token->kind != TK_RESERVED) || strcmp(token->str, op) != 0)
+    error_at(token->at, "not a '%s'", op);
   token = token->next;
 }
 
 int expect_number() {
   if (token->kind != TK_NUM)
-    error_at(token->str, "not a 'number'");
+    error_at(token->at, "not a 'number'");
   int val = token->val;
   token = token->next;
   return val;
@@ -109,38 +109,31 @@ Type *type() {
 
 Node *function() {
   Type *ty = type();
-  if (!ty) error_at(token->str, "type expected");
+  if (!ty) error_at(token->at, "type expected");
 
   Node *node = new_node(ND_FUNC, NULL, NULL);
   Token *tok = consume_ident();
-  if (!tok) error_at(token->str, "identifier expected");
+  if (!tok) error_at(token->at, "identifier expected");
 
   if (!consume("(")) {
     LVar *lvar = calloc(1, sizeof(LVar));
     lvar->name = tok->str;
-    lvar->len = tok->len;
     lvar->type = ty;
     if (ty->ty == ARRAY)
       lvar->offset = ty->size * ty->array_size;
     else
       lvar->offset = ty->size;
 
-    char *name = malloc(sizeof(char) * 64);
-    strncpy(name, lvar->name, lvar->len);
-    name[lvar->len] = '\x0';
-    map_put(globals, name, lvar);
+    map_put(globals, lvar->name, lvar);
 
     Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
-    node->name = tok->str;
-    node->len = tok->len;
-    node->offset = lvar->offset;
+    node->lvar = lvar;
     expect(";");
     return node;
   }
 
   node = new_node(ND_FUNC, NULL, NULL);
   node->name = tok->str;
-  node->len = tok->len;
 
   Node *cur;
   cur = node;
@@ -151,17 +144,14 @@ Node *function() {
     LVar *lvar = find_lvar(tok);
 
     if (lvar) {
-      arg->offset = lvar->offset;
+      arg->lvar = lvar;
 
     } else {
       lvar = calloc(1, sizeof(LVar));
       lvar->next = locals;
       lvar->name = tok->str;
-      lvar->len = tok->len;
       lvar->offset = locals->offset + 8;
       lvar->type = ty;
-      arg->offset = lvar->offset;
-      arg->type = lvar->type;
       arg->lvar = lvar;
       locals = lvar;
     }
@@ -179,7 +169,7 @@ Node *function() {
 
   expect(")");
 
-  if (!consume("{")) error_at(token->str, "block expected");
+  if (!consume("{")) error_at(token->at, "block expected");
   Node *block = new_node(ND_BLOCK, NULL, NULL);
 
   if (!consume("}")) {
@@ -276,12 +266,11 @@ Node *stmt() {
     expect(";");
 
     LVar *lvar = find_lvar(tok);
-    if (lvar) error_at(token->str, "already declared");
+    if (lvar) error_at(token->at, "already declared");
 
     lvar = calloc(1, sizeof(LVar));
     lvar->next = locals;
     lvar->name = tok->str;
-    lvar->len = tok->len;
     if (ty->ty == ARRAY)
       lvar->offset = locals->offset + 8 * ty->array_size;
     else
@@ -393,12 +382,10 @@ Node *primary() {
   if (tok) {
     Node *node = calloc(1, sizeof(Node));
     char *name = tok->str;
-    int len = tok->len;
 
     if (consume("(")) {
       node->kind = ND_CALL;
       node->name = name;
-      node->len = len;
 
       if (consume(")")) return node;
       node->child = expr();
@@ -418,23 +405,15 @@ Node *primary() {
       node->kind = ND_LVAR;
       node->lvar = lvar;
     } else {
-      char name[64];
-      strncpy(name, tok->str, tok->len);
-      name[tok->len] = '\x0';
-      lvar = map_get(globals, name);
-      if (!lvar) error_at(tok->str, "not declared");
+      lvar = map_get(globals, tok->str);
+      if (!lvar) error_at(tok->at, "not declared");
       node->kind = ND_GVAR;
       node->lvar = lvar;
     }
 
-    node->name = lvar->name;
-    node->len = lvar->len;
-
     if (consume("[")) {
       node = new_expr(ND_DEREF, new_expr(ND_ADD, node, expr()), NULL);
       expect("]");
-    } else {
-      node->offset = lvar->offset;
     }
     return node;
   }

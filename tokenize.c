@@ -10,8 +10,8 @@ bool is_token_char(char c) {
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
-  tok->str = str;
-  tok->len = len;
+  tok->at = str;
+  tok->str = substring(str, len);
   cur->next = tok;
   return tok;
 }
@@ -47,9 +47,9 @@ Token *tokenize() {
 
     if (isdigit(*p)) {
       char* prev = p;
-      cur = new_token(TK_NUM, cur, p, 0);
-      cur->val = strtol(p, &p, 10);
-      cur->len = p - prev;
+      int val = strtol(p, &p, 10);
+      cur = new_token(TK_NUM, cur, prev, p - prev);
+      cur->val = val;
       continue;
     }
 
@@ -90,11 +90,9 @@ Token *tokenize() {
     }
 
     if (is_token_char(*p)) {
-      cur = new_token(TK_IDENT, cur, p, 0);
-      while (is_token_char(*p)) {
-        p++;
-        cur->len++;
-      }
+      char* prev = p;
+      while (is_token_char(*p)) p++;
+      cur = new_token(TK_IDENT, cur, prev, p - prev);
       continue;
     }
 

@@ -84,7 +84,7 @@ struct Token {
   Token *next;
   int val;
   char *str;
-  int len;
+  char *at;
 };
 
 typedef struct LVar LVar;
@@ -92,7 +92,6 @@ typedef struct LVar LVar;
 struct LVar {
   LVar *next;
   char *name;
-  int len;
   int offset;
   Type *type;
 };
@@ -111,9 +110,7 @@ struct Node {
   Node *child;
   Node *next;
   int val;
-  int offset;
   char *name;
-  int len;
   Type *type;
   LVar *lvar;
 };
@@ -123,6 +120,7 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
+char* substring(char *str, int len);
 
 bool consume(char *op);
 void expect(char *op);
