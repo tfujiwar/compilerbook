@@ -120,6 +120,8 @@ struct Node {
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
+void debug_token(Token *tok);
+void debug_node(Node *node, char *pre1, char *pre2);
 
 bool consume(char *op);
 void expect(char *op);

@@ -14,6 +14,8 @@ int main(int argc, char **argv) {
 
   user_input = argv[1];
   token = tokenize();
+  debug("");
+  debug_token(token);
 
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
@@ -33,7 +35,9 @@ int main(int argc, char **argv) {
   printf("\n");
   printf("  .text");
   for (; code[i]; i++) {
+    debug_node(code[i], "", "");
     code[i] = analyze(code[i]);
+    debug_node(code[i], "", "");
     gen(code[i]);
   }
 

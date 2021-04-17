@@ -65,3 +65,205 @@ void *map_get(Map *map, char *key) {
   }
   return NULL;
 }
+
+char *substr(char *str, int len) {
+  char *sub = malloc(sizeof(char) * (len + 1));
+  strncpy(sub, str, len);
+  sub[len] = '\x0';
+  return sub;
+}
+
+void debug_token(Token *token) {
+  Token *tok = token;
+  while (tok) {
+    switch (tok->kind) {
+    case TK_RESERVED:
+      fprintf(stderr, "%s ", substr(tok->str, tok->len));
+      break;
+    case TK_IDENT:
+      fprintf(stderr, "IDENT(%s) ", substr(tok->str, tok->len));
+      break;
+    case TK_NUM:
+      fprintf(stderr, "NUM(%d) ", tok->val);
+      break;
+    case TK_RETURN:
+      fprintf(stderr, "RETURN ");
+      break;
+    case TK_IF:
+      fprintf(stderr, "IF ");
+      break;
+    case TK_ELSE:
+      fprintf(stderr, "ELSE ");
+      break;
+    case TK_FOR:
+      fprintf(stderr, "FOR ");
+      break;
+    case TK_WHILE:
+      fprintf(stderr, "WHILE ");
+      break;
+    case TK_EOF:
+      fprintf(stderr, "EOF\n");
+      break;
+    case TK_INT:
+      fprintf(stderr, "INT ");
+      break;
+    case TK_SIZEOF:
+      fprintf(stderr, "SIZEOF ");
+      break;
+    }
+    tok = tok->next;
+  }
+}
+
+void debug_node(Node *node, char *pre1, char *pre2) {
+  Node *cur;
+  char p11[255], p21[255], p31[255], p41[255], p12[255], p22[255], p32[255], p42[255];
+  char *label;
+
+  if (!node) {
+    fprintf(stderr, "%sNULL\n", pre1);
+    return;
+  }
+
+  switch (node->kind) {
+  case ND_LVAR:
+    fprintf(stderr, "%s%s\n", pre1, substr(node->name, node->len));
+    return;
+
+  case ND_GVAR:
+    fprintf(stderr, "%s%s\n", pre1, substr(node->name, node->len));
+    return;
+
+  case ND_NUM:
+    fprintf(stderr, "%s%d\n", pre1, node->val);
+    return;
+
+  case ND_DECLARE:
+    fprintf(stderr, "%sDECL\n", pre1);
+    return;
+
+  case ND_DECLARE_GVAR:
+    fprintf(stderr, "%sDECL\n", pre1);
+    return;
+
+  case ND_RETURN:
+    sprintf(p11, "%sRET ─ ", pre1);
+    sprintf(p12, "%s      ", pre2);
+    debug_node(node->lhs, p11, p12);
+    return;
+
+  case ND_FUNC:
+    sprintf(p11, "%sFUN ─ ", pre1);
+    sprintf(p12, "%s      ", pre2);
+    debug_node(node->body, p11, p12);
+    return;
+
+  case ND_ADDR:
+    sprintf(p11, "%sADR ─ ", pre1);
+    sprintf(p12, "%s      ", pre2);
+    debug_node(node->lhs, p11, p12);
+    return;
+
+  case ND_DEREF:
+    sprintf(p11, "%sDER ─ ", pre1);
+    sprintf(p12, "%s      ", pre2);
+    debug_node(node->lhs, p11, p12);
+    return;
+
+  case ND_IF:
+    sprintf(p11, "%sIF  ┬ ", pre1);
+    sprintf(p12, "%s    │ ", pre2);
+    sprintf(p21, "%s    ├ ", pre2);
+    sprintf(p22, "%s    │ ", pre2);
+    sprintf(p31, "%s    └ ", pre2);
+    sprintf(p32, "%s      ", pre2);
+    debug_node(node->cond, p11, p12);
+    debug_node(node->body, p21, p22);
+    debug_node(node->els, p31, p32);
+    return;
+
+  case ND_FOR:
+    sprintf(p11, "%sFOR ┬ ", pre1);
+    sprintf(p12, "%s    │ ", pre2);
+    sprintf(p21, "%s    ├ ", pre2);
+    sprintf(p22, "%s    │ ", pre2);
+    sprintf(p31, "%s    ├ ", pre2);
+    sprintf(p32, "%s    │ ", pre2);
+    sprintf(p41, "%s    └ ", pre2);
+    sprintf(p42, "%s      ", pre2);
+    debug_node(node->init, p11, p12);
+    debug_node(node->cond, p21, p22);
+    debug_node(node->inc, p31, p32);
+    debug_node(node->body, p41, p42);
+    return;
+
+  case ND_WHILE:
+    sprintf(p11, "%sWHI ┬ ", pre1);
+    sprintf(p12, "%s    │ ", pre2);
+    sprintf(p21, "%s    └ ", pre2);
+    sprintf(p22, "%s      ", pre2);
+    debug_node(node->cond, p11, p12);
+    debug_node(node->body, p21, p22);
+    return;
+
+  case ND_BLOCK:
+    cur = node->child;
+    while (cur) {
+      if (cur == node->child && !cur->next) {
+        sprintf(p11, "%sBLO ─ ", pre1);
+        sprintf(p12, "%s      ", pre2);
+      } else if (cur == node->child) {
+        sprintf(p11, "%sBLO ┬ ", pre1);
+        sprintf(p12, "%s    │ ", pre2);
+      } else if (cur->next) {
+        sprintf(p11, "%s    ├ ", pre2);
+        sprintf(p12, "%s    │ ", pre2);
+      } else {
+        sprintf(p11, "%s    └ ", pre2);
+        sprintf(p12, "%s      ", pre2);
+      }
+      debug_node(cur, p11, p12);
+      cur = cur->next;
+    }
+    return;
+
+  case ND_CALL:
+    cur = node->child;
+    while (cur) {
+      if (cur == node->child && !cur->next) {
+        sprintf(p11, "%sCAL ─ ", pre1);
+        sprintf(p12, "%s      ", pre2);
+      } else if (cur == node->child) {
+        sprintf(p11, "%sCAL ┬ ", pre1);
+        sprintf(p12, "%s    │ ", pre2);
+      } else if (cur->next) {
+        sprintf(p11, "%s    ├ ", pre2);
+        sprintf(p12, "%s    │ ", pre2);
+      } else {
+        sprintf(p11, "%s    └ ", pre2);
+        sprintf(p12, "%s      ", pre2);
+      }
+      debug_node(cur, p11, p12);
+      cur = cur->next;
+    }
+    return;
+
+  case ND_ADD: label = "ADD"; break;
+  case ND_SUB: label = "SUB"; break;
+  case ND_MUL: label = "MUL"; break;
+  case ND_DIV: label = "DIV"; break;
+  case ND_ASSIGN: label = "ASS"; break;
+  case ND_EQ: label = "EQ "; break;
+  case ND_NE: label = "NE "; break;
+  case ND_LE: label = "LE "; break;
+  case ND_LT: label = "LT "; break;
+  }
+
+  sprintf(p11, "%s%s ┬ ", pre1, label);
+  sprintf(p12, "%s    │ ", pre2, label);
+  sprintf(p21, "%s    └ ", pre2);
+  sprintf(p22, "%s      ", pre2);
+  debug_node(node->lhs, p11, p12);
+  debug_node(node->rhs, p21, p22);
+  return;
+}
