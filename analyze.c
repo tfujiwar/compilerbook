@@ -230,7 +230,7 @@ Node *analyze(Node *node) {
       *next = analyze(*next);
       next = &((*next)->next);
     }
-    return node;  // TODO
+    return node;
 
   case ND_ADDR:
     node->lhs = analyze(node->lhs);

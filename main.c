@@ -5,6 +5,7 @@ char *user_input;
 Node *code[100];
 LVar *locals;
 Map *globals;
+Map *functions;
 int labels = 0;
 
 int main(int argc, char **argv) {
@@ -20,6 +21,7 @@ int main(int argc, char **argv) {
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
   globals = new_map();
+  functions = new_map();
   program();
 
   printf(".intel_syntax noprefix\n");

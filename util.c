@@ -254,10 +254,10 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     cur = node->child;
     while (cur) {
       if (cur == node->child && !cur->next) {
-        sprintf(p11, "%sCALL ───── ", pre1);
+        sprintf(p11, "%sCAL(%s) ─ ", pre1, type);
         sprintf(p12, "%s           ", pre2);
       } else if (cur == node->child) {
-        sprintf(p11, "%sCALL ────┬ ", pre1);
+        sprintf(p11, "%sCAL(%s) ┬ ", pre1, type);
         sprintf(p12, "%s         │ ", pre2);
       } else if (cur->next) {
         sprintf(p11, "%s         ├ ", pre2);

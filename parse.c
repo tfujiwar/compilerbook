@@ -126,9 +126,11 @@ Node *function() {
 
   // Function
   Node *node = new_node(ND_FUNC, NULL, NULL);
-  node->name = ident->str;;
+  node->name = ident->str;
+  map_put(functions, node->name, ty);
 
   // Function args
+  Node *cur = node;
   while (ty = type()) {
     Token *ident = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
@@ -145,7 +147,6 @@ Node *function() {
 
     arg->lvar = lvar;
 
-    Node *cur = node;
     if (cur == node) {
       cur->child = arg;
       cur = cur->child;
@@ -162,7 +163,7 @@ Node *function() {
   expect("{");
   Node *block = new_node(ND_BLOCK, NULL, NULL);
 
-  Node *cur = block;
+  cur = block;
   while (!consume("}")) {
     if (cur == block) {
       cur->child = stmt();
@@ -384,6 +385,9 @@ Node *primary() {
     if (consume("(")) {
       node->kind = ND_CALL;
       node->name = name;
+
+      Type *func = map_get(functions, name);
+      node->type = func;
 
       if (consume(")")) return node;
       node->child = expr();

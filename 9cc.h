@@ -156,3 +156,4 @@ extern Node *code[];
 extern LVar *locals;
 extern int labels;
 extern Map *globals;
+extern Map *functions;
