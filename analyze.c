@@ -245,7 +245,6 @@ Node *analyze(Node *node) {
 
   case ND_SIZEOF:
     node->lhs = analyze(node->lhs);
-    debug("%d", node->lhs->type->ty);
     if (node->lhs->type->ty == ARRAY)
       return int_node(node->lhs->type->ptr_to->size * node->lhs->type->array_size);
     else

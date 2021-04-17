@@ -64,14 +64,6 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   return node;
 }
 
-Node *new_expr(NodeKind kind, Node *lhs, Node *rhs) {
-  Node *node = calloc(1, sizeof(Node));
-  node->kind = kind;
-  node->lhs = lhs;
-  node->rhs = rhs;
-  return node;
-}
-
 Node *new_node_num(int val) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_NUM;
@@ -111,13 +103,13 @@ Node *function() {
   Type *ty = type();
   if (!ty) error_at(token->at, "type expected");
 
-  Node *node = new_node(ND_FUNC, NULL, NULL);
-  Token *tok = consume_ident();
-  if (!tok) error_at(token->at, "identifier expected");
+  Token *ident = consume_ident();
+  if (!ident) error_at(token->at, "identifier expected");
 
+  // Global variable
   if (!consume("(")) {
     LVar *lvar = calloc(1, sizeof(LVar));
-    lvar->name = tok->str;
+    lvar->name = ident->str;
     lvar->type = ty;
     if (ty->ty == ARRAY)
       lvar->offset = ty->size * ty->array_size;
@@ -132,30 +124,28 @@ Node *function() {
     return node;
   }
 
-  node = new_node(ND_FUNC, NULL, NULL);
-  node->name = tok->str;
+  // Function
+  Node *node = new_node(ND_FUNC, NULL, NULL);
+  node->name = ident->str;;
 
-  Node *cur;
-  cur = node;
-
+  // Function args
   while (ty = type()) {
-    tok = consume_ident();
+    Token *ident = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
-    LVar *lvar = find_lvar(tok);
+    LVar *lvar = find_lvar(ident);
 
-    if (lvar) {
-      arg->lvar = lvar;
-
-    } else {
+    if (!lvar) {
       lvar = calloc(1, sizeof(LVar));
       lvar->next = locals;
-      lvar->name = tok->str;
+      lvar->name = ident->str;
       lvar->offset = locals->offset + 8;
       lvar->type = ty;
-      arg->lvar = lvar;
       locals = lvar;
     }
 
+    arg->lvar = lvar;
+
+    Node *cur = node;
     if (cur == node) {
       cur->child = arg;
       cur = cur->child;
@@ -166,20 +156,21 @@ Node *function() {
 
     if (!consume(",")) break;
   }
-
   expect(")");
 
-  if (!consume("{")) error_at(token->at, "block expected");
+  // Function body
+  expect("{");
   Node *block = new_node(ND_BLOCK, NULL, NULL);
 
-  if (!consume("}")) {
-    block->child = stmt();
-    cur = block->child;
-  }
-
+  Node *cur = block;
   while (!consume("}")) {
-    cur->next = stmt();
-    cur = cur->next;
+    if (cur == block) {
+      cur->child = stmt();
+      cur = cur->child;
+    } else {
+      cur->next = stmt();
+      cur = cur->next;
+    }
   }
 
   node->body = block;
@@ -187,12 +178,14 @@ Node *function() {
 }
 
 Node *stmt() {
+  // Return statement
   if (consume_token(TK_RETURN)) {
     Node *node = new_node(ND_RETURN, expr(), NULL);
     expect(";");
     return node;
   }
 
+  // If statement
   if (consume_token(TK_IF)) {
     Node *node = new_node(ND_IF, NULL, NULL);
     expect("(");
@@ -205,6 +198,7 @@ Node *stmt() {
     return node;
   }
 
+  // For statement
   if (consume_token(TK_FOR)) {
     Node *node = new_node(ND_FOR, NULL, NULL);
     expect("(");
@@ -224,6 +218,7 @@ Node *stmt() {
     return node;
   }
 
+  // While statement
   if (consume_token(TK_WHILE)) {
     Node *node = new_node(ND_WHILE, NULL, NULL);
     expect("(");
@@ -233,25 +228,26 @@ Node *stmt() {
     return node;
   }
 
+  // Block
   if (consume("{")) {
     Node *node = new_node(ND_BLOCK, NULL, NULL);
-
-    Node *cur;
-    if (!consume("}")) {
-      node->child = stmt();
-      cur = node->child;
-    }
-
+    Node *cur = node;
     while (!consume("}")) {
-      cur->next = stmt();
-      cur = cur->next;
+      if (cur == node) {
+        cur->child = stmt();
+        cur = cur->child;
+      } else {
+        cur->next = stmt();
+        cur = cur->next;
+      }
     }
     return node;
   }
 
+  // Declare local variable
   Type *ty;
   if (ty = type()) {
-    Token *tok = consume_ident();
+    Token *ident = consume_ident();
 
     if (consume("[")) {
       Type *ary = calloc(1, sizeof(Type));
@@ -265,16 +261,16 @@ Node *stmt() {
 
     expect(";");
 
-    LVar *lvar = find_lvar(tok);
+    LVar *lvar = find_lvar(ident);
     if (lvar) error_at(token->at, "already declared");
 
     lvar = calloc(1, sizeof(LVar));
     lvar->next = locals;
-    lvar->name = tok->str;
+    lvar->name = ident->str;
     if (ty->ty == ARRAY)
-      lvar->offset = locals->offset + 8 * ty->array_size;
+      lvar->offset = locals->offset + ty->size * ty->array_size;
     else
-      lvar->offset = locals->offset + 8;
+      lvar->offset = locals->offset + ty->size;
     lvar->type = ty;
     locals = lvar;
 
@@ -282,6 +278,7 @@ Node *stmt() {
     return node;
   }
 
+  // Expression
   Node *node = expr();
   expect(";");
   return node;
@@ -294,7 +291,7 @@ Node *expr() {
 Node *assign() {
   Node *node = equality();
   if (consume("="))
-    node = new_expr(ND_ASSIGN, node, assign());
+    node = new_node(ND_ASSIGN, node, assign());
   return node;
 }
 
@@ -302,9 +299,9 @@ Node *equality() {
   Node *node = relational();
   while (true) {
     if (consume("=="))
-      node = new_expr(ND_EQ, node, relational());
+      node = new_node(ND_EQ, node, relational());
     else if (consume("!="))
-      node = new_expr(ND_NE, node, relational());
+      node = new_node(ND_NE, node, relational());
     else
       return node;
   }
@@ -314,13 +311,13 @@ Node *relational() {
   Node *node = add();
   while (true) {
     if (consume("<="))
-      node = new_expr(ND_LE, node, add());
+      node = new_node(ND_LE, node, add());
     else if (consume(">="))
-      node = new_expr(ND_LE, add(), node);
+      node = new_node(ND_LE, add(), node);
     else if (consume("<"))
-      node = new_expr(ND_LT, node, add());
+      node = new_node(ND_LT, node, add());
     else if (consume(">"))
-      node = new_expr(ND_LT, add(), node);
+      node = new_node(ND_LT, add(), node);
     else
       return node;
   }
@@ -330,9 +327,9 @@ Node *add() {
   Node *node = mul();
   while (true) {
     if (consume("+")) {
-      node = new_expr(ND_ADD, node, mul());
+      node = new_node(ND_ADD, node, mul());
     } else if (consume("-")) {
-      node = new_expr(ND_SUB, node, mul());
+      node = new_node(ND_SUB, node, mul());
     } else {
       return node;
     }
@@ -343,9 +340,9 @@ Node *mul() {
   Node *node = unary();
   while (true) {
     if (consume("*"))
-      node = new_expr(ND_MUL, node, unary());
+      node = new_node(ND_MUL, node, unary());
     else if (consume("/"))
-      node = new_expr(ND_DIV, node, unary());
+      node = new_node(ND_DIV, node, unary());
     else
       return node;
   }
@@ -356,16 +353,16 @@ Node *unary() {
     return primary();
 
   if (consume("-"))
-    return new_expr(ND_SUB, new_node_num(0), primary());
+    return new_node(ND_SUB, new_node_num(0), primary());
 
   if (consume("*"))
-    return new_expr(ND_DEREF, unary(), NULL);
+    return new_node(ND_DEREF, unary(), NULL);
 
   if (consume("&"))
-    return new_expr(ND_ADDR, unary(), NULL);
+    return new_node(ND_ADDR, unary(), NULL);
 
   if (consume_token(TK_SIZEOF))
-    return new_expr(ND_SIZEOF, expr(), NULL);
+    return new_node(ND_SIZEOF, expr(), NULL);
 
   Node *node = primary();
   return node;
@@ -378,11 +375,12 @@ Node *primary() {
     return node;
   }
 
-  Token *tok = consume_ident();
-  if (tok) {
+  Token *ident = consume_ident();
+  if (ident) {
     Node *node = calloc(1, sizeof(Node));
-    char *name = tok->str;
+    char *name = ident->str;
 
+    // Function call
     if (consume("(")) {
       node->kind = ND_CALL;
       node->name = name;
@@ -400,19 +398,20 @@ Node *primary() {
       return node;
     }
 
-    LVar *lvar = find_lvar(tok);
+    // Local or global variable
+    LVar *lvar = find_lvar(ident);
     if (lvar) {
       node->kind = ND_LVAR;
       node->lvar = lvar;
     } else {
-      lvar = map_get(globals, tok->str);
-      if (!lvar) error_at(tok->at, "not declared");
+      lvar = map_get(globals, ident->str);
+      if (!lvar) error_at(token->at, "not declared");
       node->kind = ND_GVAR;
       node->lvar = lvar;
     }
 
     if (consume("[")) {
-      node = new_expr(ND_DEREF, new_expr(ND_ADD, node, expr()), NULL);
+      node = new_node(ND_DEREF, new_node(ND_ADD, node, expr()), NULL);
       expect("]");
     }
     return node;
