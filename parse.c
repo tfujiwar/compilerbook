@@ -375,9 +375,8 @@ Node *unary() {
   if (consume("&"))
     return new_expr(ND_ADDR, unary(), NULL);
 
-  if (consume_token(TK_SIZEOF)) {
-    Node *node = unary();
-  }
+  if (consume_token(TK_SIZEOF))
+    return new_expr(ND_SIZEOF, expr(), NULL);
 
   Node *node = primary();
   return node;

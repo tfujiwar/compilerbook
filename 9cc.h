@@ -63,6 +63,7 @@ typedef enum {
   ND_CALL,
   ND_ADDR,
   ND_DEREF,
+  ND_SIZEOF,
   ND_DECLARE,
   ND_DECLARE_GVAR,
 } NodeKind;
@@ -146,7 +147,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-Node *analyze();
+Node *analyze(Node *node);
 
 void gen(Node *node);
 void gen_lval(Node *node);
