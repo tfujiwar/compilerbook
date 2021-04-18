@@ -1,5 +1,44 @@
 #include "9cc.h"
 
+char *word_ptr(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "BYTE PTR";
+    case 2:
+      return "WORD PTR";
+    case 4:
+      return "DWORD PTR";
+    case 8:
+      return "QWORD PTR";
+  }
+}
+
+char *reg_a(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "al";
+    case 2:
+      return "ax";
+    case 4:
+      return "eax";
+    case 8:
+      return "rax";
+  }
+}
+
+char *reg_d(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "dil";
+    case 2:
+      return "di";
+    case 4:
+      return "edi";
+    case 8:
+      return "rdi";
+  }
+}
+
 void gen_lval(Node *node) {
   if (node->kind != ND_LVAR)
     error("not a variable");
@@ -23,14 +62,14 @@ void gen(Node *node) {
     printf("  # ND_LVAR\n");
     gen_lval(node);
     printf("  pop rax\n");
-    printf("  mov rax, [rax]\n");
+    printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
     return;
 
   case ND_GVAR:
     printf("  # ND_GVAR\n");
-    printf("  lea rax, [%s]\n", node->lvar->name);
-    printf("  mov rax, [rax]\n");
+    printf("  lea %s, %s [%s]\n", reg_a(node), word_ptr(node), node->lvar->name);
+    printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
     return;
 
@@ -39,8 +78,8 @@ void gen(Node *node) {
     if (node->lhs->kind == ND_GVAR) {
       gen(node->rhs);
       printf("  pop rdi\n");
-      printf("  lea rax, [%s]\n", node->lhs->lvar->name);
-      printf("  mov [rax], rdi\n");
+      printf("  lea rax, %s [%s]\n", word_ptr(node), node->lhs->lvar->name);
+      printf("  mov %s [rax], %s\n", word_ptr(node), reg_d(node));
       printf("  push rdi\n");
       return;
     }
@@ -49,7 +88,7 @@ void gen(Node *node) {
     gen(node->rhs);
     printf("  pop rdi\n");
     printf("  pop rax\n");
-    printf("  mov [rax], rdi\n");
+    printf("  mov %s [rax], %s\n", word_ptr(node), reg_d(node));
     printf("  push rdi\n");
     return;
 
@@ -187,7 +226,7 @@ void gen(Node *node) {
   case ND_ADDR:
     printf("  # ND_ADDR\n");
     if (node->lhs->kind == ND_GVAR) {
-      printf("  lea rax, [%s]\n", node->lhs->lvar->name);
+      printf("  lea rax, %s [%s]\n", word_ptr(node), node->lhs->lvar->name);
       printf("  push rax\n");
       return;
     }
@@ -198,7 +237,7 @@ void gen(Node *node) {
     printf("  # ND_DEREF\n");
     gen(node->lhs);
     printf("  pop rax\n");
-    printf("  mov rax, [rax]\n");
+    printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
     return;
 
