@@ -10,6 +10,9 @@ $(OBJS): 9cc.h
 test: 9cc
 	./test.sh
 
+test_file: 9cc
+	./9cc -f test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+
 clean:
 	rm -f 9cc *.o *~ tmp*
 

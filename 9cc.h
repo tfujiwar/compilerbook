@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -116,12 +117,13 @@ struct Node {
   LVar *lvar;
 };
 
+char *read_file(char *path);
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
-char* substring(char *str, int len);
+char *substring(char *str, int len);
 
 bool consume(char *op);
 void expect(char *op);
@@ -151,8 +153,9 @@ Node *analyze(Node *node);
 void gen(Node *node);
 void gen_lval(Node *node);
 
-extern Token *token;
+extern char *filename;
 extern char *user_input;
+extern Token *token;
 extern Node *code[];
 extern LVar *locals;
 extern int labels;

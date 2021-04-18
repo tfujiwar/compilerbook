@@ -1,5 +1,27 @@
 #include "9cc.h"
 
+char *read_file(char *path) {
+  FILE *fp = fopen(path, "r");
+  if (!fp)
+    error("cannot open %s: %s", path, strerror(errno));
+
+  if (fseek(fp, 0, SEEK_END) == -1)
+    error("%s: fseek: %s", path, strerror(errno));
+
+  size_t size = ftell(fp);
+  if (fseek(fp, 0, SEEK_SET) == -1)
+    error("%s: fseek: %s", path, strerror(errno));
+
+  char *buf = calloc(1, size + 2);
+  fread(buf, size, 1, fp);
+
+  if (size == 0 || buf[size - 1] != '\n')
+    buf[size++] = '\n';
+  buf[size++] = '\0';
+  fclose(fp);
+  return buf;
+}
+
 void debug(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -19,8 +41,22 @@ void error_at(char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
 
-  int pos = loc - user_input;
-  fprintf(stderr, "%s\n", user_input);
+  char *begin = loc;
+  while (user_input < begin && begin[-1] != '\n')
+    begin--;
+
+  char *end = loc;
+  while (*end != '\n')
+    end++;
+
+  int line = 1;
+  for (char *p = user_input; p < begin; p++)
+    if (*p == '\n') line++;
+
+  int indent = fprintf(stderr, "%s:%d: ", filename, line);
+  fprintf(stderr, "%.*s\n", (int)(end - begin), begin);
+
+  int pos = loc - begin + indent;
   fprintf(stderr, "%*s", pos, " ");
   fprintf(stderr, "^ ");
 

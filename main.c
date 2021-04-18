@@ -1,7 +1,8 @@
 #include "9cc.h"
 
-Token *token;
+char *filename;
 char *user_input;
+Token *token;
 Node *code[100];
 LVar *locals;
 Map *globals;
@@ -9,11 +10,16 @@ Map *functions;
 int labels = 0;
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
+  if (argc == 2) {
+    filename = "input";
+    user_input = argv[1];
+  } else if (argc == 3 && strcmp(argv[1], "-f") == 0) {
+    filename = argv[2];
+    user_input = read_file(argv[2]);
+  } else {
     error("incorrect number of argument");
   }
 
-  user_input = argv[1];
   token = tokenize();
   debug("");
   debug_token(token);

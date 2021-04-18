@@ -107,7 +107,7 @@ Node *function() {
   if (!ty) error_at(token->at, "type expected");
 
   Token *ident = consume_ident();
-  if (!ident) error_at(token->at, "identifier expected");
+  if (!ident) error_at(ident->at, "identifier expected");
 
   // Global variable
   if (!consume("(")) {
@@ -422,7 +422,7 @@ Node *primary() {
       node->lvar = lvar;
     } else {
       lvar = map_get(globals, ident->str);
-      if (!lvar) error_at(token->at, "not declared");
+      if (!lvar) error_at(ident->at, "not declared");
       node->kind = ND_GVAR;
       node->lvar = lvar;
     }
