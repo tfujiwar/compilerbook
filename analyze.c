@@ -19,7 +19,7 @@ bool same_type(Type *t1, Type *t2) {
   if (t1->ty != t2->ty)
     return false;
 
-  if (t1->ty == INT)
+  if (t1->ty == CHAR || t1->ty == INT)
     return true;
 
   if (t1->ty == PTR)
@@ -107,6 +107,16 @@ Node *cast_array(Node *from) {
   return node;
 }
 
+bool is_ptr(Node *node) {
+  return node->type->ty == PTR || node->type->ty == ARRAY;
+}
+
+Type *bigger_type(Node *n1, Node *n2) {
+  if (n1->type->size > n2->type->size)
+    return n1->type;
+  return n2->type;
+}
+
 Node *analyze(Node *node) {
   Node **next;
 
@@ -115,51 +125,48 @@ Node *analyze(Node *node) {
     node->lhs = analyze(node->lhs);
     node->rhs = analyze(node->rhs);
 
-    if ((node->lhs->type->ty == PTR || node->lhs->type->ty == ARRAY) && node->rhs->type->ty == INT) {
+    if (is_ptr(node->lhs) && is_ptr(node->rhs)) {
+      error("invalid operands for add: ptr, ptr");
+    }
+
+    if (is_ptr(node->lhs) && !is_ptr(node->rhs)) {
       node->lhs = cast_array(node->lhs);
       return add_ptr_node(node->lhs, node->rhs);
     }
 
-    if ((node->rhs->type->ty == PTR || node->rhs->type->ty == ARRAY) && node->lhs->type->ty == INT) {
+    if (is_ptr(node->rhs) && !is_ptr(node->lhs)) {
       node->rhs = cast_array(node->rhs);
       return add_ptr_node(node->rhs, node->lhs);
     }
 
-    if (same_type(node->lhs->type, node->rhs->type)) {
-      node->type = node->lhs->type;
-      return node;
-    }
-
-    error("invalid type for add");
-    break;
+    node->type = bigger_type(node->lhs, node->rhs);
+    return node;
 
   case ND_SUB:
     node->lhs = analyze(node->lhs);
     node->rhs = analyze(node->rhs);
 
-    if (node->lhs->type->ty == PTR && node->rhs->type->ty == INT)
+    if (!is_ptr(node->lhs) && is_ptr(node->rhs))
+      error("invalid operands for sub: num, ptr");
+
+    if (is_ptr(node->lhs) && is_ptr(node->rhs))
+      error("not supported operands for sub: ptr, ptr");  // TODO
+
+    if (is_ptr(node->lhs) && !is_ptr(node->rhs))
       return sub_ptr_node(node->lhs, node->rhs);
 
-    if (same_type(node->lhs->type, node->rhs->type)) {
-      node->type = node->lhs->type;
-      return node;
-    }
-
-    error("invalid type for sub");
-    break;
+    node->type = bigger_type(node->lhs, node->rhs);;
+    return node;
 
   case ND_MUL:
   case ND_DIV:
     node->lhs = analyze(node->lhs);
     node->rhs = analyze(node->rhs);
 
-    if (!same_type(node->lhs->type, node->rhs->type))
-      error("invalid type for mul or div");
+    if (is_ptr(node->lhs) || is_ptr(node->lhs))
+      error("invalid operands for mul or div");
 
-    if (node->lhs->type->ty != INT)
-      error("invalid type for mul or div");
-
-    node->type = type_int();
+    node->type = bigger_type(node->lhs, node->rhs);
     return node;
 
   case ND_ASSIGN:
@@ -167,7 +174,7 @@ Node *analyze(Node *node) {
     node->rhs = analyze(node->rhs);
     node->rhs = cast_array(node->rhs);
 
-    if (!same_type(node->lhs->type, node->rhs->type))
+    if (is_ptr(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
       error("invalid type for assign");
 
     node->type = node->lhs->type;
@@ -188,10 +195,6 @@ Node *analyze(Node *node) {
   case ND_LT:
     node->lhs = analyze(node->lhs);
     node->rhs = analyze(node->rhs);
-
-    if (!same_type(node->lhs->type, node->rhs->type))
-      error("invalid type for comparison");
-
     node->type = type_int();
     return node;
 

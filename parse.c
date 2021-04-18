@@ -81,7 +81,10 @@ void program() {
 Type *type() {
   Type *ty = calloc(1, sizeof(Type));
 
-  if (consume_token(TK_INT)) {
+  if (consume_token(TK_CHAR)) {
+    ty->ty = CHAR;
+    ty->size = 1;
+  } else if (consume_token(TK_INT)) {
     ty->ty = INT;
     ty->size = 4;
   } else {

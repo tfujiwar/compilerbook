@@ -62,14 +62,16 @@ void gen(Node *node) {
     printf("  # ND_LVAR\n");
     gen_lval(node);
     printf("  pop rax\n");
-    printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
+    if (node->type->size < 4) printf("  movsx eax, %s [rax]\n", word_ptr(node));
+    else                      printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
     return;
 
   case ND_GVAR:
     printf("  # ND_GVAR\n");
-    printf("  lea %s, %s [%s]\n", reg_a(node), word_ptr(node), node->lvar->name);
-    printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
+    printf("  lea rax, %s [%s]\n", word_ptr(node), node->lvar->name);
+    if (node->type->size < 4) printf("  movsx eax, %s [rax]\n", word_ptr(node));
+    else                      printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
     return;
 
@@ -237,7 +239,8 @@ void gen(Node *node) {
     printf("  # ND_DEREF\n");
     gen(node->lhs);
     printf("  pop rax\n");
-    printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
+    if (node->type->size < 4) printf("  movsx eax, %s [rax]\n", word_ptr(node));
+    else                      printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
     return;
 

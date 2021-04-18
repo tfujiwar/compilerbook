@@ -37,6 +37,7 @@ typedef enum {
   TK_FOR,
   TK_WHILE,
   TK_EOF,
+  TK_CHAR,
   TK_INT,
   TK_SIZEOF,
 } TokenKind;
@@ -71,7 +72,7 @@ typedef enum {
 typedef struct Type Type;
 
 struct Type {
-  enum { INT, PTR, ARRAY } ty;
+  enum { CHAR, INT, PTR, ARRAY } ty;
   struct Type *ptr_to;
   size_t size;
   size_t array_size;

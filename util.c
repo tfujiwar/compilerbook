@@ -107,6 +107,9 @@ void debug_token(Token *token) {
     case TK_INT:
       fprintf(stderr, "INT ");
       break;
+    case TK_CHAR:
+      fprintf(stderr, "CHAR ");
+      break;
     case TK_SIZEOF:
       fprintf(stderr, "SIZEOF ");
       break;
@@ -128,6 +131,9 @@ void debug_node(Node *node, char *pre1, char *pre2) {
 
   if (node->type) {
     switch (node->type->ty) {
+    case CHAR:
+      type = "CHR";
+      break;
     case INT:
       type = "INT";
       break;

@@ -28,6 +28,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "char", 4) == 0) {
+      cur = new_token(TK_CHAR, cur, p, 4);
+      p += 4;
+      continue;
+    }
+
     if (memcmp(p, "int", 3) == 0) {
       cur = new_token(TK_INT, cur, p, 3);
       p += 3;
