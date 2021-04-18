@@ -108,6 +108,16 @@ Node *function() {
 
   // Global variable
   if (!consume("(")) {
+    if (consume("[")) {
+      Type *ary = calloc(1, sizeof(Type));
+      ary->ty = ARRAY;
+      ary->size = 8;
+      ary->array_size = expect_number();
+      ary->ptr_to = ty;
+      ty = ary;
+      expect("]");
+    }
+
     LVar *lvar = calloc(1, sizeof(LVar));
     lvar->name = ident->str;
     lvar->type = ty;

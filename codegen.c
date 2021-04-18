@@ -186,6 +186,11 @@ void gen(Node *node) {
 
   case ND_ADDR:
     printf("  # ND_ADDR\n");
+    if (node->lhs->kind == ND_GVAR) {
+      printf("  lea rax, [%s]\n", node->lhs->lvar->name);
+      printf("  push rax\n");
+      return;
+    }
     gen_lval(node->lhs);
     return;
 
@@ -200,7 +205,10 @@ void gen(Node *node) {
   case ND_DECLARE_GVAR:
     printf("# ND_DECLARE_GVAR\n");
     printf("%s:\n", node->lvar->name);
-    printf("  .zero %d\n", 4);
+    if (node->lvar->type->ty == ARRAY)
+      printf("  .zero %d\n", node->lvar->type->ptr_to->size * node->lvar->type->array_size);
+    else
+      printf("  .zero %d\n", node->lvar->type->size);
     printf("\n");
     return;
   }

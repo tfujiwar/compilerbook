@@ -44,7 +44,7 @@ Type *array_to_ptr(Type *array) {
 Node *add_ptr_node(Node *ptr, Node *num) {
   Node *size = calloc(1, sizeof(Node));
   size->kind = ND_NUM;
-  size->val = ptr->type->size;
+  size->val = ptr->type->ptr_to->size;
   size->type = type_int();
 
   Node *mul = calloc(1, sizeof(Node));
@@ -65,7 +65,7 @@ Node *add_ptr_node(Node *ptr, Node *num) {
 Node *sub_ptr_node(Node *ptr, Node *num) {
   Node *size = calloc(1, sizeof(Node));
   size->kind = ND_NUM;
-  size->val = ptr->type->size;
+  size->val = ptr->type->ptr_to->size;
   size->type = type_int();
 
   Node *mul = calloc(1, sizeof(Node));
@@ -91,14 +91,19 @@ Node *int_node(int val) {
   return node;
 }
 
-Node *cast_array(Node *node) {
-  if (node->type->ty != ARRAY) return node;
+Node *cast_array(Node *from) {
+  if (from->type->ty != ARRAY) return from;
   Type *type = calloc(1, sizeof(Type));
   type->ty = PTR;
-  type->ptr_to = node->type->ptr_to;
+  type->ptr_to = from->type->ptr_to;
   type->size = 8;
   type->array_size = 0;
+
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_ADDR;
+  node->lhs = from;
   node->type = type;
+
   return node;
 }
 
