@@ -253,6 +253,12 @@ void gen(Node *node) {
       printf("  .zero %d\n", node->lvar->type->size);
     printf("\n");
     return;
+
+  case ND_STRING:
+    printf("# ND_STRING\n");
+    printf("  mov rax, OFFSET FLAT:.Lstr%03d\n", node->val);
+    printf("  push rax\n");
+    return;
   }
 
   gen(node->lhs);
@@ -306,4 +312,12 @@ void gen(Node *node) {
 
   printf("  push rax\n");
   printf("\n");
+}
+
+void gen_string() {
+  for (int i = 0; i < strings->keys->len; i++) {
+    char *str = vec_get(strings->keys, i);
+    printf(".Lstr%03d:\n", i);
+    printf("  .string \"%s\"\n", str);
+  }
 }

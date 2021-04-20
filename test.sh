@@ -130,5 +130,9 @@ assert 1 "int main() { char a; char b; a=-1; b=2; return a+b; }"
 assert 1 "int main() { char a; char b; a=128; b=-128; return a==b; }"
 assert 1 "int main() { int a; int b; a=128; b=-128; return a!=b; }"
 
+assert 65 "int main() { char *s; s=\"ABC\"; return s[0]; }"
+assert 66 "int main() { char *s; s=\"ABC\"; return s[1]; }"
+assert 67 "int main() { char *s; s=\"ABC\"; return s[2]; }"
+assert 0 "int main() { char *s; s=\"ABC\"; return s[3]; }"
 
 echo OK

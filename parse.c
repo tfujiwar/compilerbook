@@ -25,6 +25,15 @@ Token *consume_ident() {
   return tok;
 }
 
+Token *consume_string() {
+  if (token->kind != TK_STRING)
+    return NULL;
+
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
+
 LVar *find_lvar(Token *tok) {
   for (LVar *var = locals; var; var = var->next) {
     if (var->name && strcmp(tok->str, var->name) == 0) return var;
@@ -431,6 +440,14 @@ Node *primary() {
       node = new_node(ND_DEREF, new_node(ND_ADD, node, expr()), NULL);
       expect("]");
     }
+    return node;
+  }
+
+  Token *str;
+  if (str = consume_string()) {
+    Node *node = new_node(ND_STRING, NULL, NULL);
+    node->val = strings->keys->len;
+    map_put(strings, str->str, NULL);
     return node;
   }
 

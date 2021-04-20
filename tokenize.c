@@ -101,6 +101,13 @@ Token *tokenize() {
       cur = new_token(TK_IDENT, cur, prev, p - prev);
       continue;
     }
+    if (*p == '"') {
+      char *prev = ++p;
+      while (*p != '"' || *p == '\\') p++;
+      cur = new_token(TK_STRING, cur, prev, p - prev);
+      p++;
+      continue;
+    }
 
     error_at(p, "failed to tokenize");
   }

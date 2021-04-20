@@ -25,6 +25,7 @@ struct Map {
 };
 
 Map *new_map();
+void *vec_get(Vector *vec, int i);
 void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
 
@@ -41,6 +42,7 @@ typedef enum {
   TK_CHAR,
   TK_INT,
   TK_SIZEOF,
+  TK_STRING,
 } TokenKind;
 
 typedef enum {
@@ -68,6 +70,7 @@ typedef enum {
   ND_SIZEOF,
   ND_DECLARE,
   ND_DECLARE_GVAR,
+  ND_STRING,
 } NodeKind;
 
 typedef struct Type Type;
@@ -152,6 +155,7 @@ Node *analyze(Node *node);
 
 void gen(Node *node);
 void gen_lval(Node *node);
+void gen_string();
 
 extern char *filename;
 extern char *user_input;
@@ -161,3 +165,4 @@ extern LVar *locals;
 extern int labels;
 extern Map *globals;
 extern Map *functions;
+extern Map *strings;

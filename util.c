@@ -73,6 +73,10 @@ Vector *new_vec() {
   return vec;
 }
 
+void *vec_get(Vector *vec, int i) {
+  return vec->data[i];
+}
+
 void vec_push(Vector *vec, void *elem) {
   if (vec->len == vec->capacity) {
     vec->capacity *= 2;
@@ -149,6 +153,9 @@ void debug_token(Token *token) {
     case TK_SIZEOF:
       fprintf(stderr, "SIZEOF ");
       break;
+    case TK_STRING:
+      fprintf(stderr, "STRING");
+      break;
     }
     tok = tok->next;
   }
@@ -204,6 +211,9 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_DECLARE_GVAR:
     fprintf(stderr, "%sDECL\n", pre1);
     return;
+
+  case ND_STRING:
+    fprintf(stderr, "%sSTRING\n", pre1);
 
   case ND_RETURN:
     sprintf(p11, "%sRET ────── ", pre1);

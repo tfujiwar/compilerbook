@@ -7,6 +7,7 @@ Node *code[100];
 LVar *locals;
 Map *globals;
 Map *functions;
+Map *strings;
 int labels = 0;
 
 int main(int argc, char **argv) {
@@ -28,6 +29,7 @@ int main(int argc, char **argv) {
   locals->offset = 0;
   globals = new_map();
   functions = new_map();
+  strings = new_map();
   program();
 
   printf(".intel_syntax noprefix\n");
@@ -40,6 +42,9 @@ int main(int argc, char **argv) {
     code[i] = analyze(code[i]);
     gen(code[i]);
   }
+
+  printf("  .data\n\n");
+  gen_string();
 
   printf("  .text\n\n");
   for (; code[i]; i++) {

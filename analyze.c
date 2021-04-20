@@ -1,5 +1,12 @@
 #include "9cc.h"
 
+Type *type_char() {
+  Type *type = calloc(1, sizeof(Type));
+  type->ty = CHAR;
+  type->size = 1;
+  return type;
+}
+
 Type *type_int() {
   Type *type = calloc(1, sizeof(Type));
   type->ty = INT;
@@ -262,6 +269,10 @@ Node *analyze(Node *node) {
     return node;
 
   case ND_DECLARE_GVAR:
+    return node;
+
+  case ND_STRING:
+    node->type = ptr_to(type_char());
     return node;
   }
 }
