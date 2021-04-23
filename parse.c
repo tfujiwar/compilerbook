@@ -1,5 +1,12 @@
 #include "mycc.h"
 
+Scope *new_scope(Scope *parent) {
+  Scope *scope = calloc(1, sizeof(Scope));
+  scope->parent = parent;
+  scope->vars = new_map();
+  return scope;
+}
+
 bool consume_token(int kind) {
   if (token->kind != kind)
     return false;
@@ -138,7 +145,7 @@ Node *function() {
     else
       lvar->offset = ty->size;
 
-    map_put(globals, lvar->name, lvar);
+    map_put(global->vars, lvar->name, lvar);
 
     Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
     node->lvar = lvar;
@@ -430,7 +437,7 @@ Node *primary() {
       node->kind = ND_LVAR;
       node->lvar = lvar;
     } else {
-      lvar = map_get(globals, ident->str);
+      lvar = map_get(global->vars, ident->str);
       if (!lvar) error_at(ident->at, "not declared");
       node->kind = ND_GVAR;
       node->lvar = lvar;

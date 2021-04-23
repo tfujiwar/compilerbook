@@ -120,6 +120,13 @@ struct Node {
   LVar *lvar;
 };
 
+typedef struct Scope Scope;
+
+struct Scope {
+  Scope *parent;
+  Map *vars;
+};
+
 char *read_file(char *path);
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
@@ -138,6 +145,7 @@ Token *tokenize();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
+Scope *new_scope(Scope *parent);
 
 void program();
 Node *function();
@@ -163,6 +171,7 @@ extern Token *token;
 extern Node *code[];
 extern LVar *locals;
 extern int labels;
-extern Map *globals;
 extern Map *functions;
 extern Map *strings;
+extern Scope *global;
+extern Scope *scope;

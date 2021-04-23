@@ -5,9 +5,10 @@ char *user_input;
 Token *token;
 Node *code[100];
 LVar *locals;
-Map *globals;
 Map *functions;
 Map *strings;
+Scope *global;
+Scope *scope;
 int labels = 0;
 
 int main(int argc, char **argv) {
@@ -27,9 +28,10 @@ int main(int argc, char **argv) {
 
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
-  globals = new_map();
   functions = new_map();
   strings = new_map();
+  global = new_scope(NULL);
+  scope = global;
   program();
 
   printf(".intel_syntax noprefix\n");
