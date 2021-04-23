@@ -2,18 +2,18 @@ CFLAGS=-std=c11 -g -static
 SRCS=$(wildcard *.c)
 OBJS=$(SRCS:.c=.o)
 
-9cc: $(OBJS)
-	$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+mycc: $(OBJS)
+	$(CC) -o mycc $(OBJS) $(LDFLAGS)
 
-$(OBJS): 9cc.h
+$(OBJS): mycc.h
 
-test: 9cc
+test: mycc
 	./test.sh
 
-test_file: 9cc
-	./9cc -f test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+test_file: mycc
+	./mycc -f test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
 
 clean:
-	rm -f 9cc *.o *~ tmp*
+	rm -f mycc *.o *~ tmp*
 
 .PHONY: test clean

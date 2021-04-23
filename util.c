@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "mycc.h"
 
 char *read_file(char *path) {
   FILE *fp = fopen(path, "r");

@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "mycc.h"
 
 char *word_ptr(Node *node) {
   switch (node->type->size) {

@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "mycc.h"
 
 bool consume_token(int kind) {
   if (token->kind != kind)

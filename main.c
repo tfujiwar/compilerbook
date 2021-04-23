@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "mycc.h"
 
 char *filename;
 char *user_input;

@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "mycc.h"
 
 Type *type_char() {
   Type *type = calloc(1, sizeof(Type));

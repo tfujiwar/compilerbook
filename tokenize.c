@@ -1,4 +1,4 @@
-#include "9cc.h"
+#include "mycc.h"
 
 bool is_token_char(char c) {
   return ('a' <= c && c <= 'z') ||
