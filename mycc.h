@@ -99,6 +99,7 @@ struct LVar {
   char *name;
   int offset;
   Type *type;
+  bool is_global;
 };
 
 typedef struct Node Node;

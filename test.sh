@@ -135,4 +135,7 @@ assert 66 "int main() { char *s; s=\"ABC\"; return s[1]; }"
 assert 67 "int main() { char *s; s=\"ABC\"; return s[2]; }"
 assert 0 "int main() { char *s; s=\"ABC\"; return s[3]; }"
 
+assert 11 "int a; int main() { int a; a=10; { int a; a=100; a=a+1; } a=a+1; return a; }"
+assert 101 "int a; int main() { int a; a=10; { int a; a=100; a=a+1; return a; } a=a+1; }"
+
 echo OK

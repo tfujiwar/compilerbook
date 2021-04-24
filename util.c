@@ -46,7 +46,7 @@ void error_at(char *loc, char *fmt, ...) {
     begin--;
 
   char *end = loc;
-  while (*end != '\n')
+  while (*end != '\0' && *end != '\n')
     end++;
 
   int line = 1;

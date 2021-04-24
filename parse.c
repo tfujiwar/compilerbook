@@ -7,6 +7,13 @@ Scope *new_scope(Scope *parent) {
   return scope;
 }
 
+LVar *new_var(char *name) {
+  LVar *lvar = calloc(1, sizeof(LVar));
+  lvar->name = name;
+  map_put(scope->vars, name, lvar);
+  return lvar;
+}
+
 bool consume_token(int kind) {
   if (token->kind != kind)
     return false;
@@ -41,11 +48,18 @@ Token *consume_string() {
   return tok;
 }
 
-LVar *find_lvar(Token *tok) {
-  for (LVar *var = locals; var; var = var->next) {
-    if (var->name && strcmp(tok->str, var->name) == 0) return var;
+LVar *find_lvar(char *name) {
+  LVar *lvar;
+  Scope *sc = scope;
+  while (sc) {
+    if (lvar = map_get(sc->vars, name)) return lvar;
+    sc = sc->parent;
   }
   return NULL;
+}
+
+LVar *find_lvar_in_scope(char *name) {
+  return map_get(scope->vars, name);
 }
 
 bool expect_token(int kind) {
@@ -137,15 +151,13 @@ Node *function() {
       expect("]");
     }
 
-    LVar *lvar = calloc(1, sizeof(LVar));
-    lvar->name = ident->str;
+    LVar *lvar = new_var(ident->str);
+    lvar->is_global = true;
     lvar->type = ty;
     if (ty->ty == ARRAY)
       lvar->offset = ty->size * ty->array_size;
     else
       lvar->offset = ty->size;
-
-    map_put(global->vars, lvar->name, lvar);
 
     Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
     node->lvar = lvar;
@@ -159,20 +171,18 @@ Node *function() {
   map_put(functions, node->name, ty);
 
   // Function args
+  scope = new_scope(scope);
+
   Node *cur = node;
   while (ty = type()) {
     Token *ident = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
-    LVar *lvar = find_lvar(ident);
-
-    if (!lvar) {
-      lvar = calloc(1, sizeof(LVar));
-      lvar->next = locals;
-      lvar->name = ident->str;
-      lvar->offset = locals->offset + 8;
-      lvar->type = ty;
-      locals = lvar;
-    }
+    LVar *lvar = new_var(ident->str);
+    lvar->is_global = false;
+    lvar->next = locals;
+    lvar->offset = locals->offset + 8;
+    lvar->type = ty;
+    locals = lvar;
 
     arg->lvar = lvar;
 
@@ -202,6 +212,7 @@ Node *function() {
       cur = cur->next;
     }
   }
+  scope = scope->parent;
 
   node->body = block;
   return node;
@@ -260,7 +271,9 @@ Node *stmt() {
 
   // Block
   if (consume("{")) {
+    scope = new_scope(scope);
     Node *node = new_node(ND_BLOCK, NULL, NULL);
+
     Node *cur = node;
     while (!consume("}")) {
       if (cur == node) {
@@ -271,6 +284,8 @@ Node *stmt() {
         cur = cur->next;
       }
     }
+    scope = scope->parent;
+
     return node;
   }
 
@@ -291,12 +306,12 @@ Node *stmt() {
 
     expect(";");
 
-    LVar *lvar = find_lvar(ident);
-    if (lvar) error_at(token->at, "already declared");
+    LVar *lvar = find_lvar_in_scope(ident->str);
+    if (lvar) error_at(ident->at, "already declared");
 
-    lvar = calloc(1, sizeof(LVar));
+    lvar = new_var(ident->str);
+    lvar->is_global = false;
     lvar->next = locals;
-    lvar->name = ident->str;
     if (ty->ty == ARRAY)
       lvar->offset = locals->offset + ty->size * ty->array_size;
     else
@@ -432,16 +447,11 @@ Node *primary() {
     }
 
     // Local or global variable
-    LVar *lvar = find_lvar(ident);
-    if (lvar) {
-      node->kind = ND_LVAR;
-      node->lvar = lvar;
-    } else {
-      lvar = map_get(global->vars, ident->str);
-      if (!lvar) error_at(ident->at, "not declared");
-      node->kind = ND_GVAR;
-      node->lvar = lvar;
-    }
+    LVar *lvar = find_lvar(ident->str);
+    if (!lvar) error_at(ident->at, "not declared");
+
+    node->lvar = lvar;
+    node->kind = lvar->is_global ? ND_GVAR : ND_LVAR;
 
     if (consume("[")) {
       node = new_node(ND_DEREF, new_node(ND_ADD, node, expr()), NULL);
