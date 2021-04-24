@@ -103,6 +103,12 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *new_node_string(char* str) {
+  Node *node = new_node(ND_STRING, NULL, NULL);
+  node->val = strings->keys->len;
+  map_put(strings, str, NULL);
+}
+
 void program() {
   int i = 0;
   while (!at_eof())
@@ -310,8 +316,6 @@ Node *stmt() {
       expect("]");
     }
 
-    expect(";");
-
     LVar *lvar = find_lvar_in_scope(ident->str);
     if (lvar) error_at(ident->at, "already declared");
 
@@ -330,7 +334,16 @@ Node *stmt() {
     lvar->type = ty;
     locals = lvar;
 
+    if (consume("=")) {
+      Node *lhs = new_node(ND_LVAR, NULL, NULL);
+      lhs->lvar = lvar;
+      Node *node = new_node(ND_ASSIGN, lhs, expr());;
+      expect(";");
+      return node;
+    }
+
     Node *node = new_node(ND_DECLARE, NULL, NULL);
+    expect(";");
     return node;
   }
 
@@ -473,10 +486,7 @@ Node *primary() {
 
   Token *str;
   if (str = consume_string()) {
-    Node *node = new_node(ND_STRING, NULL, NULL);
-    node->val = strings->keys->len;
-    map_put(strings, str->str, NULL);
-    return node;
+    return new_node_string(str->str);
   }
 
   return new_node_num(expect_number());

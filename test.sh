@@ -142,4 +142,16 @@ assert 0 "int main() { char *s; s=\"ABC\"; return s[3]; }"
 assert 11 "int a; int main() { int a; a=10; { int a; a=100; a=a+1; } a=a+1; return a; }"
 assert 101 "int a; int main() { int a; a=10; { int a; a=100; a=a+1; return a; } a=a+1; }"
 
+assert 1 "int main() { int a=1; return a; }"
+assert 2 "int main() { int a=1; int b=a*2; return b; }"
+# assert 1 "int main() { int a[]={1,2,3}; return a[0]; }"
+# assert 1 "int main() { int a[5]={1,2,3}; return a[0]; }"
+# assert 0 "int main() { int a[5]={1,2,3}; return a[3]; }"
+
+# assert 1 "int a=1; int main() { return a; }"
+# assert 2 "int a=1; int main() { int b=a*2; return b; }"
+# assert 1 "int a[]={1,2,3}; int main() { return a[0]; }"
+# assert 1 "int a[5]={1,2,3}; int main() { return a[0]; }"
+# assert 0 "int a[5]={1,2,3}; int main() { return a[3]; }"
+
 echo OK
