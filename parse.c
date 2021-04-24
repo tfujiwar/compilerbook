@@ -180,7 +180,7 @@ Node *function() {
     LVar *lvar = new_var(ident->str);
     lvar->is_global = false;
     lvar->next = locals;
-    lvar->offset = locals->offset + 8;
+    lvar->offset = locals->offset + ty->size;
     lvar->type = ty;
     locals = lvar;
 

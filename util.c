@@ -214,6 +214,7 @@ void debug_node(Node *node, char *pre1, char *pre2) {
 
   case ND_STRING:
     fprintf(stderr, "%sSTRING\n", pre1);
+    return;
 
   case ND_RETURN:
     sprintf(p11, "%sRET ────── ", pre1);

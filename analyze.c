@@ -237,6 +237,11 @@ Node *analyze(Node *node) {
 
   case ND_FUNC:
     node->body = analyze(node->body);
+    next = &(node->child);
+    while (*next) {
+      (*next)->type = (*next)->lvar->type;
+      next = &((*next)->next);
+    }
     return node;
 
   case ND_CALL:

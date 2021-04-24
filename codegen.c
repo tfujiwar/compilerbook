@@ -26,7 +26,46 @@ char *reg_a(Node *node) {
   }
 }
 
+char *reg_b(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "bl";
+    case 2:
+      return "bx";
+    case 4:
+      return "ebx";
+    case 8:
+      return "rbx";
+  }
+}
+
+char *reg_c(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "cl";
+    case 2:
+      return "cx";
+    case 4:
+      return "ecx";
+    case 8:
+      return "rcx";
+  }
+}
+
 char *reg_d(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "dl";
+    case 2:
+      return "dx";
+    case 4:
+      return "edx";
+    case 8:
+      return "rdx";
+  }
+}
+
+char *reg_di(Node *node) {
   switch (node->type->size) {
     case 1:
       return "dil";
@@ -36,6 +75,45 @@ char *reg_d(Node *node) {
       return "edi";
     case 8:
       return "rdi";
+  }
+}
+
+char *reg_si(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "sil";
+    case 2:
+      return "si";
+    case 4:
+      return "esi";
+    case 8:
+      return "rsi";
+  }
+}
+
+char *reg_8(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "r8b";
+    case 2:
+      return "r8w";
+    case 4:
+      return "r8d";
+    case 8:
+      return "r8";
+  }
+}
+
+char *reg_9(Node *node) {
+  switch (node->type->size) {
+    case 1:
+      return "r9b";
+    case 2:
+      return "r9w";
+    case 4:
+      return "r9d";
+    case 8:
+      return "r9";
   }
 }
 
@@ -81,7 +159,7 @@ void gen(Node *node) {
       gen(node->rhs);
       printf("  pop rdi\n");
       printf("  lea rax, %s [%s]\n", word_ptr(node), node->lhs->lvar->name);
-      printf("  mov %s [rax], %s\n", word_ptr(node), reg_d(node));
+      printf("  mov %s [rax], %s\n", word_ptr(node), reg_di(node));
       printf("  push rdi\n");
       return;
     }
@@ -90,7 +168,7 @@ void gen(Node *node) {
     gen(node->rhs);
     printf("  pop rdi\n");
     printf("  pop rax\n");
-    printf("  mov %s [rax], %s\n", word_ptr(node), reg_d(node));
+    printf("  mov %s [rax], %s\n", word_ptr(node), reg_di(node));
     printf("  push rdi\n");
     return;
 
@@ -190,12 +268,12 @@ void gen(Node *node) {
     while (cur) {
       gen_lval(cur);
       printf("  pop rax\n");
-      if (num == 0) printf("  mov [rax], rdi\n");
-      if (num == 1) printf("  mov [rax], rsi\n");
-      if (num == 2) printf("  mov [rax], rdx\n");
-      if (num == 3) printf("  mov [rax], rcx\n");
-      if (num == 4) printf("  mov [rax], r8\n");
-      if (num == 5) printf("  mov [rax], r9\n");
+      if (num == 0) printf("  mov [rax], %s\n", reg_di(cur));
+      if (num == 1) printf("  mov [rax], %s\n", reg_si(cur));
+      if (num == 2) printf("  mov [rax], %s\n", reg_d(cur));
+      if (num == 3) printf("  mov [rax], %s\n", reg_c(cur));
+      if (num == 4) printf("  mov [rax], %s\n", reg_8(cur));
+      if (num == 5) printf("  mov [rax], %s\n", reg_9(cur));
       cur = cur->next;
       num++;
     }
