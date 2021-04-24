@@ -1,5 +1,7 @@
 #include "mycc.h"
 
+int offset = 0;
+
 Scope *new_scope(Scope *parent) {
   Scope *scope = calloc(1, sizeof(Scope));
   scope->parent = parent;
@@ -172,15 +174,17 @@ Node *function() {
 
   // Function args
   scope = new_scope(scope);
+  offset = 0;
 
   Node *cur = node;
   while (ty = type()) {
     Token *ident = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
     LVar *lvar = new_var(ident->str);
+    offset += ty->size;
     lvar->is_global = false;
     lvar->next = locals;
-    lvar->offset = locals->offset + ty->size;
+    lvar->offset = offset;
     lvar->type = ty;
     locals = lvar;
 
@@ -212,7 +216,9 @@ Node *function() {
       cur = cur->next;
     }
   }
+
   scope = scope->parent;
+  node->val = offset;
 
   node->body = block;
   return node;
@@ -312,10 +318,15 @@ Node *stmt() {
     lvar = new_var(ident->str);
     lvar->is_global = false;
     lvar->next = locals;
-    if (ty->ty == ARRAY)
+
+    if (ty->ty == ARRAY) {
+      offset += ty->size * ty->array_size;
       lvar->offset = locals->offset + ty->size * ty->array_size;
-    else
-      lvar->offset = locals->offset + ty->size;
+    } else {
+      offset += ty->size;
+      lvar->offset = offset;
+    }
+
     lvar->type = ty;
     locals = lvar;
 

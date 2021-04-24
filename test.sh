@@ -88,6 +88,10 @@ assert 0 "int main() { int a; a=0; if (a==1) { return 1; } else { return 0; } }"
 
 assert 3 "int f(int a, int b) { return a+b; } int main() { return f(1,2); }"
 assert 10 "int f(int a, int b) { return a+b; } int main() { return f(f(1,2), f(3,4)); }"
+assert 10 "int f(char a, char b) { return a+b; } int main() { return f(f(1,2), f(3,4)); }"
+assert 10 "int f(int a, char b) { return a+b; } int main() { return f(f(1,2), f(3,4)); }"
+assert 3 "int f(int a, int b) { return a+b; } int main() { int a; int b; a=1; b=2; return f(a,b); }"
+assert 3 "int f(int *a, int *b) { return *a+*b; } int main() { int a; int b; a=1; b=2; return f(&a,&b); }"
 
 assert 3 "int main() { int x; int *y; x=3; y=&x; return *y; }"
 assert 3 "int main() { int x; int *y; y=&x; *y=3; return x; }"

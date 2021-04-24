@@ -260,7 +260,7 @@ void gen(Node *node) {
     printf("%s:\n", node->name);
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
-    printf("  sub rsp, 160\n");
+    printf("  sub rsp, %d\n", (node->val + 15) / 16 * 16);
 
     num = 0;
     cur = node->child;
