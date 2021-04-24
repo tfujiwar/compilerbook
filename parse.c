@@ -50,6 +50,15 @@ Token *consume_string() {
   return tok;
 }
 
+Token *consume_num() {
+  if (token->kind != TK_NUM)
+    return NULL;
+
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
+
 LVar *find_lvar(char *name) {
   LVar *lvar;
   Scope *sc = scope;
@@ -107,6 +116,7 @@ Node *new_node_string(char* str) {
   Node *node = new_node(ND_STRING, NULL, NULL);
   node->val = strings->keys->len;
   map_put(strings, str, NULL);
+  return node;
 }
 
 void program() {
@@ -310,8 +320,13 @@ Node *stmt() {
       Type *ary = calloc(1, sizeof(Type));
       ary->ty = ARRAY;
       ary->size = 8;
-      ary->array_size = expect_number();
       ary->ptr_to = ty;
+
+      Token *tok;
+      if (tok = consume_num()) {
+        ary->array_size = tok->val;
+      }
+
       ty = ary;
       expect("]");
     }
@@ -325,7 +340,7 @@ Node *stmt() {
 
     if (ty->ty == ARRAY) {
       offset += ty->size * ty->array_size;
-      lvar->offset = locals->offset + ty->size * ty->array_size;
+      lvar->offset = offset;
     } else {
       offset += ty->size;
       lvar->offset = offset;
@@ -334,12 +349,71 @@ Node *stmt() {
     lvar->type = ty;
     locals = lvar;
 
+    // Initialize variable
     if (consume("=")) {
+
+      // Initialize with array literal
+      if (consume("{")) {
+        if (lvar->type->ty != ARRAY) error_at(token->at, "not an array");
+
+        Node *node = new_node(ND_DECLARE, NULL, NULL);
+        node->lvar = lvar;
+
+        int index = 0;
+        Node *cur = node;
+
+        while (true) {
+          Node *nd = new_node(ND_LVAR, NULL, NULL);
+          nd->lvar = lvar;
+          Node *lhs = new_node(ND_DEREF, new_node(ND_ADD, nd, new_node_num(index++)), NULL);
+          Node *child = new_node(ND_ASSIGN, lhs, expr());
+
+          if (cur == node) {
+            cur->child = child;
+            cur = child;
+          } else {
+            cur->next = child;
+            cur = child;
+          }
+
+          if (!consume(",")) break;
+        }
+
+        if (node->lvar->type->array_size == 0) {
+          node->lvar->type->array_size = index;
+          offset += node->lvar->type->size * index;
+          lvar->offset = offset;
+        }
+
+        for (;index <= node->lvar->type->array_size; index++) {
+          Node *nd = new_node(ND_LVAR, NULL, NULL);
+          nd->lvar = lvar;
+          Node *lhs = new_node(ND_DEREF, new_node(ND_ADD, nd, new_node_num(index)), NULL);
+          Node *child = new_node(ND_ASSIGN, lhs, new_node_num(0));
+
+          if (cur == node) {
+            cur->child = child;
+            cur = child;
+          } else {
+            cur->next = child;
+            cur = child;
+          }
+        }
+
+        expect("}");
+        expect(";");
+        return node;
+      }
+
       Node *lhs = new_node(ND_LVAR, NULL, NULL);
       lhs->lvar = lvar;
+
       Node *node = new_node(ND_ASSIGN, lhs, expr());;
       expect(";");
       return node;
+
+    } else if (lvar->type->ty == ARRAY && lvar->type->array_size == 0) {
+      error_at(token->at, "array size or initialization is needed");
     }
 
     Node *node = new_node(ND_DECLARE, NULL, NULL);

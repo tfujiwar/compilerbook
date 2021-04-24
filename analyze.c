@@ -271,6 +271,11 @@ Node *analyze(Node *node) {
       return int_node(node->lhs->type->size);
 
   case ND_DECLARE:
+    next = &(node->child);
+    while (*next) {
+      *next = analyze(*next);
+      next = &((*next)->next);
+    }
     return node;
 
   case ND_DECLARE_GVAR:

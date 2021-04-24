@@ -244,11 +244,9 @@ void gen(Node *node) {
     printf("  # ND_BLOCK\n");
     cur = node->child;
     while (cur) {
-      if (cur->kind != ND_DECLARE) {
-        gen(cur);
-        printf("  pop rax\n");
-        printf("\n");
-      }
+      gen(cur);
+      printf("  pop rax\n");
+      printf("\n");
       cur = cur->next;
     }
     printf("  push 0\n");  // dummy
@@ -320,6 +318,16 @@ void gen(Node *node) {
     if (node->type->size < 4) printf("  movsx eax, %s [rax]\n", word_ptr(node));
     else                      printf("  mov %s, %s [rax]\n", reg_a(node), word_ptr(node));
     printf("  push rax\n");
+    return;
+
+  case ND_DECLARE:
+    cur = node->child;
+    while (cur) {
+      gen(cur);
+      cur = cur->next;
+      printf("  pop rax\n");
+    }
+    printf("  push 0\n");  // dummy
     return;
 
   case ND_DECLARE_GVAR:

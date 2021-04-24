@@ -205,7 +205,28 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_DECLARE:
-    fprintf(stderr, "%sDECL\n", pre1);
+    if (!node->child) {
+      fprintf(stderr, "%sDECL\n", pre1);
+      return;
+    }
+    cur = node->child;
+    while (cur) {
+      if (cur == node->child && !cur->next) {
+        sprintf(p11, "%sDECL ───── ", pre1);
+        sprintf(p12, "%s           ", pre2);
+      } else if (cur == node->child) {
+        sprintf(p11, "%sDECL ────┬ ", pre1);
+        sprintf(p12, "%s         │ ", pre2);
+      } else if (cur->next) {
+        sprintf(p11, "%s         ├ ", pre2);
+        sprintf(p12, "%s         │ ", pre2);
+      } else {
+        sprintf(p11, "%s         └ ", pre2);
+        sprintf(p12, "%s           ", pre2);
+      }
+      debug_node(cur, p11, p12);
+      cur = cur->next;
+    }
     return;
 
   case ND_DECLARE_GVAR:
