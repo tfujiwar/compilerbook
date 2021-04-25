@@ -117,6 +117,20 @@ char *reg_9(Node *node) {
   }
 }
 
+char *byte(Type *type) {
+  switch (type->size) {
+    case 1:
+      return ".byte";
+    case 2:
+      return ".word";
+    case 4:
+      return ".long";
+    case 8:
+      return ".quad";
+  }
+}
+
+
 void gen_lval(Node *node) {
   if (node->kind != ND_LVAR)
     error("not a variable");
@@ -339,12 +353,13 @@ void gen(Node *node) {
     cur = node->rhs;
     while (cur) {
       if (cur->kind == ND_NUM) {
-        if (node->lvar->type->ty == ARRAY)
+        if (node->lvar->type->ty == ARRAY) {
+          printf("  %s %d\n", byte(node->lvar->type->ptr_to), cur->val);
           bytes += node->lvar->type->ptr_to->size;
-        else
+        } else {
+          printf("  %s %d\n", byte(node->lvar->type), cur->val);
           bytes += node->type->size;
-
-        printf("  .long %d\n", cur->val);
+        }
       }
       cur = cur->next;
     }

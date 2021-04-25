@@ -219,6 +219,35 @@ Node *function() {
         return node;
       }
 
+      // Initialize with string literal
+      Token *str;
+      if ((str = consume_string()) && lvar->type->ty == ARRAY) {
+        Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
+        node->lvar = lvar;
+
+        Node *cur = node;
+
+        for (int i = 0; i < strlen(str->str) + 1; i++) {
+          Node *child = new_node_num(str->str[i]);
+          if (cur == node) {
+            cur->rhs = child;
+            cur = child;
+          } else {
+            cur->next = child;
+            cur = child;
+          }
+        }
+
+        if (node->lvar->type->array_size == 0) {
+          node->lvar->type->array_size = strlen(str->str) + 1;
+          offset += node->lvar->type->size * strlen(str->str) + 1;
+          lvar->offset = offset;
+        }
+
+        expect(";");
+        return node;
+      }
+
       // Initialize with other expression
       Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
       node->lvar = lvar;
@@ -465,8 +494,6 @@ Node *stmt() {
         Node *cur = node;
 
         for (int i = 0; i < strlen(str->str); i++) {
-          debug("%c", str->str[i]);
-
           Node *nd = new_node(ND_LVAR, NULL, NULL);
           nd->lvar = lvar;
           Node *lhs = new_node(ND_DEREF, new_node(ND_ADD, nd, new_node_num(index++)), NULL);
