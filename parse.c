@@ -163,7 +163,12 @@ Node *function() {
       Type *ary = calloc(1, sizeof(Type));
       ary->ty = ARRAY;
       ary->size = 8;
-      ary->array_size = expect_number();
+
+      Token *tok;
+      if (tok = consume_num()) {
+        ary->array_size = tok->val;
+      }
+
       ary->ptr_to = ty;
       ty = ary;
       expect("]");
@@ -176,6 +181,51 @@ Node *function() {
       lvar->offset = ty->size * ty->array_size;
     else
       lvar->offset = ty->size;
+
+    // Initialize variable
+    if (consume("=")) {
+
+      // Initialize with array literal
+      if (consume("{")) {
+        if (lvar->type->ty != ARRAY) error_at(token->at, "not an array");
+
+        Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
+        node->lvar = lvar;
+
+        int index = 0;
+        Node *cur = node;
+
+        while (true) {
+          Node *child = expr();
+          if (cur == node) {
+            cur->rhs = child;
+            cur = child;
+          } else {
+            cur->next = child;
+            cur = child;
+          }
+          index++;
+          if (!consume(",")) break;
+        }
+
+        if (node->lvar->type->array_size == 0) {
+          node->lvar->type->array_size = index;
+          offset += node->lvar->type->size * index;
+          lvar->offset = offset;
+        }
+
+        expect("}");
+        expect(";");
+        return node;
+      }
+
+      // Initialize with other expression
+      Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
+      node->lvar = lvar;
+      node->rhs = expr();
+      expect(";");
+      return node;
+    }
 
     Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
     node->lvar = lvar;
@@ -405,7 +455,7 @@ Node *stmt() {
         return node;
       }
 
-      // Initialize with array literal
+      // Initialize with string literal
       Token *str;
       if ((str = consume_string()) && lvar->type->ty == ARRAY) {
         Node *node = new_node(ND_DECLARE, NULL, NULL);

@@ -39,13 +39,12 @@ int main(int argc, char **argv) {
   printf("\n");
 
   int i = 0;
-  printf("  .bss\n\n");
+  printf("  .data\n\n");
   for (; code[i]->kind == ND_DECLARE_GVAR; i++) {
     code[i] = analyze(code[i]);
     gen(code[i]);
   }
 
-  printf("  .data\n\n");
   gen_string();
 
   printf("  .text\n\n");

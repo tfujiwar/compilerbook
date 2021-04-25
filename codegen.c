@@ -129,6 +129,7 @@ void gen(Node *node) {
   int l, num;
   Node *cur;
   char name[64];
+  int bytes;
 
   switch (node->kind) {
   case ND_NUM:
@@ -333,10 +334,27 @@ void gen(Node *node) {
   case ND_DECLARE_GVAR:
     printf("# ND_DECLARE_GVAR\n");
     printf("%s:\n", node->lvar->name);
-    if (node->lvar->type->ty == ARRAY)
-      printf("  .zero %d\n", node->lvar->type->ptr_to->size * node->lvar->type->array_size);
-    else
-      printf("  .zero %d\n", node->lvar->type->size);
+
+    bytes = 0;
+    cur = node->rhs;
+    while (cur) {
+      if (cur->kind == ND_NUM) {
+        if (node->lvar->type->ty == ARRAY)
+          bytes += node->lvar->type->ptr_to->size;
+        else
+          bytes += node->type->size;
+
+        printf("  .long %d\n", cur->val);
+      }
+      cur = cur->next;
+    }
+
+    if (node->lvar->type->ty == ARRAY) {
+      printf("  .zero %d\n", node->lvar->type->ptr_to->size * node->lvar->type->array_size - bytes);
+    } else {
+      printf("  .zero %d\n", node->lvar->type->size - bytes);
+    }
+
     printf("\n");
     return;
 

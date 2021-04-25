@@ -279,6 +279,12 @@ Node *analyze(Node *node) {
     return node;
 
   case ND_DECLARE_GVAR:
+    node->type = node->lvar->type;
+    next = &(node->rhs);
+    while (*next) {
+      *next = analyze(*next);
+      next = &((*next)->next);
+    }
     return node;
 
   case ND_STRING:
