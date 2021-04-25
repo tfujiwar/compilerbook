@@ -51,6 +51,11 @@ assert 1 "int main() { return 0 || 1; }"
 assert 0 "int main() { return 0 || 0; }"
 assert 0 "int main() { int a=0; int b=0; (a=a+1) || (b=b+1); return b; }"
 
+assert 0 "int main() { return 1 & 2; }"
+assert 3 "int main() { return 1 | 2; }"
+assert 2 "int main() { return 1 ^ 3; }"
+assert 31 "int main() { return 1 | 2 | 4 | 8 | 16; }"
+
 assert 1 "int main() { int a; char b; a=1; b=1; return a==b; }"
 assert 0 "int main() { int a; char b; a=1; b=0; return a==b; }"
 assert 0 "int main() { int a; char b; a=1; b=1; return a!=b; }"

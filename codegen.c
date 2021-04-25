@@ -461,6 +461,18 @@ void gen(Node *node) {
     printf("  setl al\n");
     printf("  movzb rax, al\n");
     break;
+
+  case ND_BITWISE_AND:
+    printf("  and rax, rdi\n");
+    break;
+
+  case ND_BITWISE_OR:
+    printf("  or rax, rdi\n");
+    break;
+
+  case ND_BITWISE_XOR:
+    printf("  xor rax, rdi\n");
+    break;
   }
 
   printf("  push rax\n");

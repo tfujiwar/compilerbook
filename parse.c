@@ -589,17 +589,43 @@ Node *logical_or() {
 }
 
 Node *logical_and() {
-  Node *node = bit();
+  Node *node = bitwise_or();
   while (true) {
     if (consume("&&"))
-      node = new_node(ND_LOGICAL_AND, node, bit());
+      node = new_node(ND_LOGICAL_AND, node, bitwise_or());
     else
       return node;
   }
 }
 
-Node *bit() {
-  return equality();
+Node *bitwise_or() {
+  Node *node = bitwise_xor();
+  while (true) {
+    if (consume("|"))
+      node = new_node(ND_BITWISE_OR, node, bitwise_xor());
+    else
+      return node;
+  }
+}
+
+Node *bitwise_xor() {
+  Node *node = bitwise_and();
+  while (true) {
+    if (consume("^"))
+      node = new_node(ND_BITWISE_XOR, node, bitwise_and());
+    else
+      return node;
+  }
+}
+
+Node *bitwise_and() {
+  Node *node = equality();
+  while (true) {
+    if (consume("&"))
+      node = new_node(ND_BITWISE_AND, node, equality());
+    else
+      return node;
+  }
 }
 
 Node *equality() {

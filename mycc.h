@@ -73,6 +73,9 @@ typedef enum {
   ND_STRING,
   ND_LOGICAL_AND,
   ND_LOGICAL_OR,
+  ND_BITWISE_AND,
+  ND_BITWISE_OR,
+  ND_BITWISE_XOR,
 } NodeKind;
 
 typedef struct Type Type;
@@ -158,7 +161,9 @@ Node *compound_assign();
 Node *assign();
 Node *logical_or();
 Node *logical_and();
-Node *bit();
+Node *bitwise_or();
+Node *bitwise_xor();
+Node *bitwise_and();
 Node *equality();
 Node *relational();
 Node *add();
