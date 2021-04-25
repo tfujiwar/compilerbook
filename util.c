@@ -354,6 +354,8 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_NE: label = "NE "; break;
   case ND_LE: label = "LE "; break;
   case ND_LT: label = "LT "; break;
+  case ND_LOGICAL_AND: label = "&& "; break;
+  case ND_LOGICAL_OR: label = "|| "; break;
   }
 
   sprintf(p11, "%s%s(%s) ┬ ", pre1, label, type);

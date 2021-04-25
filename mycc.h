@@ -71,6 +71,8 @@ typedef enum {
   ND_DECLARE,
   ND_DECLARE_GVAR,
   ND_STRING,
+  ND_LOGICAL_AND,
+  ND_LOGICAL_OR,
 } NodeKind;
 
 typedef struct Type Type;
@@ -153,6 +155,8 @@ Node *function();
 Node *stmt();
 Node *expr();
 Node *assign();
+Node *logical();
+Node *bit();
 Node *equality();
 Node *relational();
 Node *add();

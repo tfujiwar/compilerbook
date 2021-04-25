@@ -190,6 +190,8 @@ Node *analyze(Node *node, bool cast_array) {
   case ND_NE:
   case ND_LE:
   case ND_LT:
+  case ND_LOGICAL_AND:
+  case ND_LOGICAL_OR:
     node->lhs = analyze(node->lhs, true);
     node->rhs = analyze(node->rhs, true);
     node->type = type_int();

@@ -378,6 +378,40 @@ void gen(Node *node) {
     printf("  mov rax, OFFSET FLAT:.Lstr%03d\n", node->val);
     printf("  push rax\n");
     return;
+
+  case ND_LOGICAL_AND:
+    l = labels++;
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .Lfalse%03d\n", l);
+    gen(node->rhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .Lfalse%03d\n", l);
+    printf("  push 1\n");
+    printf("  jmp .Lend%03d\n", l);
+    printf(".Lfalse%03d:\n", l);
+    printf("  push 0\n");
+    printf(".Lend%03d:\n", l);
+    return;
+
+  case ND_LOGICAL_OR:
+    l = labels++;
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  jne .Ltrue%03d\n", l);
+    gen(node->rhs);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  jne .Ltrue%03d\n", l);
+    printf("  push 0\n");
+    printf("  jmp .Lend%03d\n", l);
+    printf(".Ltrue%03d:\n", l);
+    printf("  push 1\n");
+    printf(".Lend%03d:\n", l);
+    return;
   }
 
   gen(node->lhs);
