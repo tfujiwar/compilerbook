@@ -572,19 +572,30 @@ Node *compound_assign() {
 }
 
 Node *assign() {
-  Node *node = logical();
+  Node *node = logical_or();
   if (consume("="))
     return new_node(ND_ASSIGN, node, assign());
   return node;
 }
 
-Node *logical() {
+Node *logical_or() {
+  Node *node = logical_and();
+  while (true) {
+    if (consume("||"))
+      node = new_node(ND_LOGICAL_OR, node, logical_and());
+    else
+      return node;
+  }
+}
+
+Node *logical_and() {
   Node *node = bit();
-  if (consume("&&"))
-    return new_node(ND_LOGICAL_AND, node, bit());
-  if (consume("||"))
-    return new_node(ND_LOGICAL_OR, node, bit());
-  return node;
+  while (true) {
+    if (consume("&&"))
+      node = new_node(ND_LOGICAL_AND, node, bit());
+    else
+      return node;
+  }
 }
 
 Node *bit() {
