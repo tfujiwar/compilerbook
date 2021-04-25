@@ -26,6 +26,7 @@ assert 15 "int main() { return 5*(9-6); }"
 assert 4 "int main() { return (3+5)/2; }"
 assert 1 "int main() { return -1+2; }"
 assert 5 "int main() { return -3*+5+20; }"
+assert 1 "int main() { return 10%3; }"
 
 assert 1 "int main() { return 1==1; }"
 assert 0 "int main() { return 1==0; }"

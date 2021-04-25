@@ -355,6 +355,7 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_SUB: label = "SUB"; break;
   case ND_MUL: label = "MUL"; break;
   case ND_DIV: label = "DIV"; break;
+  case ND_MOD: label = "MOD"; break;
   case ND_ASSIGN: label = "ASS"; break;
   case ND_EQ: label = "EQ "; break;
   case ND_NE: label = "NE "; break;
