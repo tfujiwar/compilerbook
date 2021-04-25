@@ -263,6 +263,11 @@ Node *analyze(Node *node, bool cast_array) {
     node->lhs = analyze(node->lhs, false);
     return int_node(node->lhs->type->size);
 
+  case ND_BITWISE_NOT:
+    node->lhs = analyze(node->lhs, true);
+    node->type = type_int();
+    return node;
+
   case ND_DECLARE:
     next = &(node->child);
     while (*next) {

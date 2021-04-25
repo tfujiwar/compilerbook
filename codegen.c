@@ -335,6 +335,14 @@ void gen(Node *node) {
     printf("  push rax\n");
     return;
 
+  case ND_BITWISE_NOT:
+    printf("  # ND_BITWISE_NOT\n");
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  not rax\n");
+    printf("  push rax\n");
+    return;
+
   case ND_DECLARE:
     cur = node->child;
     while (cur) {

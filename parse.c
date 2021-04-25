@@ -694,10 +694,10 @@ Node *mul() {
 
 Node *unary() {
   if (consume("+"))
-    return primary();
+    return unary();
 
   if (consume("-"))
-    return new_node(ND_SUB, new_node_num(0), primary());
+    return new_node(ND_SUB, new_node_num(0), unary());
 
   if (consume("*"))
     return new_node(ND_DEREF, unary(), NULL);
@@ -706,7 +706,23 @@ Node *unary() {
     return new_node(ND_ADDR, unary(), NULL);
 
   if (consume_token(TK_SIZEOF))
-    return new_node(ND_SIZEOF, expr(), NULL);
+    return new_node(ND_SIZEOF, unary(), NULL);
+
+  if (consume("++")) {
+    Node *nd = unary();
+    return new_node(ND_ASSIGN, nd, new_node(ND_ADD, nd, new_node_num(1)));
+  }
+
+  if (consume("--")) {
+    Node *nd = unary();
+    return new_node(ND_ASSIGN, nd, new_node(ND_SUB, nd, new_node_num(1)));
+  }
+
+  if (consume("!"))
+    return new_node(ND_EQ, unary(), new_node_num(0));
+
+  if (consume("~"))
+    return new_node(ND_BITWISE_NOT, unary(), NULL);
 
   Node *node = primary();
   return node;

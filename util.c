@@ -267,6 +267,12 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     debug_node(node->lhs, p11, p12);
     return;
 
+  case ND_BITWISE_NOT:
+    sprintf(p11, "%s~ ──────── ", pre1);
+    sprintf(p12, "%s           ", pre2);
+    debug_node(node->lhs, p11, p12);
+    return;
+
   case ND_IF:
     sprintf(p11, "%sIF ──────┬ ", pre1);
     sprintf(p12, "%s         │ ", pre2);

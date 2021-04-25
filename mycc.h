@@ -78,6 +78,7 @@ typedef enum {
   ND_BITWISE_XOR,
   ND_SHIFT_LEFT,
   ND_SHIFT_RIGHT,
+  ND_BITWISE_NOT,
 } NodeKind;
 
 typedef struct Type Type;

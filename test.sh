@@ -213,4 +213,10 @@ assert 1 "int main() { int a=2; a/=1+1; return a; }"
 assert 2 "int main() { int a; int b; a=b=1; return a+b; }"
 assert 12 "int main() { int a=1; int b=10; a+=b+=1; return a; }"
 
+assert 2 "int main() { int a=0; int b=++a; return a+b; }"
+assert 0 "int main() { int a=1; int b=--a; return a+b; }"
+assert 1 "int main() { int a=0; return !a; }"
+assert 0 "int main() { int a=1; return !a; }"
+assert 0 "int main() { int a=-1; return ~a; }"
+
 echo OK
