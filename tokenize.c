@@ -40,6 +40,19 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "//", 2) == 0) {
+      p += 2;
+      while (*p != '\n' && *p != '\0') p++;
+      continue;
+    }
+
+    if (memcmp(p, "/*", 2) == 0) {
+      p += 2;
+      while (memcmp(p, "*/", 2) != 0 && *p != '\0') p++;
+      if (*p) p += 2;
+      continue;
+    }
+
     bool found = false;
     for (int i = 0; i < sizeof(reserved) / sizeof(char*); i++) {
       if (memcmp(p, reserved[i], strlen(reserved[i])) == 0) {

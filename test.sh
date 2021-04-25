@@ -183,4 +183,7 @@ assert 0 "char a[5]=\"ABC\"; int main() { return a[4]; }"
 assert 5 "char a[5]=\"ABC\"; int main() { return sizeof(a); }"
 assert 4 "char s[]=\"ABC\"; int main() { return printf(\"%s\n\", s); }"
 
+assert 0 "int main() { return 0; } // comment"
+assert 0 "int main() { int a=0; /* a=1 */ return a; }"
+
 echo OK

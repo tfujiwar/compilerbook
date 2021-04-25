@@ -1,9 +1,14 @@
+// this is line comment
 int fib(int n) {
   if (n <= 0) return 0;
   if (n == 1) return 1;
   return fib(n - 2) + fib(n - 1);
 }
 
+/*
+this is block comment
+hoge fuga
+*/
 int main() {
   int i;
   for (i = 0; i <= 10; i = i + 1) {
