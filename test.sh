@@ -186,4 +186,9 @@ assert 4 "char s[]=\"ABC\"; int main() { return printf(\"%s\n\", s); }"
 assert 0 "int main() { return 0; } // comment"
 assert 0 "int main() { int a=0; /* a=1 */ return a; }"
 
+assert 4 "int main() { int a=2; a+=1+1; return a; }"
+assert 0 "int main() { int a=2; a-=1+1; return a; }"
+assert 4 "int main() { int a=2; a*=1+1; return a; }"
+assert 1 "int main() { int a=2; a/=1+1; return a; }"
+
 echo OK

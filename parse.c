@@ -560,7 +560,15 @@ Node *expr() {
 Node *assign() {
   Node *node = equality();
   if (consume("="))
-    node = new_node(ND_ASSIGN, node, assign());
+    return new_node(ND_ASSIGN, node, assign());
+  if (consume("+="))
+    return new_node(ND_ASSIGN, node, new_node(ND_ADD, node, assign()));
+  if (consume("-="))
+    return new_node(ND_ASSIGN, node, new_node(ND_SUB, node, assign()));
+  if (consume("*="))
+    return new_node(ND_ASSIGN, node, new_node(ND_MUL, node, assign()));
+  if (consume("/="))
+    return new_node(ND_ASSIGN, node, new_node(ND_DIV, node, assign()));
   return node;
 }
 
