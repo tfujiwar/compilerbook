@@ -1,6 +1,6 @@
 #include "mycc.h"
 
-bool is_token_char(char c) {
+bool is_ident_char(char c) {
   return ('a' <= c && c <= 'z') ||
          ('A' <= c && c <= 'Z') ||
          ('0' <= c && c <= '9') ||
@@ -71,48 +71,49 @@ Token *tokenize() {
       continue;
     }
 
-    if (memcmp(p, "return", 6) == 0 && !is_token_char(p[6])) {
+    if (memcmp(p, "return", 6) == 0 && !is_ident_char(p[6])) {
       cur = new_token(TK_RETURN, cur, p, 6);
       p += 6;
       continue;
     }
 
-    if (memcmp(p, "if", 2) == 0 && !is_token_char(p[2])) {
+    if (memcmp(p, "if", 2) == 0 && !is_ident_char(p[2])) {
       cur = new_token(TK_IF, cur, p, 2);
       p += 2;
       continue;
     }
 
-    if (memcmp(p, "else", 4) == 0 && !is_token_char(p[4])) {
+    if (memcmp(p, "else", 4) == 0 && !is_ident_char(p[4])) {
       cur = new_token(TK_ELSE, cur, p, 4);
       p += 4;
       continue;
     }
 
-    if (memcmp(p, "for", 3) == 0 && !is_token_char(p[3])) {
+    if (memcmp(p, "for", 3) == 0 && !is_ident_char(p[3])) {
       cur = new_token(TK_FOR, cur, p, 3);
       p += 3;
       continue;
     }
 
-    if (memcmp(p, "while", 5) == 0 && !is_token_char(p[5])) {
+    if (memcmp(p, "while", 5) == 0 && !is_ident_char(p[5])) {
       cur = new_token(TK_WHILE, cur, p, 5);
       p += 5;
       continue;
     }
 
-    if (memcmp(p, "sizeof", 6) == 0 && !is_token_char(p[6])) {
+    if (memcmp(p, "sizeof", 6) == 0 && !is_ident_char(p[6])) {
       cur = new_token(TK_SIZEOF, cur, p, 6);
       p += 6;
       continue;
     }
 
-    if (is_token_char(*p)) {
+    if (is_ident_char(*p)) {
       char* prev = p;
-      while (is_token_char(*p)) p++;
+      while (is_ident_char(*p)) p++;
       cur = new_token(TK_IDENT, cur, prev, p - prev);
       continue;
     }
+
     if (*p == '"') {
       char *prev = ++p;
       while (*p != '"' || *p == '\\') p++;

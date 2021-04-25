@@ -140,7 +140,7 @@ bool consume(char *op);
 void expect(char *op);
 int expect_number();
 bool at_eof();
-bool is_token_char(char c);
+bool is_ident_char(char c);
 
 Token *tokenize();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);

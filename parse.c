@@ -33,7 +33,7 @@ bool consume(char *op) {
 }
 
 Token *consume_ident() {
-  if (token->kind != TK_IDENT || !is_token_char(token->str[0]))
+  if (token->kind != TK_IDENT || !is_ident_char(token->str[0]))
     return NULL;
 
   Token *tok = token;
