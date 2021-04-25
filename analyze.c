@@ -160,6 +160,8 @@ Node *analyze(Node *node, bool cast_array) {
   case ND_BITWISE_AND:
   case ND_BITWISE_OR:
   case ND_BITWISE_XOR:
+  case ND_SHIFT_LEFT:
+  case ND_SHIFT_RIGHT:
     node->lhs = analyze(node->lhs, true);
     node->rhs = analyze(node->rhs, true);
 

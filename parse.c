@@ -641,16 +641,28 @@ Node *equality() {
 }
 
 Node *relational() {
-  Node *node = add();
+  Node *node = shift();
   while (true) {
     if (consume("<="))
-      node = new_node(ND_LE, node, add());
+      node = new_node(ND_LE, node, shift());
     else if (consume(">="))
-      node = new_node(ND_LE, add(), node);
+      node = new_node(ND_LE, shift(), node);
     else if (consume("<"))
-      node = new_node(ND_LT, node, add());
+      node = new_node(ND_LT, node, shift());
     else if (consume(">"))
-      node = new_node(ND_LT, add(), node);
+      node = new_node(ND_LT, shift(), node);
+    else
+      return node;
+  }
+}
+
+Node *shift() {
+  Node *node = add();
+  while (true) {
+    if (consume("<<"))
+      node = new_node(ND_SHIFT_LEFT, node, add());
+    else if (consume(">>"))
+      node = new_node(ND_SHIFT_RIGHT, node, add());
     else
       return node;
   }
@@ -659,13 +671,12 @@ Node *relational() {
 Node *add() {
   Node *node = mul();
   while (true) {
-    if (consume("+")) {
+    if (consume("+"))
       node = new_node(ND_ADD, node, mul());
-    } else if (consume("-")) {
+    else if (consume("-"))
       node = new_node(ND_SUB, node, mul());
-    } else {
+    else
       return node;
-    }
   }
 }
 

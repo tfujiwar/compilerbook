@@ -473,6 +473,16 @@ void gen(Node *node) {
   case ND_BITWISE_XOR:
     printf("  xor rax, rdi\n");
     break;
+
+  case ND_SHIFT_LEFT:
+    printf("  mov cl, dil\n");
+    printf("  shl rax, cl\n");
+    break;
+
+  case ND_SHIFT_RIGHT:
+    printf("  mov cl, dil\n");
+    printf("  shr rax, cl\n");
+    break;
   }
 
   printf("  push rax\n");

@@ -76,6 +76,8 @@ typedef enum {
   ND_BITWISE_AND,
   ND_BITWISE_OR,
   ND_BITWISE_XOR,
+  ND_SHIFT_LEFT,
+  ND_SHIFT_RIGHT,
 } NodeKind;
 
 typedef struct Type Type;
@@ -166,6 +168,7 @@ Node *bitwise_xor();
 Node *bitwise_and();
 Node *equality();
 Node *relational();
+Node *shift();
 Node *add();
 Node *mul();
 Node *unary();
