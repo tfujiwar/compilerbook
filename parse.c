@@ -177,10 +177,6 @@ Node *function() {
     LVar *lvar = new_var(ident->str);
     lvar->is_global = true;
     lvar->type = ty;
-    if (ty->ty == ARRAY)
-      lvar->offset = ty->size * ty->array_size;
-    else
-      lvar->offset = ty->size;
 
     // Initialize variable
     if (consume("=")) {
@@ -210,8 +206,6 @@ Node *function() {
 
         if (node->lvar->type->array_size == 0) {
           node->lvar->type->array_size = index;
-          offset += node->lvar->type->size * index;
-          lvar->offset = offset;
         }
 
         expect("}");
@@ -240,8 +234,6 @@ Node *function() {
 
         if (node->lvar->type->array_size == 0) {
           node->lvar->type->array_size = strlen(str->str) + 1;
-          offset += node->lvar->type->size * strlen(str->str) + 1;
-          lvar->offset = offset;
         }
 
         expect(";");
