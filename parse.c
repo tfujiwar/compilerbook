@@ -554,21 +554,27 @@ Node *stmt() {
 }
 
 Node *expr() {
-  return assign();
+  return compound_assign();
+}
+
+Node *compound_assign() {
+  Node *node = assign();
+  if (consume("+="))
+    return new_node(ND_ASSIGN, node, new_node(ND_ADD, node, compound_assign()));
+  else if (consume("-="))
+    return new_node(ND_ASSIGN, node, new_node(ND_SUB, node, compound_assign()));
+  else if (consume("*="))
+    return new_node(ND_ASSIGN, node, new_node(ND_MUL, node, compound_assign()));
+  else if (consume("/="))
+    return new_node(ND_ASSIGN, node, new_node(ND_DIV, node, compound_assign()));
+  else
+    return node;
 }
 
 Node *assign() {
   Node *node = logical();
   if (consume("="))
     return new_node(ND_ASSIGN, node, assign());
-  if (consume("+="))
-    return new_node(ND_ASSIGN, node, new_node(ND_ADD, node, assign()));
-  if (consume("-="))
-    return new_node(ND_ASSIGN, node, new_node(ND_SUB, node, assign()));
-  if (consume("*="))
-    return new_node(ND_ASSIGN, node, new_node(ND_MUL, node, assign()));
-  if (consume("/="))
-    return new_node(ND_ASSIGN, node, new_node(ND_DIV, node, assign()));
   return node;
 }
 

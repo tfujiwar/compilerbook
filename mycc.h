@@ -154,6 +154,7 @@ void program();
 Node *function();
 Node *stmt();
 Node *expr();
+Node *compound_assign();
 Node *assign();
 Node *logical();
 Node *bit();
