@@ -22,11 +22,34 @@ Token *tokenize() {
   head.next = NULL;
   Token *cur = &head;
 
+  char *reserved[] = {
+    "++", "--",
+    "==", "!=", "<=", ">=",
+    "+=", "-=", "*=", "/=", "%%=", "<<=", ">>=", "&=", "|=", "^=",
+    "<<", ">>", "&&", "||",
+    "->",
+    "+", "-", "*", "/", "%%",
+    "(", ")", "<", ">", "{", "}", "[", "]",
+    "=", ";", ",", ".",
+    "&", "|", "^", "~",
+  };
+
   while (*p) {
     if (isspace(*p)) {
       p++;
       continue;
     }
+
+    bool found = false;
+    for (int i = 0; i < sizeof(reserved) / sizeof(char*); i++) {
+      if (memcmp(p, reserved[i], strlen(reserved[i])) == 0) {
+        cur = new_token(TK_RESERVED, cur, p, strlen(reserved[i]));
+        p += strlen(reserved[i]);
+        found = true;
+        break;
+      }
+    }
+    if (found) continue;
 
     if (memcmp(p, "char", 4) == 0) {
       cur = new_token(TK_CHAR, cur, p, 4);
@@ -37,17 +60,6 @@ Token *tokenize() {
     if (memcmp(p, "int", 3) == 0) {
       cur = new_token(TK_INT, cur, p, 3);
       p += 3;
-      continue;
-    }
-
-    if (memcmp(p, "==", 2) == 0 || memcmp(p, "!=", 2) == 0 || memcmp(p, "<=", 2) == 0 || memcmp(p, ">=", 2) == 0) {
-      cur = new_token(TK_RESERVED, cur, p, 2);
-      p += 2;
-      continue;
-    }
-
-    if (strchr("+-*/()<>{}[]=;,*&", *p)) {
-      cur = new_token(TK_RESERVED, cur, p++, 1);
       continue;
     }
 
