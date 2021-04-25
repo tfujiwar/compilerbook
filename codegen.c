@@ -355,19 +355,19 @@ void gen(Node *node) {
       if (cur->kind == ND_NUM) {
         if (node->lvar->type->ty == ARRAY) {
           printf("  %s %d\n", byte(node->lvar->type->ptr_to), cur->val);
-          bytes += node->lvar->type->ptr_to->size;
+          bytes += node->type->ptr_to->size;
         } else {
           printf("  %s %d\n", byte(node->lvar->type), cur->val);
           bytes += node->type->size;
         }
+      } else {
+        error("cannot initialize global variable: %s", node->lvar->name);
       }
       cur = cur->next;
     }
 
-    if (node->lvar->type->ty == ARRAY) {
-      printf("  .zero %d\n", node->lvar->type->ptr_to->size * node->lvar->type->array_size - bytes);
-    } else {
-      printf("  .zero %d\n", node->lvar->type->size - bytes);
+    if (node->type->size > bytes) {
+      printf("  .zero %d\n", node->type->size - bytes);
     }
 
     printf("\n");

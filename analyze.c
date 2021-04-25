@@ -265,10 +265,7 @@ Node *analyze(Node *node) {
 
   case ND_SIZEOF:
     node->lhs = analyze(node->lhs);
-    if (node->lhs->type->ty == ARRAY)
-      return int_node(node->lhs->type->ptr_to->size * node->lhs->type->array_size);
-    else
-      return int_node(node->lhs->type->size);
+    return int_node(node->lhs->type->size);
 
   case ND_DECLARE:
     next = &(node->child);

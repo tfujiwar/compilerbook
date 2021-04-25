@@ -162,14 +162,14 @@ Node *function() {
     if (consume("[")) {
       Type *ary = calloc(1, sizeof(Type));
       ary->ty = ARRAY;
-      ary->size = 8;
+      ary->ptr_to = ty;
 
       Token *tok;
       if (tok = consume_num()) {
         ary->array_size = tok->val;
+        ary->size = ary->ptr_to->size * tok->val;
       }
 
-      ary->ptr_to = ty;
       ty = ary;
       expect("]");
     }
@@ -206,6 +206,7 @@ Node *function() {
 
         if (node->lvar->type->array_size == 0) {
           node->lvar->type->array_size = index;
+          node->lvar->type->size = node->lvar->type->ptr_to->size * index;
         }
 
         expect("}");
@@ -234,6 +235,7 @@ Node *function() {
 
         if (node->lvar->type->array_size == 0) {
           node->lvar->type->array_size = strlen(str->str) + 1;
+          node->lvar->type->size = node->lvar->type->ptr_to->size * (strlen(str->str) + 1);
         }
 
         expect(";");
@@ -390,12 +392,12 @@ Node *stmt() {
     if (consume("[")) {
       Type *ary = calloc(1, sizeof(Type));
       ary->ty = ARRAY;
-      ary->size = 8;
       ary->ptr_to = ty;
 
       Token *tok;
       if (tok = consume_num()) {
         ary->array_size = tok->val;
+        ary->size = ary->ptr_to->size * tok->val;
       }
 
       ty = ary;
@@ -452,9 +454,11 @@ Node *stmt() {
 
         if (node->lvar->type->array_size == 0) {
           node->lvar->type->array_size = index;
-          offset += node->lvar->type->size * index;
-          lvar->offset = offset;
+          node->lvar->type->size = node->lvar->type->ptr_to->size * index;
         }
+
+        offset += node->lvar->type->size;
+        lvar->offset = offset;
 
         for (;index <= node->lvar->type->array_size; index++) {
           Node *nd = new_node(ND_LVAR, NULL, NULL);
@@ -502,9 +506,11 @@ Node *stmt() {
 
         if (node->lvar->type->array_size == 0) {
           node->lvar->type->array_size = index + 1;
-          offset += node->lvar->type->size * index + 1;
-          lvar->offset = offset;
+          node->lvar->type->size = node->lvar->type->ptr_to->size * (index + 1);
         }
+
+        offset += node->lvar->type->size;
+        lvar->offset = offset;
 
         for (;index < node->lvar->type->array_size; index++) {
           Node *nd = new_node(ND_LVAR, NULL, NULL);
