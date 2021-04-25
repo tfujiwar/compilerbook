@@ -40,14 +40,6 @@ Type *deref(Type *from) {
   return from->ptr_to;
 }
 
-Type *array_to_ptr(Type *array) {
-  Type *type = calloc(1, sizeof(Type));
-  type->ty = PTR;
-  type->size = 8;
-  type->ptr_to = array->ptr_to;
-  return type;
-}
-
 Node *add_ptr_node(Node *ptr, Node *num) {
   Node *size = calloc(1, sizeof(Node));
   size->kind = ND_NUM;
@@ -98,7 +90,7 @@ Node *int_node(int val) {
   return node;
 }
 
-Node *cast_array(Node *from) {
+Node *cast_array_to_ptr(Node *from) {
   if (from->type->ty != ARRAY) return from;
   Type *type = calloc(1, sizeof(Type));
   type->ty = PTR;
@@ -114,7 +106,7 @@ Node *cast_array(Node *from) {
   return node;
 }
 
-bool is_ptr(Node *node) {
+bool is_ptr_like(Node *node) {
   return node->type->ty == PTR || node->type->ty == ARRAY;
 }
 
@@ -124,25 +116,23 @@ Type *bigger_type(Node *n1, Node *n2) {
   return n2->type;
 }
 
-Node *analyze(Node *node) {
+Node *analyze(Node *node, bool cast_array) {
   Node **next;
 
   switch (node->kind) {
   case ND_ADD:
-    node->lhs = analyze(node->lhs);
-    node->rhs = analyze(node->rhs);
+    node->lhs = analyze(node->lhs, true);
+    node->rhs = analyze(node->rhs, true);
 
-    if (is_ptr(node->lhs) && is_ptr(node->rhs)) {
+    if (is_ptr_like(node->lhs) && is_ptr_like(node->rhs)) {
       error("invalid operands for add: ptr, ptr");
     }
 
-    if (is_ptr(node->lhs) && !is_ptr(node->rhs)) {
-      node->lhs = cast_array(node->lhs);
+    if (is_ptr_like(node->lhs) && !is_ptr_like(node->rhs)) {
       return add_ptr_node(node->lhs, node->rhs);
     }
 
-    if (is_ptr(node->rhs) && !is_ptr(node->lhs)) {
-      node->rhs = cast_array(node->rhs);
+    if (is_ptr_like(node->rhs) && !is_ptr_like(node->lhs)) {
       return add_ptr_node(node->rhs, node->lhs);
     }
 
@@ -150,16 +140,16 @@ Node *analyze(Node *node) {
     return node;
 
   case ND_SUB:
-    node->lhs = analyze(node->lhs);
-    node->rhs = analyze(node->rhs);
+    node->lhs = analyze(node->lhs, true);
+    node->rhs = analyze(node->rhs, true);
 
-    if (!is_ptr(node->lhs) && is_ptr(node->rhs))
+    if (!is_ptr_like(node->lhs) && is_ptr_like(node->rhs))
       error("invalid operands for sub: num, ptr");
 
-    if (is_ptr(node->lhs) && is_ptr(node->rhs))
+    if (is_ptr_like(node->lhs) && is_ptr_like(node->rhs))
       error("not supported operands for sub: ptr, ptr");  // TODO
 
-    if (is_ptr(node->lhs) && !is_ptr(node->rhs))
+    if (is_ptr_like(node->lhs) && !is_ptr_like(node->rhs))
       return sub_ptr_node(node->lhs, node->rhs);
 
     node->type = bigger_type(node->lhs, node->rhs);;
@@ -167,21 +157,20 @@ Node *analyze(Node *node) {
 
   case ND_MUL:
   case ND_DIV:
-    node->lhs = analyze(node->lhs);
-    node->rhs = analyze(node->rhs);
+    node->lhs = analyze(node->lhs, true);
+    node->rhs = analyze(node->rhs, true);
 
-    if (is_ptr(node->lhs) || is_ptr(node->lhs))
+    if (is_ptr_like(node->lhs) || is_ptr_like(node->lhs))
       error("invalid operands for mul or div");
 
     node->type = bigger_type(node->lhs, node->rhs);
     return node;
 
   case ND_ASSIGN:
-    node->lhs = analyze(node->lhs);
-    node->rhs = analyze(node->rhs);
-    node->rhs = cast_array(node->rhs);
+    node->lhs = analyze(node->lhs, true);
+    node->rhs = analyze(node->rhs, true);
 
-    if (is_ptr(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
+    if (is_ptr_like(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
       error("invalid type for assign");
 
     node->type = node->lhs->type;
@@ -190,6 +179,7 @@ Node *analyze(Node *node) {
   case ND_LVAR:
   case ND_GVAR:
     node->type = node->lvar->type;
+    if (cast_array) node = cast_array_to_ptr(node);
     return node;
 
   case ND_NUM:
@@ -200,43 +190,43 @@ Node *analyze(Node *node) {
   case ND_NE:
   case ND_LE:
   case ND_LT:
-    node->lhs = analyze(node->lhs);
-    node->rhs = analyze(node->rhs);
+    node->lhs = analyze(node->lhs, true);
+    node->rhs = analyze(node->rhs, true);
     node->type = type_int();
     return node;
 
   case ND_RETURN:
-    node->lhs = analyze(node->lhs);
+    node->lhs = analyze(node->lhs, true);
     return node;
 
   case ND_IF:
-    node->cond = analyze(node->cond);
-    node->body = analyze(node->body);
-    if (node->els) node->els  = analyze(node->els);
+    node->cond = analyze(node->cond, true);
+    node->body = analyze(node->body, true);
+    if (node->els) node->els  = analyze(node->els, true);
     return node;
 
   case ND_FOR:
-    if (node->init) node->init = analyze(node->init);
-    if (node->cond) node->cond = analyze(node->cond);
-    if (node->inc)  node->inc  = analyze(node->inc);
-    node->body = analyze(node->body);
+    if (node->init) node->init = analyze(node->init, true);
+    if (node->cond) node->cond = analyze(node->cond, true);
+    if (node->inc)  node->inc  = analyze(node->inc, true);
+    node->body = analyze(node->body, true);
     return node;
 
   case ND_WHILE:
-    node->cond = analyze(node->cond);
-    node->body = analyze(node->body);
+    node->cond = analyze(node->cond, true);
+    node->body = analyze(node->body, true);
     return node;
 
   case ND_BLOCK:
     next = &(node->child);
     while (*next) {
-      *next = analyze(*next);
+      *next = analyze(*next, true);
       next = &((*next)->next);
     }
     return node;
 
   case ND_FUNC:
-    node->body = analyze(node->body);
+    node->body = analyze(node->body, true);
     next = &(node->child);
     while (*next) {
       (*next)->type = (*next)->lvar->type;
@@ -247,30 +237,29 @@ Node *analyze(Node *node) {
   case ND_CALL:
     next = &(node->child);
     while (*next) {
-      *next = analyze(*next);
+      *next = analyze(*next, true);
       next = &((*next)->next);
     }
     return node;
 
   case ND_ADDR:
-    node->lhs = analyze(node->lhs);
+    node->lhs = analyze(node->lhs, false);
     node->type = ptr_to(node->lhs->type);
     return node;
 
   case ND_DEREF:
-    node->lhs = analyze(node->lhs);
-    node->lhs = cast_array(node->lhs);
+    node->lhs = analyze(node->lhs, true);
     node->type = deref(node->lhs->type);
     return node;
 
   case ND_SIZEOF:
-    node->lhs = analyze(node->lhs);
+    node->lhs = analyze(node->lhs, false);
     return int_node(node->lhs->type->size);
 
   case ND_DECLARE:
     next = &(node->child);
     while (*next) {
-      *next = analyze(*next);
+      *next = analyze(*next, true);
       next = &((*next)->next);
     }
     return node;
@@ -279,7 +268,7 @@ Node *analyze(Node *node) {
     node->type = node->lvar->type;
     next = &(node->rhs);
     while (*next) {
-      *next = analyze(*next);
+      *next = analyze(*next, true);
       next = &((*next)->next);
     }
     return node;

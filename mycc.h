@@ -160,7 +160,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-Node *analyze(Node *node);
+Node *analyze(Node *node, bool cast_array);
 
 void gen(Node *node);
 void gen_lval(Node *node);
