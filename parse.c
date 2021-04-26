@@ -567,6 +567,18 @@ Node *compound_assign() {
     return new_node(ND_ASSIGN, node, new_node(ND_MUL, node, compound_assign()));
   else if (consume("/="))
     return new_node(ND_ASSIGN, node, new_node(ND_DIV, node, compound_assign()));
+  else if (consume("%="))
+    return new_node(ND_ASSIGN, node, new_node(ND_MOD, node, compound_assign()));
+  else if (consume("<<="))
+    return new_node(ND_ASSIGN, node, new_node(ND_SHIFT_LEFT, node, compound_assign()));
+  else if (consume(">>="))
+    return new_node(ND_ASSIGN, node, new_node(ND_SHIFT_RIGHT, node, compound_assign()));
+  else if (consume("&="))
+    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_AND, node, compound_assign()));
+  else if (consume("^="))
+    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_XOR, node, compound_assign()));
+  else if (consume("|="))
+    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_OR, node, compound_assign()));
   else
     return node;
 }

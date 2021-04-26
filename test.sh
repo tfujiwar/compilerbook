@@ -211,6 +211,13 @@ assert 4 "int main() { int a=2; a+=1+1; return a; }"
 assert 0 "int main() { int a=2; a-=1+1; return a; }"
 assert 4 "int main() { int a=2; a*=1+1; return a; }"
 assert 1 "int main() { int a=2; a/=1+1; return a; }"
+assert 1 "int main() { int a=10; a%=3; return a;}"
+assert 4 "int main() { int a=1; a<<=2; return a;}"
+assert 1 "int main() { int a=4; a>>=2; return a;}"
+assert 1 "int main() { int a=1; a&=3; return a;}"
+assert 2 "int main() { int a=1; a^=3; return a;}"
+assert 3 "int main() { int a=1; a|=2; return a;}"
+
 assert 2 "int main() { int a; int b; a=b=1; return a+b; }"
 assert 12 "int main() { int a=1; int b=10; a+=b+=1; return a; }"
 
