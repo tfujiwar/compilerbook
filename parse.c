@@ -554,40 +554,49 @@ Node *stmt() {
 }
 
 Node *expr() {
-  return compound_assign();
+  return assign();
 }
 
-Node *compound_assign() {
-  Node *node = assign();
-  if (consume("+="))
-    return new_node(ND_ASSIGN, node, new_node(ND_ADD, node, compound_assign()));
+Node *assign() {
+  Node *node = conditional();
+  if (consume("="))
+    return new_node(ND_ASSIGN, node, assign());
+  else if (consume("+="))
+    return new_node(ND_ASSIGN, node, new_node(ND_ADD, node, assign()));
   else if (consume("-="))
-    return new_node(ND_ASSIGN, node, new_node(ND_SUB, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_SUB, node, assign()));
   else if (consume("*="))
-    return new_node(ND_ASSIGN, node, new_node(ND_MUL, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_MUL, node, assign()));
   else if (consume("/="))
-    return new_node(ND_ASSIGN, node, new_node(ND_DIV, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_DIV, node, assign()));
   else if (consume("%="))
-    return new_node(ND_ASSIGN, node, new_node(ND_MOD, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_MOD, node, assign()));
   else if (consume("<<="))
-    return new_node(ND_ASSIGN, node, new_node(ND_SHIFT_LEFT, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_SHIFT_LEFT, node, assign()));
   else if (consume(">>="))
-    return new_node(ND_ASSIGN, node, new_node(ND_SHIFT_RIGHT, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_SHIFT_RIGHT, node, assign()));
   else if (consume("&="))
-    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_AND, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_AND, node, assign()));
   else if (consume("^="))
-    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_XOR, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_XOR, node, assign()));
   else if (consume("|="))
-    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_OR, node, compound_assign()));
+    return new_node(ND_ASSIGN, node, new_node(ND_BITWISE_OR, node, assign()));
   else
     return node;
 }
 
-Node *assign() {
+Node *conditional() {
   Node *node = logical_or();
-  if (consume("="))
-    return new_node(ND_ASSIGN, node, assign());
-  return node;
+  if (consume("?")) {
+    Node *nd = new_node(ND_CONDITIONAL, NULL, NULL);
+    nd->cond = node;
+    nd->body = conditional();
+    expect(":");
+    nd->els = conditional();
+    return nd;
+  } else {
+    return node;
+  }
 }
 
 Node *logical_or() {

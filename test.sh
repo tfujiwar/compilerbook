@@ -227,4 +227,10 @@ assert 1 "int main() { int a=0; return !a; }"
 assert 0 "int main() { int a=1; return !a; }"
 assert 0 "int main() { int a=-1; return ~a; }"
 
+assert 2 "int main() { return 1?2:3; }"
+assert 3 "int main() { return 0?2:3; }"
+assert 2 "int main() { return 1?1?2:3:4; }"
+assert 3 "int main() { return 1?0?2:3:4; }"
+assert 5 "int main() { return 0?2:0?4:5; }"
+
 echo OK

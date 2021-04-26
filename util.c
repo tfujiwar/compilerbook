@@ -309,6 +309,18 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     debug_node(node->body, p21, p22);
     return;
 
+  case ND_CONDITIONAL:
+    sprintf(p11, "%sCOND ────┬ ", pre1);
+    sprintf(p12, "%s         │ ", pre2);
+    sprintf(p21, "%s         ├ ", pre2);
+    sprintf(p22, "%s         │ ", pre2);
+    sprintf(p31, "%s         └ ", pre2);
+    sprintf(p32, "%s           ", pre2);
+    debug_node(node->cond, p11, p12);
+    debug_node(node->body, p21, p22);
+    debug_node(node->els, p31, p32);
+    return;
+
   case ND_BLOCK:
     cur = node->child;
     while (cur) {

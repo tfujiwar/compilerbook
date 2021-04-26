@@ -80,6 +80,7 @@ typedef enum {
   ND_SHIFT_LEFT,
   ND_SHIFT_RIGHT,
   ND_BITWISE_NOT,
+  ND_CONDITIONAL,
 } NodeKind;
 
 typedef struct Type Type;
@@ -161,8 +162,8 @@ void program();
 Node *function();
 Node *stmt();
 Node *expr();
-Node *compound_assign();
 Node *assign();
+Node *conditional();
 Node *logical_or();
 Node *logical_and();
 Node *bitwise_or();

@@ -420,6 +420,19 @@ void gen(Node *node) {
     printf("  push 1\n");
     printf(".Lend%03d:\n", l);
     return;
+
+  case ND_CONDITIONAL:
+    l = labels++;
+    gen(node->cond);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  je .Lelse%03d\n", l);
+    gen(node->body);
+    printf("  jmp .Lend%03d\n", l);
+    printf(".Lelse%03d:\n", l);
+    gen(node->els);
+    printf(".Lend%03d:\n", l);
+    return;
   }
 
   gen(node->lhs);

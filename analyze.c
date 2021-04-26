@@ -203,6 +203,13 @@ Node *analyze(Node *node, bool cast_array) {
     node->type = type_int();
     return node;
 
+  case ND_CONDITIONAL:
+    node->cond = analyze(node->cond, true);
+    node->body = analyze(node->body, true);
+    node->els = analyze(node->els, true);
+    node->type = type_int();
+    return node;
+
   case ND_RETURN:
     node->lhs = analyze(node->lhs, true);
     return node;
