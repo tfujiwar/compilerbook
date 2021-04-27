@@ -250,11 +250,18 @@ Node *analyze(Node *node, bool cast_array) {
     return node;
 
   case ND_CALL:
+    node->lhs = analyze(node->lhs, true);
+    node->type = node->lhs->type;
+
     next = &(node->child);
     while (*next) {
       *next = analyze(*next, true);
       next = &((*next)->next);
     }
+
+    return node;
+
+  case ND_FUNC_NAME:
     return node;
 
   case ND_ADDR:

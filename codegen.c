@@ -151,6 +151,11 @@ void gen(Node *node) {
     printf("  push %d\n", node->val);
     return;
 
+  case ND_FUNC_NAME:
+    printf("  # ND_FUNC_NAME\n");
+    printf("  push OFFSET FLAT:%s\n", node->name);
+    return;
+
   case ND_LVAR:
     printf("  # ND_LVAR\n");
     gen_lval(node);
@@ -296,6 +301,7 @@ void gen(Node *node) {
 
   case ND_CALL:
     printf("  # ND_CALL\n");
+    gen(node->lhs);
 
     num = 0;
     cur = node->child;
@@ -312,7 +318,8 @@ void gen(Node *node) {
     if (num >= 2) printf("  pop rsi\n");
     if (num >= 1) printf("  pop rdi\n");
 
-    printf("  call %s\n", node->name);
+    printf("  pop rax\n");
+    printf("  call rax\n");
     printf("  push rax\n");
     return;
 

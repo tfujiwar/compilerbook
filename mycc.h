@@ -65,6 +65,7 @@ typedef enum {
   ND_WHILE,
   ND_BLOCK,
   ND_FUNC,
+  ND_FUNC_NAME,
   ND_CALL,
   ND_ADDR,
   ND_DEREF,

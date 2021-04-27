@@ -757,6 +757,20 @@ Node *unary_right() {
     if (consume("[")) {
       node = new_node(ND_DEREF, new_node(ND_ADD, node, unary_right()), NULL);
       expect("]");
+
+    } else if (consume("(")) {
+      node = new_node(ND_CALL, node, NULL);
+      if (consume(")")) continue;
+
+      node->child = expr();
+      Node *cur = node->child;
+
+      while (!consume(")")) {
+        expect(",");
+        cur->next = expr();
+        cur = cur->next;
+      }
+
     } else {
       return node;
     }
@@ -775,24 +789,12 @@ Node *primary() {
     Node *node = calloc(1, sizeof(Node));
     char *name = ident->str;
 
-    // Function call
-    if (consume("(")) {
-      node->kind = ND_CALL;
+    // Function name
+    Type *func = map_get(functions, name);
+    if (func) {
+      node->kind = ND_FUNC_NAME;
       node->name = name;
-
-      Type *func = map_get(functions, name);
       node->type = func;
-
-      if (consume(")")) return node;
-      node->child = expr();
-      Node *cur = node->child;
-
-      while (!consume(")")) {
-        expect(",");
-        cur->next = expr();
-        cur = cur->next;
-      }
-
       return node;
     }
 
