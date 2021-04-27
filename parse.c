@@ -702,53 +702,65 @@ Node *add() {
 }
 
 Node *mul() {
-  Node *node = unary();
+  Node *node = unary_left();
   while (true) {
     if (consume("*"))
-      node = new_node(ND_MUL, node, unary());
+      node = new_node(ND_MUL, node, unary_left());
     else if (consume("/"))
-      node = new_node(ND_DIV, node, unary());
+      node = new_node(ND_DIV, node, unary_left());
     else if (consume("%"))
-      node = new_node(ND_MOD, node, unary());
+      node = new_node(ND_MOD, node, unary_left());
     else
       return node;
   }
 }
 
-Node *unary() {
+Node *unary_left() {
   if (consume("+"))
-    return unary();
+    return unary_left();
 
   if (consume("-"))
-    return new_node(ND_SUB, new_node_num(0), unary());
+    return new_node(ND_SUB, new_node_num(0), unary_left());
 
   if (consume("*"))
-    return new_node(ND_DEREF, unary(), NULL);
+    return new_node(ND_DEREF, unary_left(), NULL);
 
   if (consume("&"))
-    return new_node(ND_ADDR, unary(), NULL);
+    return new_node(ND_ADDR, unary_left(), NULL);
 
   if (consume_token(TK_SIZEOF))
-    return new_node(ND_SIZEOF, unary(), NULL);
+    return new_node(ND_SIZEOF, unary_left(), NULL);
 
   if (consume("++")) {
-    Node *nd = unary();
+    Node *nd = unary_left();
     return new_node(ND_ASSIGN, nd, new_node(ND_ADD, nd, new_node_num(1)));
   }
 
   if (consume("--")) {
-    Node *nd = unary();
+    Node *nd = unary_left();
     return new_node(ND_ASSIGN, nd, new_node(ND_SUB, nd, new_node_num(1)));
   }
 
   if (consume("!"))
-    return new_node(ND_EQ, unary(), new_node_num(0));
+    return new_node(ND_EQ, unary_left(), new_node_num(0));
 
   if (consume("~"))
-    return new_node(ND_BITWISE_NOT, unary(), NULL);
+    return new_node(ND_BITWISE_NOT, unary_left(), NULL);
 
-  Node *node = primary();
+  Node *node = unary_right();
   return node;
+}
+
+Node *unary_right() {
+  Node *node = primary();
+  while (true) {
+    if (consume("[")) {
+      node = new_node(ND_DEREF, new_node(ND_ADD, node, unary_right()), NULL);
+      expect("]");
+    } else {
+      return node;
+    }
+  }
 }
 
 Node *primary() {
@@ -790,11 +802,6 @@ Node *primary() {
 
     node->lvar = lvar;
     node->kind = lvar->is_global ? ND_GVAR : ND_LVAR;
-
-    if (consume("[")) {
-      node = new_node(ND_DEREF, new_node(ND_ADD, node, expr()), NULL);
-      expect("]");
-    }
     return node;
   }
 

@@ -174,7 +174,8 @@ Node *relational();
 Node *shift();
 Node *add();
 Node *mul();
-Node *unary();
+Node *unary_left();
+Node *unary_right();
 Node *primary();
 
 Node *analyze(Node *node, bool cast_array);
