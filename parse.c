@@ -760,7 +760,17 @@ Node *unary_left() {
 Node *unary_right() {
   Node *node = primary();
   while (true) {
-    if (consume("[")) {
+    if (consume("++")) {
+      Node *lhs = new_node(ND_ASSIGN, node, new_node(ND_ADD, node, new_node_num(1)));
+      Node *rhs = new_node(ND_SUB, node, new_node_num(1));
+      node = new_node(ND_COMMA, lhs, rhs);
+
+    } else if (consume("--")) {
+      Node *lhs = new_node(ND_ASSIGN, node, new_node(ND_SUB, node, new_node_num(1)));
+      Node *rhs = new_node(ND_ADD, node, new_node_num(1));
+      node = new_node(ND_COMMA, lhs, rhs);
+
+    } else if (consume("[")) {
       node = new_node(ND_DEREF, new_node(ND_ADD, node, unary_right()), NULL);
       expect("]");
 
