@@ -243,11 +243,12 @@ Node *analyze(Node *node, bool cast_array) {
 
   case ND_FUNC:
     node->body = analyze(node->body, true);
-    next = &(node->child);
-    while (*next) {
-      (*next)->type = (*next)->lvar->type;
-      next = &((*next)->next);
+
+    for (int i = 0; i < node->func->args->len; i++) {
+      Node *nd = vec_get(node->func->args, i);
+      nd->type = nd->lvar->type;
     }
+
     return node;
 
   case ND_CALL:
@@ -263,6 +264,7 @@ Node *analyze(Node *node, bool cast_array) {
     return node;
 
   case ND_FUNC_NAME:
+    node->type = node->func->return_type;
     return node;
 
   case ND_ADDR:

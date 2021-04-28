@@ -119,6 +119,14 @@ Node *new_node_string(char* str) {
   return node;
 }
 
+Function *new_function(char *name, Type *type) {
+  Function *func = calloc(1, sizeof(Function));
+  func->name = name;
+  func->return_type = type;
+  func->args = new_vec();
+  return func;
+}
+
 void program() {
   int i = 0;
   while (!at_eof())
@@ -258,14 +266,13 @@ Node *function() {
 
   // Function
   Node *node = new_node(ND_FUNC, NULL, NULL);
-  node->name = ident->str;
-  map_put(functions, node->name, ty);
+  node->func = new_function(ident->str, ty);
+  map_put(functions, node->func->name, node->func);
 
   // Function args
   scope = new_scope(scope);
   offset = 0;
 
-  Node *cur = node;
   while (ty = type()) {
     Token *ident = consume_ident();
     Node *arg = new_node(ND_LVAR, NULL, NULL);
@@ -279,13 +286,7 @@ Node *function() {
 
     arg->lvar = lvar;
 
-    if (cur == node) {
-      cur->child = arg;
-      cur = cur->child;
-    } else {
-      cur->next = arg;
-      cur = cur->next;
-    }
+    vec_push(node->func->args, arg);
 
     if (!consume(",")) break;
   }
@@ -295,6 +296,7 @@ Node *function() {
   expect("{");
   Node *block = new_node(ND_BLOCK, NULL, NULL);
 
+  Node *cur = node;
   cur = block;
   while (!consume("}")) {
     if (cur == block) {
@@ -806,11 +808,10 @@ Node *primary() {
     char *name = ident->str;
 
     // Function name
-    Type *func = map_get(functions, name);
+    Function *func = map_get(functions, name);
     if (func) {
       node->kind = ND_FUNC_NAME;
-      node->name = name;
-      node->type = func;
+      node->func = func;
       return node;
     }
 

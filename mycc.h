@@ -114,6 +114,14 @@ struct LVar {
   bool is_global;
 };
 
+typedef struct Function Function;
+
+struct Function {
+  char *name;
+  Vector *args;
+  Type *return_type;
+};
+
 typedef struct Node Node;
 
 struct Node {
@@ -131,6 +139,7 @@ struct Node {
   char *name;
   Type *type;
   LVar *lvar;
+  Function *func;
 };
 
 typedef struct Scope Scope;
@@ -159,6 +168,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Scope *new_scope(Scope *parent);
+Function *new_function(char *name, Type *type);
 
 void program();
 Node *function();

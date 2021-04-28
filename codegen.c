@@ -153,7 +153,7 @@ void gen(Node *node) {
 
   case ND_FUNC_NAME:
     printf("  # ND_FUNC_NAME\n");
-    printf("  push OFFSET FLAT:%s\n", node->name);
+    printf("  push OFFSET FLAT:%s\n", node->func->name);
     return;
 
   case ND_LVAR:
@@ -275,25 +275,21 @@ void gen(Node *node) {
 
   case ND_FUNC:
     printf("# ND_FUNC\n");
-    printf("%s:\n", node->name);
+    printf("%s:\n", node->func->name);
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
     printf("  sub rsp, %d\n", (node->val + 15) / 16 * 16);
 
-    num = 0;
-    cur = node->child;
-
-    while (cur) {
-      gen_lval(cur);
+    for (int i = 0; i < node->func->args->len; i++) {
+      Node *nd = node->func->args->data[i];
+      gen_lval(nd);
       printf("  pop rax\n");
-      if (num == 0) printf("  mov [rax], %s\n", reg_di(cur));
-      if (num == 1) printf("  mov [rax], %s\n", reg_si(cur));
-      if (num == 2) printf("  mov [rax], %s\n", reg_d(cur));
-      if (num == 3) printf("  mov [rax], %s\n", reg_c(cur));
-      if (num == 4) printf("  mov [rax], %s\n", reg_8(cur));
-      if (num == 5) printf("  mov [rax], %s\n", reg_9(cur));
-      cur = cur->next;
-      num++;
+      if (num == 0) printf("  mov [rax], %s\n", reg_di(nd));
+      if (num == 1) printf("  mov [rax], %s\n", reg_si(nd));
+      if (num == 2) printf("  mov [rax], %s\n", reg_d(nd));
+      if (num == 3) printf("  mov [rax], %s\n", reg_c(nd));
+      if (num == 4) printf("  mov [rax], %s\n", reg_8(nd));
+      if (num == 5) printf("  mov [rax], %s\n", reg_9(nd));
     }
 
     gen(node->body);
