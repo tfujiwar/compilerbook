@@ -180,6 +180,7 @@ Node *unary_left();
 Node *unary_right();
 Node *primary();
 
+Type *type_int();
 Node *analyze(Node *node, bool cast_array);
 
 void gen(Node *node);

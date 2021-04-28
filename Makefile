@@ -8,9 +8,6 @@ mycc: $(OBJS)
 $(OBJS): mycc.h
 
 test: mycc
-	./test.sh
-
-test_file: mycc
 	./mycc -f test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
 
 clean:

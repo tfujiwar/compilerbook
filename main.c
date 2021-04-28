@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
   functions = new_map();
+  map_put(functions, "printf", type_int());
   strings = new_map();
   global = new_scope(NULL);
   scope = global;

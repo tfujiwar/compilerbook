@@ -102,6 +102,7 @@ Node *cast_array_to_ptr(Node *from) {
   node->kind = ND_ADDR;
   node->lhs = from;
   node->type = type;
+  node->next = from->next;
 
   return node;
 }
