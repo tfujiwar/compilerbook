@@ -82,6 +82,7 @@ typedef enum {
   ND_SHIFT_RIGHT,
   ND_BITWISE_NOT,
   ND_CONDITIONAL,
+  ND_COMMA,
 } NodeKind;
 
 typedef struct Type Type;

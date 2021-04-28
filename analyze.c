@@ -303,5 +303,11 @@ Node *analyze(Node *node, bool cast_array) {
   case ND_STRING:
     node->type = ptr_to(type_char());
     return node;
+
+  case ND_COMMA:
+    node->lhs = analyze(node->lhs, true);
+    node->rhs = analyze(node->rhs, true);
+    node->type = node->rhs->type;
+    return node;
   }
 }

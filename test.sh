@@ -232,4 +232,6 @@ assert 2 "int main() { return 1?1?2:3:4; }"
 assert 3 "int main() { return 1?0?2:3:4; }"
 assert 5 "int main() { return 0?2:0?4:5; }"
 
+assert 6 "int main() { int a=0; int b=(a=a+1, a=a+2, a); return a+b; }"
+
 echo OK

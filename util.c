@@ -380,6 +380,7 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_BITWISE_XOR: label = "^  "; break;
   case ND_SHIFT_LEFT: label = "<< "; break;
   case ND_SHIFT_RIGHT: label = ">> "; break;
+  case ND_COMMA: label = ",  "; break;
   }
 
   sprintf(p11, "%s%s(%s) ┬ ", pre1, label, type);

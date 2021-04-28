@@ -192,7 +192,7 @@ Node *function() {
         Node *cur = node;
 
         while (true) {
-          Node *child = expr();
+          Node *child = assign();
           if (cur == node) {
             cur->rhs = child;
             cur = child;
@@ -245,7 +245,7 @@ Node *function() {
       // Initialize with other expression
       Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
       node->lvar = lvar;
-      node->rhs = expr();
+      node->rhs = assign();
       expect(";");
       return node;
     }
@@ -439,7 +439,7 @@ Node *stmt() {
           Node *nd = new_node(ND_LVAR, NULL, NULL);
           nd->lvar = lvar;
           Node *lhs = new_node(ND_DEREF, new_node(ND_ADD, nd, new_node_num(index++)), NULL);
-          Node *child = new_node(ND_ASSIGN, lhs, expr());
+          Node *child = new_node(ND_ASSIGN, lhs, assign());
 
           if (cur == node) {
             cur->child = child;
@@ -534,7 +534,7 @@ Node *stmt() {
       Node *lhs = new_node(ND_LVAR, NULL, NULL);
       lhs->lvar = lvar;
 
-      Node *node = new_node(ND_ASSIGN, lhs, expr());;
+      Node *node = new_node(ND_ASSIGN, lhs, assign());
       expect(";");
       return node;
 
@@ -554,7 +554,13 @@ Node *stmt() {
 }
 
 Node *expr() {
-  return assign();
+  Node *node = assign();
+  while (true) {
+    if (consume(","))
+      node = new_node(ND_COMMA, node, assign());
+    else
+      return node;
+  }
 }
 
 Node *assign() {
@@ -762,12 +768,12 @@ Node *unary_right() {
       node = new_node(ND_CALL, node, NULL);
       if (consume(")")) continue;
 
-      node->child = expr();
+      node->child = assign();
       Node *cur = node->child;
 
       while (!consume(")")) {
         expect(",");
-        cur->next = expr();
+        cur->next = assign();
         cur = cur->next;
       }
 

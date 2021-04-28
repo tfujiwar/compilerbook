@@ -440,6 +440,12 @@ void gen(Node *node) {
     gen(node->els);
     printf(".Lend%03d:\n", l);
     return;
+
+  case ND_COMMA:
+    gen(node->lhs);
+    printf("  pop rax\n");
+    gen(node->rhs);
+    return;
   }
 
   gen(node->lhs);
