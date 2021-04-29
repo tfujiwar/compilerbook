@@ -317,9 +317,22 @@ Node *analyze(Node *node, bool cast_array) {
 
     Node *base = new_node(ND_ADDR, node->lhs, NULL);
     Node *offset = new_node_num(member->offset);
-    Node *node = new_node(ND_DEREF, new_node(ND_ADD, base, offset), NULL);
-    node->type = member->type;
+    Node *nd = new_node(ND_DEREF, new_node(ND_ADD, base, offset), NULL);
+    nd->type = member->type;
+    return nd;
 
-    return node;
+  case ND_ARROW:
+    node->lhs = analyze(node->lhs, true);
+    if (node->lhs->type->ty != PTR || node->lhs->type->ptr_to->ty != STRUCT)
+      error("struct expected: %d", node->lhs->type->ty);
+
+    type = map_get(scope->types, node->lhs->type->ptr_to->strct->name);
+    member = map_get(type->strct->member, node->name);
+
+    base = node->lhs;
+    offset = new_node_num(member->offset);
+    nd = new_node(ND_DEREF, new_node(ND_ADD, base, offset), NULL);
+    nd->type = member->type;
+    return nd;
   }
 }

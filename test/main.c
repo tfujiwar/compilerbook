@@ -263,6 +263,9 @@ int main() {
     assert("a.i", a.i, 1);
     assert("a.j", a.j, 2);
     assert("a.k", a.k, 3);
+    assert("(&a)->i", (&a)->i, 1);
+    assert("(&a)->j", (&a)->j, 2);
+    assert("(&a)->k", (&a)->k, 3);
     assert("sizeof(a)", sizeof(a), 9);
 
     struct Struct arr[4];

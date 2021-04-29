@@ -85,6 +85,7 @@ typedef enum {
   ND_CONDITIONAL,
   ND_COMMA,
   ND_DOT,
+  ND_ARROW,
 } NodeKind;
 
 typedef struct Member Member;

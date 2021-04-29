@@ -369,6 +369,13 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     debug_node(node->lhs, p21, p22);
     return;
 
+  case ND_ARROW:
+    fprintf(stderr, "%sARROW ───┬ %s\n", pre1, node->name);
+    sprintf(p21, "%s         └ ", pre2);
+    sprintf(p22, "%s           ", pre2);
+    debug_node(node->lhs, p21, p22);
+    return;
+
   case ND_ADD: label = "ADD"; break;
   case ND_SUB: label = "SUB"; break;
   case ND_MUL: label = "MUL"; break;

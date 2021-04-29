@@ -830,6 +830,13 @@ Node *unary_right() {
       node = new_node(ND_DOT, node, NULL);
       node->name = ident->str;
 
+    } else if (consume("->")) {
+      Token *ident = consume_ident();
+      if (!ident) error_at(token->at, "identificer expected");
+      node = new_node(ND_ARROW, node, NULL);
+      node->name = ident->str;
+      debug("%s", node->name);
+
     } else {
       return node;
     }
