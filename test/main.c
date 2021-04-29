@@ -23,6 +23,11 @@ struct Nest {
   struct Struct a;
 };
 
+struct Node {
+  int value;
+  struct Node *next;
+};
+
 int assert(char *msg, int a, int b) {
   if (a != b) printf("%s: %d != %d\n", msg, a, b);
   return 0;
@@ -285,6 +290,16 @@ int main() {
     assert("nest.a.j", nest.a.j, 2);
     assert("nest.a.k", nest.a.k, 3);
     assert("sizeof(nest)", sizeof(nest), 9);
+
+    struct Node n1;
+    struct Node n2;
+    struct Node n3;
+    n1.value = 1;
+    n2.value = 2;
+    n3.value = 3;
+    n1.next = &n2;
+    n2.next = &n3;
+    assert("n1.next->next->value", n1.next->next->value, 3);
   }
 
   return 0;

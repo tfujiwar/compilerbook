@@ -189,6 +189,9 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     case ARRAY:
       type = "ARR";
       break;
+    case STRUCT:
+      type = "STR";
+      break;
     }
   } else {
     type = "NUL";

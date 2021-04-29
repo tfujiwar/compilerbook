@@ -177,8 +177,8 @@ Node *analyze(Node *node, bool cast_array) {
     node->lhs = analyze(node->lhs, true);
     node->rhs = analyze(node->rhs, true);
 
-    if (is_ptr_like(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
-      error("invalid type for assign");
+    // if (is_ptr_like(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
+    //   error("invalid type for assign");
 
     node->type = node->lhs->type;
     return node;

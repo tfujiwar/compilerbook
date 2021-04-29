@@ -151,30 +151,32 @@ void program() {
 }
 
 Type *type() {
+  Type *ty;
+
   if (consume_token(TK_STRUCT)) {
     Token *ident = consume_ident();
     if (!ident) error_at(token->at, "identifier expected");
 
     Scope *sc = scope;
     while (sc) {
-      Type *ty = map_get(sc->types, ident->str);
-      if (ty) return ty;
+      ty = map_get(sc->types, ident->str);
+      if (ty) break;
       sc = sc->parent;
     }
+    if (!ty) error_at(ident->at, "undefined struct");
 
-    error_at(ident->at, "undefined struct");
-  }
-
-  Type *ty = calloc(1, sizeof(Type));
-
-  if (consume_token(TK_CHAR)) {
-    ty->ty = CHAR;
-    ty->size = 1;
-  } else if (consume_token(TK_INT)) {
-    ty->ty = INT;
-    ty->size = 4;
   } else {
-    return NULL;
+    ty = calloc(1, sizeof(Type));
+
+    if (consume_token(TK_CHAR)) {
+      ty->ty = CHAR;
+      ty->size = 1;
+    } else if (consume_token(TK_INT)) {
+      ty->ty = INT;
+      ty->size = 4;
+    } else {
+      return NULL;
+    }
   }
 
   while (consume("*")) {
@@ -192,7 +194,11 @@ Node *function() {
   // Struct
   if (consume_token(TK_STRUCT)) {
     Token *ident = consume_ident();
-    Struct *strct = new_struct(ident->str);
+    Type *st_type = calloc(1, sizeof(Type));
+    st_type->ty = STRUCT;
+    st_type->strct = new_struct(ident->str);
+    map_put(scope->types, st_type->strct->name, st_type);
+
     int offset = 0;
 
     expect("{");
@@ -200,17 +206,14 @@ Node *function() {
       Type *ty = type();
       Token *mem = consume_ident();
       Member *member = new_member(mem->str, ty, offset);
-      map_put(strct->member, member->name, member);
+      map_put(st_type->strct->member, member->name, member);
       offset += ty->size;
       expect(";");
     }
     expect(";");
 
-    Type *ty = calloc(1, sizeof(Type));
-    ty->ty = STRUCT;
-    ty->strct = strct;
-    ty->size = offset;
-    map_put(scope->types, strct->name, ty);
+    st_type->size = offset;
+
     return new_node(ND_DECLARE, NULL, NULL);
   }
 
@@ -835,7 +838,6 @@ Node *unary_right() {
       if (!ident) error_at(token->at, "identificer expected");
       node = new_node(ND_ARROW, node, NULL);
       node->name = ident->str;
-      debug("%s", node->name);
 
     } else {
       return node;
