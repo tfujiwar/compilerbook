@@ -176,6 +176,7 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
+void debug_type(Type *type);
 char *substring(char *str, int len);
 
 bool consume(char *op);

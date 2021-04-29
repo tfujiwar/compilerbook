@@ -407,3 +407,23 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   debug_node(node->rhs, p21, p22);
   return;
 }
+
+void debug_type(Type *type) {
+  if (type->ty == INT) {
+    fprintf(stderr, "INT\n");
+
+  } else if (type->ty == CHAR) {
+    fprintf(stderr, "CHAR\n");
+
+  } else if (type->ty == PTR) {
+    fprintf(stderr, "PTR -> ");
+    debug_type(type->ptr_to);
+
+  } else if (type->ty == ARRAY) {
+    fprintf(stderr, "ARRAY[%d] -> ", type->array_size);
+    debug_type(type->ptr_to);
+
+  } else if (type->ty == STRUCT) {
+    fprintf(stderr, "%s\n", type->strct->name);
+  }
+}

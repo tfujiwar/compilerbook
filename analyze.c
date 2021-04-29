@@ -34,6 +34,11 @@ bool same_type(Type *t1, Type *t2) {
 
   if (t1->ty == ARRAY)
     return t1->array_size == t2->array_size && same_type(t1->ptr_to, t2->ptr_to);
+
+  if (t1->ty == STRUCT)
+    return t1->strct == t2->strct;
+
+  error("unsupported type");
 }
 
 Type *deref(Type *from) {
@@ -177,8 +182,8 @@ Node *analyze(Node *node, bool cast_array) {
     node->lhs = analyze(node->lhs, true);
     node->rhs = analyze(node->rhs, true);
 
-    // if (is_ptr_like(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
-    //   error("invalid type for assign");
+    if (is_ptr_like(node->lhs) && !same_type(node->lhs->type, node->rhs->type))
+      error("invalid type for assign");
 
     node->type = node->lhs->type;
     return node;
@@ -316,9 +321,17 @@ Node *analyze(Node *node, bool cast_array) {
     Member *member = map_get(type->strct->member, node->name);
 
     Node *base = new_node(ND_ADDR, node->lhs, NULL);
+    base->type = ptr_to(type);
+
     Node *offset = new_node_num(member->offset);
-    Node *nd = new_node(ND_DEREF, new_node(ND_ADD, base, offset), NULL);
+    offset->type = type_int();
+
+    Node *addr = new_node(ND_ADD, base, offset);
+    addr->type = ptr_to(member->type);
+
+    Node *nd = new_node(ND_DEREF, addr, NULL);
     nd->type = member->type;
+
     return nd;
 
   case ND_ARROW:
@@ -330,9 +343,16 @@ Node *analyze(Node *node, bool cast_array) {
     member = map_get(type->strct->member, node->name);
 
     base = node->lhs;
+
     offset = new_node_num(member->offset);
-    nd = new_node(ND_DEREF, new_node(ND_ADD, base, offset), NULL);
+    offset->type = type_int();
+
+    addr = new_node(ND_ADD, base, offset);
+    addr->type = ptr_to(member->type);
+
+    nd = new_node(ND_DEREF, addr, NULL);
     nd->type = member->type;
+
     return nd;
   }
 }
