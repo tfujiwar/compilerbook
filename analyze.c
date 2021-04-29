@@ -308,5 +308,18 @@ Node *analyze(Node *node, bool cast_array) {
     node->rhs = analyze(node->rhs, true);
     node->type = node->rhs->type;
     return node;
+
+  case ND_DOT:
+    node->lhs = analyze(node->lhs, true);
+    if (node->lhs->type->ty != STRUCT) error("struct expected: %d", node->lhs->type->ty);
+    Type *type = map_get(scope->types, node->lhs->type->strct->name);
+    Member *member = map_get(type->strct->member, node->name);
+
+    Node *base = new_node(ND_ADDR, node->lhs, NULL);
+    Node *offset = new_node_num(member->offset);
+    Node *node = new_node(ND_DEREF, new_node(ND_ADD, base, offset), NULL);
+    node->type = member->type;
+
+    return node;
   }
 }

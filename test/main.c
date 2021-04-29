@@ -16,6 +16,11 @@ char gstr[5] = "ABC";
 struct Struct {
   int i;
   int j;
+  char k;
+};
+
+struct Nest {
+  struct Struct a;
 };
 
 int assert(char *msg, int a, int b) {
@@ -252,6 +257,31 @@ int main() {
 
   {
     struct Struct a;
+    a.i = 1;
+    a.j = 2;
+    a.k = 3;
+    assert("a.i", a.i, 1);
+    assert("a.j", a.j, 2);
+    assert("a.k", a.k, 3);
+    assert("sizeof(a)", sizeof(a), 9);
+
+    struct Struct arr[4];
+    arr[0].i = 1;
+    arr[0].j = 2;
+    arr[0].k = 3;
+    assert("arr[0].i", arr[0].i, 1);
+    assert("arr[0].j", arr[0].j, 2);
+    assert("arr[0].k", arr[0].k, 3);
+    assert("sizeof(a)", sizeof(arr), 36);
+
+    struct Nest nest;
+    nest.a.i = 1;
+    nest.a.j = 2;
+    nest.a.k = 3;
+    assert("nest.a.i", nest.a.i, 1);
+    assert("nest.a.j", nest.a.j, 2);
+    assert("nest.a.k", nest.a.k, 3);
+    assert("sizeof(nest)", sizeof(nest), 9);
   }
 
   return 0;

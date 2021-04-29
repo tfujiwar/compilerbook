@@ -84,7 +84,16 @@ typedef enum {
   ND_BITWISE_NOT,
   ND_CONDITIONAL,
   ND_COMMA,
+  ND_DOT,
 } NodeKind;
+
+typedef struct Member Member;
+
+struct Member {
+  char *name;
+  struct Type *type;
+  int offset;
+};
 
 typedef struct Struct Struct;
 

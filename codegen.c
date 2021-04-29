@@ -320,6 +320,10 @@ void gen(Node *node) {
       printf("  push rax\n");
       return;
     }
+    if (node->lhs->kind == ND_DEREF) {
+      gen(node->lhs->lhs);
+      return;
+    }
     gen_lval(node->lhs);
     return;
 

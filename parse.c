@@ -135,6 +135,14 @@ Struct *new_struct(char *name) {
   return strct;
 }
 
+Member *new_member(char *name, Type *type, int offset) {
+  Member *member = calloc(1, sizeof(Member));
+  member->name = name;
+  member->type = type;
+  member->offset = offset;
+  return member;
+}
+
 void program() {
   int i = 0;
   while (!at_eof())
@@ -185,21 +193,23 @@ Node *function() {
   if (consume_token(TK_STRUCT)) {
     Token *ident = consume_ident();
     Struct *strct = new_struct(ident->str);
-    int size = 0;
+    int offset = 0;
 
     expect("{");
     while (!consume("}")) {
       Type *ty = type();
-      Token *member = consume_ident();
-      map_put(strct->member, member->str, ty);
-      size += ty->size;
+      Token *mem = consume_ident();
+      Member *member = new_member(mem->str, ty, offset);
+      map_put(strct->member, member->name, member);
+      offset += ty->size;
       expect(";");
     }
     expect(";");
 
     Type *ty = calloc(1, sizeof(Type));
+    ty->ty = STRUCT;
     ty->strct = strct;
-    ty->size = size;
+    ty->size = offset;
     map_put(scope->types, strct->name, ty);
     return new_node(ND_DECLARE, NULL, NULL);
   }
@@ -813,6 +823,12 @@ Node *unary_right() {
         if (!consume(",")) break;
       }
       expect(")");
+
+    } else if (consume(".")) {
+      Token *ident = consume_ident();
+      if (!ident) error_at(token->at, "identificer expected");
+      node = new_node(ND_DOT, node, NULL);
+      node->name = ident->str;
 
     } else {
       return node;
