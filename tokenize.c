@@ -120,6 +120,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "struct", 6) == 0 && !is_ident_char(p[6])) {
+      cur = new_token(TK_STRUCT, cur, p, 6);
+      p += 6;
+      continue;
+    }
+
     if (is_ident_char(*p)) {
       char* prev = p;
       while (is_ident_char(*p)) p++;

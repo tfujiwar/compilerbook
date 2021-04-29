@@ -13,6 +13,11 @@ int gint = 1;
 int garr[5] = {1, 2, 3};
 char gstr[5] = "ABC";
 
+struct Struct {
+  int i;
+  int j;
+};
+
 int assert(char *msg, int a, int b) {
   if (a != b) printf("%s: %d != %d\n", msg, a, b);
   return 0;
@@ -243,6 +248,10 @@ int main() {
   {
     int a[] = {1, 2, 3, 4, 5};
     assert("sum(a, 3)", sum(a, 5), 15);
+  }
+
+  {
+    struct Struct a;
   }
 
   return 0;

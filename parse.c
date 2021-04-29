@@ -6,6 +6,7 @@ Scope *new_scope(Scope *parent) {
   Scope *scope = calloc(1, sizeof(Scope));
   scope->parent = parent;
   scope->vars = new_map();
+  scope->types = new_map();
   return scope;
 }
 
@@ -127,6 +128,13 @@ Function *new_function(char *name, Type *type) {
   return func;
 }
 
+Struct *new_struct(char *name) {
+  Struct *strct = calloc(1, sizeof(Struct));
+  strct->name = name;
+  strct->member = new_map();
+  return strct;
+}
+
 void program() {
   int i = 0;
   while (!at_eof())
@@ -135,6 +143,20 @@ void program() {
 }
 
 Type *type() {
+  if (consume_token(TK_STRUCT)) {
+    Token *ident = consume_ident();
+    if (!ident) error_at(token->at, "identifier expected");
+
+    Scope *sc = scope;
+    while (sc) {
+      Type *ty = map_get(sc->types, ident->str);
+      if (ty) return ty;
+      sc = sc->parent;
+    }
+
+    error_at(ident->at, "undefined struct");
+  }
+
   Type *ty = calloc(1, sizeof(Type));
 
   if (consume_token(TK_CHAR)) {
@@ -159,6 +181,29 @@ Type *type() {
 }
 
 Node *function() {
+  // Struct
+  if (consume_token(TK_STRUCT)) {
+    Token *ident = consume_ident();
+    Struct *strct = new_struct(ident->str);
+    int size = 0;
+
+    expect("{");
+    while (!consume("}")) {
+      Type *ty = type();
+      Token *member = consume_ident();
+      map_put(strct->member, member->str, ty);
+      size += ty->size;
+      expect(";");
+    }
+    expect(";");
+
+    Type *ty = calloc(1, sizeof(Type));
+    ty->strct = strct;
+    ty->size = size;
+    map_put(scope->types, strct->name, ty);
+    return new_node(ND_DECLARE, NULL, NULL);
+  }
+
   Type *ty = type();
   if (!ty) error_at(token->at, "type expected");
 

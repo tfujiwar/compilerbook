@@ -43,6 +43,7 @@ typedef enum {
   TK_INT,
   TK_SIZEOF,
   TK_STRING,
+  TK_STRUCT,
 } TokenKind;
 
 typedef enum {
@@ -85,13 +86,21 @@ typedef enum {
   ND_COMMA,
 } NodeKind;
 
+typedef struct Struct Struct;
+
+struct Struct {
+  char *name;
+  Map *member;
+};
+
 typedef struct Type Type;
 
 struct Type {
-  enum { CHAR, INT, PTR, ARRAY } ty;
+  enum { CHAR, INT, PTR, ARRAY, STRUCT } ty;
   struct Type *ptr_to;
   size_t size;
   size_t array_size;
+  Struct *strct;
 };
 
 typedef struct Token Token;
@@ -148,6 +157,7 @@ typedef struct Scope Scope;
 struct Scope {
   Scope *parent;
   Map *vars;
+  Map *types;
 };
 
 char *read_file(char *path);

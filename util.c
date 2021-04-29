@@ -156,6 +156,9 @@ void debug_token(Token *token) {
     case TK_STRING:
       fprintf(stderr, "STRING");
       break;
+    case TK_STRUCT:
+      fprintf(stderr, "STRUCT");
+      break;
     }
     tok = tok->next;
   }
