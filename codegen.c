@@ -262,12 +262,10 @@ void gen(Node *node) {
 
   case ND_BLOCK:
     printf("  # ND_BLOCK\n");
-    cur = node->child;
-    while (cur) {
-      gen(cur);
+    for (int i = 0; i < node->children->len; i++) {
+      gen(vec_get(node->children, i));
       printf("  pop rax\n");
       printf("\n");
-      cur = cur->next;
     }
     printf("  push 0\n");  // dummy
     printf("\n");

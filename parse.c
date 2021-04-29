@@ -295,17 +295,9 @@ Node *function() {
   // Function body
   expect("{");
   Node *block = new_node(ND_BLOCK, NULL, NULL);
-
-  Node *cur = node;
-  cur = block;
+  block->children = new_vec();
   while (!consume("}")) {
-    if (cur == block) {
-      cur->child = stmt();
-      cur = cur->child;
-    } else {
-      cur->next = stmt();
-      cur = cur->next;
-    }
+    vec_push(block->children, stmt());
   }
 
   scope = scope->parent;
@@ -370,19 +362,11 @@ Node *stmt() {
   if (consume("{")) {
     scope = new_scope(scope);
     Node *node = new_node(ND_BLOCK, NULL, NULL);
-
-    Node *cur = node;
+    node->children = new_vec();
     while (!consume("}")) {
-      if (cur == node) {
-        cur->child = stmt();
-        cur = cur->child;
-      } else {
-        cur->next = stmt();
-        cur = cur->next;
-      }
+      vec_push(node->children, stmt());
     }
     scope = scope->parent;
-
     return node;
   }
 

@@ -234,10 +234,8 @@ Node *analyze(Node *node, bool cast_array) {
     return node;
 
   case ND_BLOCK:
-    next = &(node->child);
-    while (*next) {
-      *next = analyze(*next, true);
-      next = &((*next)->next);
+    for (int i = 0; i < node->children->len; i++) {
+      node->children->data[i] = analyze(node->children->data[i], true);
     }
     return node;
 

@@ -322,23 +322,21 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_BLOCK:
-    cur = node->child;
-    while (cur) {
-      if (cur == node->child && !cur->next) {
+    for (int i = 0; i < node->children->len; i++) {
+      if (node->children->len == 1) {
         sprintf(p11, "%sBLOCK ──── ", pre1);
         sprintf(p12, "%s           ", pre2);
-      } else if (cur == node->child) {
+      } else if (i == 0) {
         sprintf(p11, "%sBLOCK ───┬ ", pre1);
         sprintf(p12, "%s         │ ", pre2);
-      } else if (cur->next) {
+      } else if (i != node->children->len - 1) {
         sprintf(p11, "%s         ├ ", pre2);
         sprintf(p12, "%s         │ ", pre2);
       } else {
         sprintf(p11, "%s         └ ", pre2);
         sprintf(p12, "%s           ", pre2);
       }
-      debug_node(cur, p11, p12);
-      cur = cur->next;
+      debug_node(vec_get(node->children, i), p11, p12);
     }
     return;
 
