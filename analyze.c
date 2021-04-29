@@ -255,10 +255,8 @@ Node *analyze(Node *node, bool cast_array) {
     node->lhs = analyze(node->lhs, true);
     node->type = node->lhs->type;
 
-    next = &(node->child);
-    while (*next) {
-      *next = analyze(*next, true);
-      next = &((*next)->next);
+    for (int i = 0; i < node->children->len; i++) {
+      node->children->data[i] = analyze(node->children->data[i], true);
     }
 
     return node;

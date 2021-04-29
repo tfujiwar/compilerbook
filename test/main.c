@@ -30,6 +30,15 @@ int fpp(int *a, int *b) {
   return *a + *b;
 }
 
+int sum(int *a, int len) {
+  int i;
+  int ans = 0;
+  for (i = 0; i < len; i=i+1) {
+    ans += a[i];
+  }
+  return ans;
+}
+
 int main() {
   { assert("0", 0, 0); }
   { assert("42", 42, 42); }
@@ -197,8 +206,8 @@ int main() {
   assert("gstr[4]", gstr[4], 0);
 
   assert("sizeof(gint)", sizeof(gint), 4);
-  assert("sizeof(garr)", sizeof(gint), 20);
-  assert("sizeof(gstr)", sizeof(gint), 5);
+  assert("sizeof(garr)", sizeof(garr), 20);
+  assert("sizeof(gstr)", sizeof(gstr), 5);
 
   { int a=2; a+=1+1; assert("a", a, 4); }
   { int a=2; a-=1+1; assert("a", a, 0); }
@@ -230,6 +239,11 @@ int main() {
 
   { int a=1; int b=a++; assert("a+b", a+b, 3); }
   { int a=2; int b=a--; assert("a+b", a+b, 3); }
+
+  {
+    int a[] = {1, 2, 3, 4, 5};
+    assert("sum(a, 3)", sum(a, 5), 15);
+  }
 
   return 0;
 }

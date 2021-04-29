@@ -778,16 +778,12 @@ Node *unary_right() {
 
     } else if (consume("(")) {
       node = new_node(ND_CALL, node, NULL);
-      if (consume(")")) continue;
-
-      node->child = assign();
-      Node *cur = node->child;
-
-      while (!consume(")")) {
-        expect(",");
-        cur->next = assign();
-        cur = cur->next;
+      node->children = new_vec();
+      while (true) {
+        vec_push(node->children, assign());
+        if (!consume(",")) break;
       }
+      expect(")");
 
     } else {
       return node;

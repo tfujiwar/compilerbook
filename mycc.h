@@ -134,6 +134,7 @@ struct Node {
   Node *body;
   Node *els;
   Node *child;
+  Vector *children;
   Node *next;
   int val;
   char *name;

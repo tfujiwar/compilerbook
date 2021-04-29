@@ -284,12 +284,12 @@ void gen(Node *node) {
       Node *nd = node->func->args->data[i];
       gen_lval(nd);
       printf("  pop rax\n");
-      if (num == 0) printf("  mov [rax], %s\n", reg_di(nd));
-      if (num == 1) printf("  mov [rax], %s\n", reg_si(nd));
-      if (num == 2) printf("  mov [rax], %s\n", reg_d(nd));
-      if (num == 3) printf("  mov [rax], %s\n", reg_c(nd));
-      if (num == 4) printf("  mov [rax], %s\n", reg_8(nd));
-      if (num == 5) printf("  mov [rax], %s\n", reg_9(nd));
+      if (i == 0) printf("  mov [rax], %s\n", reg_di(nd));
+      if (i == 1) printf("  mov [rax], %s\n", reg_si(nd));
+      if (i == 2) printf("  mov [rax], %s\n", reg_d(nd));
+      if (i == 3) printf("  mov [rax], %s\n", reg_c(nd));
+      if (i == 4) printf("  mov [rax], %s\n", reg_8(nd));
+      if (i == 5) printf("  mov [rax], %s\n", reg_9(nd));
     }
 
     gen(node->body);
@@ -299,20 +299,16 @@ void gen(Node *node) {
     printf("  # ND_CALL\n");
     gen(node->lhs);
 
-    num = 0;
-    cur = node->child;
-    while (cur) {
-      gen(cur);
-      cur = cur->next;
-      num++;
+    for (int i = 0; i < node->children->len; i++) {
+      gen(node->children->data[i]);
     }
 
-    if (num >= 6) printf("  pop r9\n");
-    if (num >= 5) printf("  pop r8\n");
-    if (num >= 4) printf("  pop rcx\n");
-    if (num >= 3) printf("  pop rdx\n");
-    if (num >= 2) printf("  pop rsi\n");
-    if (num >= 1) printf("  pop rdi\n");
+    if (node->children->len >= 6) printf("  pop r9\n");
+    if (node->children->len >= 5) printf("  pop r8\n");
+    if (node->children->len >= 4) printf("  pop rcx\n");
+    if (node->children->len >= 3) printf("  pop rdx\n");
+    if (node->children->len >= 2) printf("  pop rsi\n");
+    if (node->children->len >= 1) printf("  pop rdi\n");
 
     printf("  pop rax\n");
     printf("  call rax\n");
