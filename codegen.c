@@ -130,7 +130,6 @@ char *byte(Type *type) {
   }
 }
 
-
 void gen_lval(Node *node) {
   if (node->kind != ND_LVAR)
     error("not a variable");

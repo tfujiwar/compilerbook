@@ -271,7 +271,7 @@ int main() {
     assert("(&a)->i", (&a)->i, 1);
     assert("(&a)->j", (&a)->j, 2);
     assert("(&a)->k", (&a)->k, 3);
-    assert("sizeof(a)", sizeof(a), 9);
+    assert("sizeof(a)", sizeof(a), 12);
 
     struct Struct arr[4];
     arr[0].i = 1;
@@ -280,7 +280,7 @@ int main() {
     assert("arr[0].i", arr[0].i, 1);
     assert("arr[0].j", arr[0].j, 2);
     assert("arr[0].k", arr[0].k, 3);
-    assert("sizeof(a)", sizeof(arr), 36);
+    assert("sizeof(a)", sizeof(arr), 48);
 
     struct Nest nest;
     nest.a.i = 1;
@@ -289,7 +289,7 @@ int main() {
     assert("nest.a.i", nest.a.i, 1);
     assert("nest.a.j", nest.a.j, 2);
     assert("nest.a.k", nest.a.k, 3);
-    assert("sizeof(nest)", sizeof(nest), 9);
+    assert("sizeof(nest)", sizeof(nest), 12);
 
     struct Node n1;
     struct Node n2;

@@ -212,7 +212,7 @@ Node *function() {
     }
     expect(";");
 
-    st_type->size = offset;
+    st_type->size = (offset + 3) / 4 * 4;
 
     return new_node(ND_DECLARE, NULL, NULL);
   }
