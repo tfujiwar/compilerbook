@@ -10,7 +10,10 @@ $(OBJS): mycc.h
 test: mycc
 	./mycc -f test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
 
+test_queue: mycc
+	./mycc -f test/queue.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+
 clean:
 	rm -f mycc *.o *~ tmp*
 
-.PHONY: test clean
+.PHONY: test test_queue clean

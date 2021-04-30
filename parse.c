@@ -167,8 +167,10 @@ Type *type() {
 
   } else {
     ty = calloc(1, sizeof(Type));
-
-    if (consume_token(TK_CHAR)) {
+    if (consume_token(TK_VOID)) {
+      ty->ty = VOID;
+      ty->size = 1;
+    } else if (consume_token(TK_CHAR)) {
       ty->ty = CHAR;
       ty->size = 1;
     } else if (consume_token(TK_INT)) {
@@ -368,6 +370,8 @@ Node *function() {
 Node *stmt() {
   // Return statement
   if (consume_token(TK_RETURN)) {
+    if (consume(";"))
+      return new_node(ND_RETURN, new_node_num(0), NULL);
     Node *node = new_node(ND_RETURN, expr(), NULL);
     expect(";");
     return node;

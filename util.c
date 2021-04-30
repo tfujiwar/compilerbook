@@ -144,6 +144,9 @@ void debug_token(Token *token) {
     case TK_EOF:
       fprintf(stderr, "EOF\n");
       break;
+    case TK_VOID:
+      fprintf(stderr, "VOID ");
+      break;
     case TK_INT:
       fprintf(stderr, "INT ");
       break;
@@ -154,10 +157,10 @@ void debug_token(Token *token) {
       fprintf(stderr, "SIZEOF ");
       break;
     case TK_STRING:
-      fprintf(stderr, "STRING");
+      fprintf(stderr, "STRING ");
       break;
     case TK_STRUCT:
-      fprintf(stderr, "STRUCT");
+      fprintf(stderr, "STRUCT ");
       break;
     }
     tok = tok->next;
@@ -409,7 +412,10 @@ void debug_node(Node *node, char *pre1, char *pre2) {
 }
 
 void debug_type(Type *type) {
-  if (type->ty == INT) {
+  if (type->ty == VOID) {
+    fprintf(stderr, "VOID\n");
+
+  } else if (type->ty == INT) {
     fprintf(stderr, "INT\n");
 
   } else if (type->ty == CHAR) {

@@ -8,15 +8,15 @@ struct Queue {
   struct Node *tail;
 };
 
-int enqueue(struct Queue* queue, struct Node *node) {
+void enqueue(struct Queue* queue, struct Node *node) {
   if (!queue->head) {
     queue->head = node;
     queue->tail = node;
-    return 0;
+    return;
   }
   queue->tail->next = node;
   queue->tail = node;
-  return 0;
+  return;
 }
 
 int dequeue(struct Queue* queue) {

@@ -64,6 +64,12 @@ Token *tokenize() {
     }
     if (found) continue;
 
+    if (memcmp(p, "void", 4) == 0) {
+      cur = new_token(TK_VOID, cur, p, 4);
+      p += 4;
+      continue;
+    }
+
     if (memcmp(p, "char", 4) == 0) {
       cur = new_token(TK_CHAR, cur, p, 4);
       p += 4;
