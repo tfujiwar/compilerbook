@@ -318,13 +318,7 @@ Node *analyze(Node *node, bool cast_array) {
     node->lhs = analyze(node->lhs, true);
     if (node->lhs->type->ty != STRUCT) error("struct expected: %d", node->lhs->type->ty);
 
-    Type *type;
-    Scope *sc = scope;
-    while (sc) {
-      type = map_get(sc->types, node->lhs->type->strct->name);
-      if (type) break;
-      sc = sc->parent;
-    }
+    Type *type = find_type(node->lhs->type->strct->name);
     if (!type) error("type not found");
 
     Member *member = map_get(type->strct->member, node->name);
@@ -348,12 +342,7 @@ Node *analyze(Node *node, bool cast_array) {
     if (node->lhs->type->ty != PTR || node->lhs->type->ptr_to->ty != STRUCT)
       error("struct expected: %d", node->lhs->type->ty);
 
-    sc = scope;
-    while (sc) {
-      type = map_get(sc->types, node->lhs->type->ptr_to->strct->name);
-      if (type) break;
-      sc = sc->parent;
-    }
+    type = find_type(node->lhs->type->ptr_to->strct->name);
     if (!type) error("type not found");
 
     member = map_get(type->strct->member, node->name);

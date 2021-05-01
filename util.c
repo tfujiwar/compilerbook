@@ -162,6 +162,9 @@ void debug_token(Token *token) {
     case TK_STRUCT:
       fprintf(stderr, "STRUCT ");
       break;
+    case TK_TYPEDEF:
+      fprintf(stderr, "TYPEDEF ");
+      break;
     }
     tok = tok->next;
   }

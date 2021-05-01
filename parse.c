@@ -105,6 +105,16 @@ LVar *find_lvar_in_scope(char *name) {
   return map_get(scope->vars, name);
 }
 
+Type *find_type(char *name) {
+  Type *type;
+  Scope *sc = scope;
+  while (sc) {
+    if (type = map_get(sc->types, name)) return type;
+    sc = sc->parent;
+  }
+  return NULL;
+}
+
 bool expect_token(int kind) {
   if (token->kind != kind)
     error_at(token->at, "expected %d, but got %d", kind, token->kind);
@@ -188,12 +198,7 @@ Type *type() {
     Token *ident = consume_ident();
     if (!ident) error_at(token->at, "identifier expected");
 
-    Scope *sc = scope;
-    while (sc) {
-      ty = map_get(sc->types, ident->str);
-      if (ty) break;
-      sc = sc->parent;
-    }
+    ty = find_type(ident->str);
     if (!ty) error_at(ident->at, "undefined struct");
 
   } else {

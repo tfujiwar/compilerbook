@@ -82,6 +82,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "typedef", 7) == 0) {
+      cur = new_token(TK_TYPEDEF, cur, p, 7);
+      p += 7;
+      continue;
+    }
+
     if (isdigit(*p)) {
       char* prev = p;
       int val = strtol(p, &p, 10);

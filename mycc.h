@@ -45,6 +45,7 @@ typedef enum {
   TK_SIZEOF,
   TK_STRING,
   TK_STRUCT,
+  TK_TYPEDEF,
 } TokenKind;
 
 typedef enum {
@@ -196,6 +197,7 @@ Function *new_function(char *name, Type *type);
 Struct *new_struct(char *name);
 Member *new_member(char *name, Type *type, int offset);
 Type *type();
+Type *find_type(char *name);
 
 void program();
 Node *function();
