@@ -46,9 +46,8 @@ int fpp(int *a, int *b) {
 }
 
 int sum(int *a, int len) {
-  int i;
   int ans = 0;
-  for (i = 0; i < len; i=i+1) {
+  for (int i = 0; i < len; i=i+1) {
     ans += a[i];
   }
   return ans;

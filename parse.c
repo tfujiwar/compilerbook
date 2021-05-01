@@ -355,6 +355,7 @@ Node *function() {
   // Function body
   expect("{");
   Node *block = new_node(ND_BLOCK, NULL, NULL);
+  block->scope = scope;
   block->children = new_vec();
   while (!consume("}")) {
     vec_push(block->children, stmt());
@@ -393,10 +394,11 @@ Node *stmt() {
   // For statement
   if (consume_token(TK_FOR)) {
     Node *node = new_node(ND_FOR, NULL, NULL);
+    scope = new_scope(scope);
+    node->scope = scope;
     expect("(");
     if (!consume(";")) {
-      node->init = expr();
-      expect(";");
+      node->init = stmt();
     }
     if (!consume(";")) {
       node->cond = expr();
@@ -407,6 +409,7 @@ Node *stmt() {
       expect(")");
     }
     node->body = stmt();
+    scope = scope->parent;
     return node;
   }
 
@@ -424,6 +427,7 @@ Node *stmt() {
   if (consume("{")) {
     scope = new_scope(scope);
     Node *node = new_node(ND_BLOCK, NULL, NULL);
+    node->scope = scope;
     node->children = new_vec();
     while (!consume("}")) {
       vec_push(node->children, stmt());

@@ -142,6 +142,14 @@ struct Function {
   Type *return_type;
 };
 
+typedef struct Scope Scope;
+
+struct Scope {
+  Scope *parent;
+  Map *vars;
+  Map *types;
+};
+
 typedef struct Node Node;
 
 struct Node {
@@ -161,14 +169,7 @@ struct Node {
   Type *type;
   LVar *lvar;
   Function *func;
-};
-
-typedef struct Scope Scope;
-
-struct Scope {
-  Scope *parent;
-  Map *vars;
-  Map *types;
+  Scope *scope;
 };
 
 char *read_file(char *path);

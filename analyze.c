@@ -223,10 +223,12 @@ Node *analyze(Node *node, bool cast_array) {
     return node;
 
   case ND_FOR:
+    scope = node->scope;
     if (node->init) node->init = analyze(node->init, true);
     if (node->cond) node->cond = analyze(node->cond, true);
     if (node->inc)  node->inc  = analyze(node->inc, true);
     node->body = analyze(node->body, true);
+    scope = scope->parent;
     return node;
 
   case ND_WHILE:
@@ -235,9 +237,11 @@ Node *analyze(Node *node, bool cast_array) {
     return node;
 
   case ND_BLOCK:
+    scope = node->scope;
     for (int i = 0; i < node->children->len; i++) {
       node->children->data[i] = analyze(node->children->data[i], true);
     }
+    scope = scope->parent;
     return node;
 
   case ND_FUNC:
@@ -313,7 +317,16 @@ Node *analyze(Node *node, bool cast_array) {
   case ND_DOT:
     node->lhs = analyze(node->lhs, true);
     if (node->lhs->type->ty != STRUCT) error("struct expected: %d", node->lhs->type->ty);
-    Type *type = map_get(scope->types, node->lhs->type->strct->name);
+
+    Type *type;
+    Scope *sc = scope;
+    while (sc) {
+      type = map_get(sc->types, node->lhs->type->strct->name);
+      if (type) break;
+      sc = sc->parent;
+    }
+    if (!type) error("type not found");
+
     Member *member = map_get(type->strct->member, node->name);
 
     Node *base = new_node(ND_ADDR, node->lhs, NULL);
@@ -335,7 +348,14 @@ Node *analyze(Node *node, bool cast_array) {
     if (node->lhs->type->ty != PTR || node->lhs->type->ptr_to->ty != STRUCT)
       error("struct expected: %d", node->lhs->type->ty);
 
-    type = map_get(scope->types, node->lhs->type->ptr_to->strct->name);
+    sc = scope;
+    while (sc) {
+      type = map_get(sc->types, node->lhs->type->ptr_to->strct->name);
+      if (type) break;
+      sc = sc->parent;
+    }
+    if (!type) error("type not found");
+
     member = map_get(type->strct->member, node->name);
 
     base = node->lhs;
