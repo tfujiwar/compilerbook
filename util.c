@@ -436,3 +436,10 @@ void debug_type(Type *type) {
     fprintf(stderr, "%s\n", type->strct->name);
   }
 }
+
+void debug_types(Scope *scope) {
+  for (int i = 0; i < scope->types->keys->len; i++) {
+    fprintf(stderr, "%s: ", scope->types->keys->data[i]);
+    debug_type(scope->types->vals->data[i]);
+  }
+}

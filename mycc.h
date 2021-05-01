@@ -149,6 +149,7 @@ struct Scope {
   Scope *parent;
   Map *vars;
   Map *types;
+  Map *structs;
 };
 
 typedef struct Node Node;
@@ -180,6 +181,7 @@ void error_at(char *loc, char *fmt, ...);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
 void debug_type(Type *type);
+void debug_types(Scope *scope);
 char *substring(char *str, int len);
 
 bool consume(char *op);

@@ -301,5 +301,20 @@ int main() {
     assert("n1.next->next->value", n1.next->next->value, 3);
   }
 
+  {
+    typedef struct Struct MyStruct;
+    MyStruct mystruct;
+    mystruct.i = 1;
+    assert("mystruct.i", mystruct.i, 1);
+
+    typedef int MyInt;
+    MyInt myint = 10;
+    assert("myint", myint, 10);
+
+    typedef MyInt MyInt2;
+    MyInt2 myint2 = 20;
+    assert("myint2", myint2, 20);
+  }
+
   return 0;
 }

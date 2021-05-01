@@ -7,6 +7,7 @@ Scope *new_scope(Scope *parent) {
   scope->parent = parent;
   scope->vars = new_map();
   scope->types = new_map();
+  scope->structs = new_map();
   return scope;
 }
 
@@ -68,7 +69,7 @@ Node *parse_struct_definition() {
     Type *st_type = calloc(1, sizeof(Type));
     st_type->ty = STRUCT;
     st_type->strct = new_struct(ident->str);
-    map_put(scope->types, st_type->strct->name, st_type);
+    map_put(scope->structs, st_type->strct->name, st_type);
 
     int offset = 0;
 
@@ -91,6 +92,19 @@ Node *parse_struct_definition() {
   return NULL;
 }
 
+Node *parse_typedef() {
+  if (consume_token(TK_TYPEDEF)) {
+    Type *ty = type();
+    Token *ident = consume_ident();
+    if (!ident) error_at(token->at, "identifier expected");
+    expect(";");
+
+    map_put(scope->types, ident->str, ty);
+    return new_node(ND_DECLARE, NULL, NULL);
+  }
+  return NULL;
+}
+
 LVar *find_lvar(char *name) {
   LVar *lvar;
   Scope *sc = scope;
@@ -110,6 +124,16 @@ Type *find_type(char *name) {
   Scope *sc = scope;
   while (sc) {
     if (type = map_get(sc->types, name)) return type;
+    sc = sc->parent;
+  }
+  return NULL;
+}
+
+Type *find_struct(char *name) {
+  Type *type;
+  Scope *sc = scope;
+  while (sc) {
+    if (type = map_get(sc->structs, name)) return type;
     sc = sc->parent;
   }
   return NULL;
@@ -193,13 +217,22 @@ void program() {
 
 Type *type() {
   Type *ty;
+  Token *ident;
+  Token *tok = token;
 
   if (consume_token(TK_STRUCT)) {
-    Token *ident = consume_ident();
+    ident = consume_ident();
     if (!ident) error_at(token->at, "identifier expected");
 
-    ty = find_type(ident->str);
+    ty = find_struct(ident->str);
     if (!ty) error_at(ident->at, "undefined struct");
+
+  } else if (ident = consume_ident()) {
+    ty = find_type(ident->str);
+    if (!ty) {
+      token = tok;
+      return NULL;
+    }
 
   } else {
     ty = calloc(1, sizeof(Type));
@@ -232,6 +265,7 @@ Node *function() {
   // Struct Definition
   Node *node;
   if (node = parse_struct_definition()) return node;
+  if (node = parse_typedef()) return node;
 
   Type *ty = type();
   if (!ty) error_at(token->at, "type expected");
@@ -453,6 +487,7 @@ Node *stmt() {
   // Define Struct
   Node *node;
   if (node = parse_struct_definition()) return node;
+  if (node = parse_typedef()) return node;
 
   // Declare local variable
   Type *ty;
