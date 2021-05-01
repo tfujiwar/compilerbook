@@ -316,5 +316,18 @@ int main() {
     assert("myint2", myint2, 20);
   }
 
+  {
+    // struct { int i; } anonymus;
+    // anonymus.i = 10;
+    // assert("anonymus.i", anonymus.i, 10);
+
+    struct Named { int i; } named1;
+    struct Named named2;
+    named1.i = 10;
+    named2.i = 20;
+    assert("named1.i", named1.i, 10);
+    assert("named2.i", named2.i, 20);
+  }
+
   return 0;
 }

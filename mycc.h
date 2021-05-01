@@ -200,6 +200,7 @@ Struct *new_struct(char *name);
 Member *new_member(char *name, Type *type, int offset);
 Type *type();
 Type *find_type(char *name);
+Type *find_struct(char *name);
 
 void program();
 Node *function();

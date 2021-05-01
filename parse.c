@@ -1,6 +1,7 @@
 #include "mycc.h"
 
 int offset = 0;
+int struct_label = 0;
 
 Scope *new_scope(Scope *parent) {
   Scope *scope = calloc(1, sizeof(Scope));
@@ -59,37 +60,6 @@ Token *consume_num() {
   Token *tok = token;
   token = token->next;
   return tok;
-}
-
-Node *parse_struct_definition() {
-  Token *tok = token;
-  Token *ident;
-
-  if (consume_token(TK_STRUCT) && (ident = consume_ident()) && consume("{")) {
-    Type *st_type = calloc(1, sizeof(Type));
-    st_type->ty = STRUCT;
-    st_type->strct = new_struct(ident->str);
-    map_put(scope->structs, st_type->strct->name, st_type);
-
-    int offset = 0;
-
-    while (!consume("}")) {
-      Type *ty = type();
-      Token *mem = consume_ident();
-      Member *member = new_member(mem->str, ty, offset);
-      map_put(st_type->strct->member, member->name, member);
-      offset += ty->size;
-      expect(";");
-    }
-    expect(";");
-
-    st_type->size = (offset + 3) / 4 * 4;
-
-    return new_node(ND_DECLARE, NULL, NULL);
-  }
-
-  token = tok;
-  return NULL;
 }
 
 Node *parse_typedef() {
@@ -222,10 +192,31 @@ Type *type() {
 
   if (consume_token(TK_STRUCT)) {
     ident = consume_ident();
-    if (!ident) error_at(token->at, "identifier expected");
+    if (!ident || !(ty = find_struct(ident->str))) {
+      char *st_name;
+      if (ident) st_name = ident->str;
+      else sprintf(st_name, "struct%03d", struct_label++);
 
-    ty = find_struct(ident->str);
-    if (!ty) error_at(ident->at, "undefined struct");
+      expect("{");
+      Type *st_type = calloc(1, sizeof(Type));
+      st_type->ty = STRUCT;
+      st_type->strct = new_struct(st_name);
+      map_put(scope->structs, st_type->strct->name, st_type);
+
+      int offset = 0;
+
+      while (!consume("}")) {
+        Type *ty = type();
+        Token *mem = consume_ident();
+        Member *member = new_member(mem->str, ty, offset);
+        map_put(st_type->strct->member, member->name, member);
+        offset += ty->size;
+        expect(";");
+      }
+
+      st_type->size = (offset + 3) / 4 * 4;
+      ty = st_type;
+    }
 
   } else if (ident = consume_ident()) {
     ty = find_type(ident->str);
@@ -264,11 +255,13 @@ Type *type() {
 Node *function() {
   // Struct Definition
   Node *node;
-  if (node = parse_struct_definition()) return node;
   if (node = parse_typedef()) return node;
 
   Type *ty = type();
   if (!ty) error_at(token->at, "type expected");
+  if (ty->ty == STRUCT && consume(";")) {
+    return new_node(ND_DECLARE, NULL, NULL);
+  }
 
   Token *ident = consume_ident();
   if (!ident) error_at(ident->at, "identifier expected");
@@ -486,12 +479,15 @@ Node *stmt() {
 
   // Define Struct
   Node *node;
-  if (node = parse_struct_definition()) return node;
   if (node = parse_typedef()) return node;
 
   // Declare local variable
   Type *ty;
   if (ty = type()) {
+    if (ty->ty == STRUCT && consume(";")) {
+      return new_node(ND_DECLARE, NULL, NULL);
+    }
+
     Token *ident = consume_ident();
 
     if (consume("[")) {
