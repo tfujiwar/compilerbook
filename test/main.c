@@ -317,9 +317,9 @@ int main() {
   }
 
   {
-    // struct { int i; } anonymus;
-    // anonymus.i = 10;
-    // assert("anonymus.i", anonymus.i, 10);
+    struct { int i; } anonymous;
+    anonymous.i = 10;
+    assert("anonymous.i", anonymous.i, 10);
 
     struct Named { int i; } named1;
     struct Named named2;
@@ -327,6 +327,11 @@ int main() {
     named2.i = 20;
     assert("named1.i", named1.i, 10);
     assert("named2.i", named2.i, 20);
+
+    typedef struct { int i; } WITH_TYPEDEF;
+    WITH_TYPEDEF with_typedef;
+    with_typedef.i = 30;
+    assert("with_typedef.i", with_typedef.i, 30);
   }
 
   return 0;

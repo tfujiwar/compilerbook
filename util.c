@@ -443,3 +443,10 @@ void debug_types(Scope *scope) {
     debug_type(scope->types->vals->data[i]);
   }
 }
+
+void debug_structs(Scope *scope) {
+  for (int i = 0; i < scope->structs->keys->len; i++) {
+    fprintf(stderr, "%s: ", scope->structs->keys->data[i]);
+    debug_type(scope->structs->vals->data[i]);
+  }
+}

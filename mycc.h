@@ -182,6 +182,7 @@ void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
 void debug_type(Type *type);
 void debug_types(Scope *scope);
+void debug_structs(Scope *scope);
 char *substring(char *str, int len);
 
 bool consume(char *op);

@@ -193,9 +193,13 @@ Type *type() {
   if (consume_token(TK_STRUCT)) {
     ident = consume_ident();
     if (!ident || !(ty = find_struct(ident->str))) {
-      char *st_name;
-      if (ident) st_name = ident->str;
-      else sprintf(st_name, "struct%03d", struct_label++);
+      char* st_name;
+      if (ident) {
+        st_name = ident->str;
+      } else {
+        st_name = calloc(1, sizeof(char) * 10);
+        sprintf(st_name, "struct%03d", struct_label++);
+      }
 
       expect("{");
       Type *st_type = calloc(1, sizeof(Type));
