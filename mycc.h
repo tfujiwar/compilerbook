@@ -45,6 +45,7 @@ typedef enum {
   TK_SIZEOF,
   TK_STRING,
   TK_STRUCT,
+  TK_ENUM,
   TK_TYPEDEF,
 } TokenKind;
 
@@ -105,14 +106,21 @@ struct Struct {
   Map *member;
 };
 
+typedef struct Enum Enum;
+
+struct Enum {
+  char *name;
+};
+
 typedef struct Type Type;
 
 struct Type {
-  enum { VOID, CHAR, INT, PTR, ARRAY, STRUCT } ty;
+  enum { VOID, CHAR, INT, PTR, ARRAY, STRUCT, ENUM } ty;
   struct Type *ptr_to;
   size_t size;
   size_t array_size;
   Struct *strct;
+  Enum *enm;
 };
 
 typedef struct Token Token;
@@ -150,6 +158,7 @@ struct Scope {
   Map *vars;
   Map *types;
   Map *structs;
+  Map *enums;
 };
 
 typedef struct Node Node;
@@ -199,9 +208,11 @@ Scope *new_scope(Scope *parent);
 Function *new_function(char *name, Type *type);
 Struct *new_struct(char *name);
 Member *new_member(char *name, Type *type, int offset);
+Enum *new_enum(char *name);
 Type *type();
 Type *find_type(char *name);
 Type *find_struct(char *name);
+Type *find_enum(char *name);
 
 void program();
 Node *function();

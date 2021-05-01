@@ -334,5 +334,14 @@ int main() {
     assert("with_typedef.i", with_typedef.i, 30);
   }
 
+  {
+    enum MyEnum1 { A1, B1, C1 } my_enum_1;
+
+    enum MyEnum2 { A2, B2 = 10, C2 };
+    enum MyEnum2 my_enum_2;
+
+    enum { A3, B3, C3, } my_enum_3;
+  }
+
   return 0;
 }

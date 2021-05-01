@@ -138,6 +138,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "enum", 4) == 0 && !is_ident_char(p[4])) {
+      cur = new_token(TK_ENUM, cur, p, 6);
+      p += 4;
+      continue;
+    }
+
     if (is_ident_char(*p)) {
       char* prev = p;
       while (is_ident_char(*p)) p++;

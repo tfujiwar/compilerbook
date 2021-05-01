@@ -2,6 +2,7 @@
 
 int offset = 0;
 int struct_label = 0;
+int enum_label = 0;
 
 Scope *new_scope(Scope *parent) {
   Scope *scope = calloc(1, sizeof(Scope));
@@ -9,6 +10,7 @@ Scope *new_scope(Scope *parent) {
   scope->vars = new_map();
   scope->types = new_map();
   scope->structs = new_map();
+  scope->enums = new_map();
   return scope;
 }
 
@@ -109,6 +111,16 @@ Type *find_struct(char *name) {
   return NULL;
 }
 
+Type *find_enum(char *name) {
+  Type *type;
+  Scope *sc = scope;
+  while (sc) {
+    if (type = map_get(sc->enums, name)) return type;
+    sc = sc->parent;
+  }
+  return NULL;
+}
+
 bool expect_token(int kind) {
   if (token->kind != kind)
     error_at(token->at, "expected %d, but got %d", kind, token->kind);
@@ -178,6 +190,12 @@ Member *new_member(char *name, Type *type, int offset) {
   return member;
 }
 
+Enum *new_enum(char *name) {
+  Enum *enm = calloc(1, sizeof(Enum));
+  enm->name = name;
+  return enm;
+}
+
 void program() {
   int i = 0;
   while (!at_eof())
@@ -222,6 +240,47 @@ Type *type() {
       ty = st_type;
     }
 
+  } else if (consume_token(TK_ENUM)) {
+    ident = consume_ident();
+    if (!ident || !(ty = find_enum(ident->str))) {
+      char *en_name;
+      if (ident) {
+        en_name = ident->str;
+      } else {
+        en_name = calloc(1, sizeof(char) * 8);
+        sprintf(en_name, "enum%03d", enum_label++);
+      }
+
+      expect("{");
+      Type *en_type = calloc(1, sizeof(Type));
+      en_type->ty = ENUM;
+      en_type->enm = new_enum(en_name);
+      en_type->size = 4;
+      map_put(scope->enums, en_type->enm->name, en_type);
+
+      int num = 0;
+
+      while (!consume("}")) {
+        Token *id = consume_ident();
+        if (!id) error_at(token->at, "identifier expected");
+
+        if (consume("=")) {
+          Token *specified_num;
+          if (specified_num = consume_num()) {
+            num = specified_num->val;
+          }
+        }
+
+        if (!consume(",")) {
+          expect("}");
+          break;
+        }
+        num++;
+      }
+
+      ty = en_type;
+    }
+
   } else if (ident = consume_ident()) {
     ty = find_type(ident->str);
     if (!ty) {
@@ -263,9 +322,8 @@ Node *function() {
 
   Type *ty = type();
   if (!ty) error_at(token->at, "type expected");
-  if (ty->ty == STRUCT && consume(";")) {
-    return new_node(ND_DECLARE, NULL, NULL);
-  }
+  if (ty->ty == STRUCT && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
+  if (ty->ty == ENUM && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
 
   Token *ident = consume_ident();
   if (!ident) error_at(ident->at, "identifier expected");
@@ -488,9 +546,8 @@ Node *stmt() {
   // Declare local variable
   Type *ty;
   if (ty = type()) {
-    if (ty->ty == STRUCT && consume(";")) {
-      return new_node(ND_DECLARE, NULL, NULL);
-    }
+    if (ty->ty == STRUCT && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
+    if (ty->ty == ENUM && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
 
     Token *ident = consume_ident();
 
