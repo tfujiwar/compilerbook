@@ -8,6 +8,8 @@ struct Queue {
   struct Node *tail;
 };
 
+struct Queue q;
+
 void enqueue(struct Queue* queue, struct Node *node) {
   if (!queue->head) {
     queue->head = node;
@@ -37,10 +39,6 @@ int main() {
   n1.next = 0;
   n2.next = 0;
   n3.next = 0;
-
-  struct Queue q;
-  q.head = 0;
-  q.tail = 0;
 
   enqueue(&q, &n1);
   enqueue(&q, &n2);

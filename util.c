@@ -239,7 +239,7 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_DECLARE_GVAR:
-    fprintf(stderr, "%sDECL\n", pre1);
+    fprintf(stderr, "%sDECLG(%s)\n", pre1, node->lvar->name);
     return;
 
   case ND_STRING:

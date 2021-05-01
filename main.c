@@ -41,19 +41,23 @@ int main(int argc, char **argv) {
 
   int i = 0;
   printf("  .data\n\n");
-  for (; code[i]->kind == ND_DECLARE_GVAR; i++) {
-    code[i] = analyze(code[i], true);
-    gen(code[i]);
+  for (int i = 0; code[i]; i++) {
+    if (code[i]->kind == ND_DECLARE_GVAR) {
+      code[i] = analyze(code[i], true);
+      gen(code[i]);
+    }
   }
 
   gen_string();
 
   printf("  .text\n\n");
-  for (; code[i]; i++) {
-    debug_node(code[i], "", "");
-    code[i] = analyze(code[i], true);
-    debug_node(code[i], "", "");
-    gen(code[i]);
+  for (int i = 0; code[i]; i++) {
+    if (code[i]->kind != ND_DECLARE_GVAR) {
+      debug_node(code[i], "", "");
+      code[i] = analyze(code[i], true);
+      debug_node(code[i], "", "");
+      gen(code[i]);
+    }
   }
 
   return 0;
