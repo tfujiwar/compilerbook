@@ -19,10 +19,10 @@ void enqueue(struct Queue* queue, struct Node *node) {
   return;
 }
 
-int dequeue(struct Queue* queue) {
+struct Node *dequeue(struct Queue* queue) {
   struct Node *node = queue->head;
   queue->head = queue->head->next;
-  return node->value;
+  return node;
 }
 
 int main() {
@@ -46,8 +46,8 @@ int main() {
   enqueue(&q, &n2);
   enqueue(&q, &n3);
 
-  printf("%d\n", dequeue(&q));
-  printf("%d\n", dequeue(&q));
-  printf("%d\n", dequeue(&q));
+  printf("%d\n", dequeue(&q)->value);
+  printf("%d\n", dequeue(&q)->value);
+  printf("%d\n", dequeue(&q)->value);
   return 0;
 }

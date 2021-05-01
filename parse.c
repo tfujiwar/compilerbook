@@ -60,6 +60,37 @@ Token *consume_num() {
   return tok;
 }
 
+Node *parse_struct_definition() {
+  Token *tok = token;
+  Token *ident;
+
+  if (consume_token(TK_STRUCT) && (ident = consume_ident()) && consume("{")) {
+    Type *st_type = calloc(1, sizeof(Type));
+    st_type->ty = STRUCT;
+    st_type->strct = new_struct(ident->str);
+    map_put(scope->types, st_type->strct->name, st_type);
+
+    int offset = 0;
+
+    while (!consume("}")) {
+      Type *ty = type();
+      Token *mem = consume_ident();
+      Member *member = new_member(mem->str, ty, offset);
+      map_put(st_type->strct->member, member->name, member);
+      offset += ty->size;
+      expect(";");
+    }
+    expect(";");
+
+    st_type->size = (offset + 3) / 4 * 4;
+
+    return new_node(ND_DECLARE, NULL, NULL);
+  }
+
+  token = tok;
+  return NULL;
+}
+
 LVar *find_lvar(char *name) {
   LVar *lvar;
   Scope *sc = scope;
@@ -193,31 +224,9 @@ Type *type() {
 }
 
 Node *function() {
-  // Struct
-  if (consume_token(TK_STRUCT)) {
-    Token *ident = consume_ident();
-    Type *st_type = calloc(1, sizeof(Type));
-    st_type->ty = STRUCT;
-    st_type->strct = new_struct(ident->str);
-    map_put(scope->types, st_type->strct->name, st_type);
-
-    int offset = 0;
-
-    expect("{");
-    while (!consume("}")) {
-      Type *ty = type();
-      Token *mem = consume_ident();
-      Member *member = new_member(mem->str, ty, offset);
-      map_put(st_type->strct->member, member->name, member);
-      offset += ty->size;
-      expect(";");
-    }
-    expect(";");
-
-    st_type->size = (offset + 3) / 4 * 4;
-
-    return new_node(ND_DECLARE, NULL, NULL);
-  }
+  // Struct Definition
+  Node *node;
+  if (node = parse_struct_definition()) return node;
 
   Type *ty = type();
   if (!ty) error_at(token->at, "type expected");
@@ -325,7 +334,7 @@ Node *function() {
   }
 
   // Function
-  Node *node = new_node(ND_FUNC, NULL, NULL);
+  node = new_node(ND_FUNC, NULL, NULL);
   node->func = new_function(ident->str, ty);
   map_put(functions, node->func->name, node->func);
 
@@ -435,6 +444,10 @@ Node *stmt() {
     scope = scope->parent;
     return node;
   }
+
+  // Define Struct
+  Node *node;
+  if (node = parse_struct_definition()) return node;
 
   // Declare local variable
   Type *ty;
@@ -600,7 +613,7 @@ Node *stmt() {
   }
 
   // Expression
-  Node *node = expr();
+  node = expr();
   expect(";");
   return node;
 }

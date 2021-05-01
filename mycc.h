@@ -193,6 +193,9 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Scope *new_scope(Scope *parent);
 Function *new_function(char *name, Type *type);
+Struct *new_struct(char *name);
+Member *new_member(char *name, Type *type, int offset);
+Type *type();
 
 void program();
 Node *function();

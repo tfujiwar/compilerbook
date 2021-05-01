@@ -19,15 +19,6 @@ struct Struct {
   char k;
 };
 
-struct Nest {
-  struct Struct a;
-};
-
-struct Node {
-  int value;
-  struct Node *next;
-};
-
 int assert(char *msg, int a, int b) {
   if (a != b) printf("%s: %d != %d\n", msg, a, b);
   return 0;
@@ -260,6 +251,15 @@ int main() {
   }
 
   {
+    struct Nest {
+      struct Struct a;
+    };
+
+    struct Node {
+      int value;
+      struct Node *next;
+    };
+
     struct Struct a;
     a.i = 1;
     a.j = 2;
