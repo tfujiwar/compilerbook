@@ -8,12 +8,12 @@ mycc: $(OBJS)
 $(OBJS): mycc.h
 
 test: mycc
-	cc test/main.c -o tmp && ./tmp;
 	./mycc -f test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+	cc test/main.c -o tmp && ./tmp;
 
 test_queue: mycc
-	cc test/queue.c -o tmp && ./tmp;
 	./mycc -f test/queue.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+	cc test/queue.c -o tmp && ./tmp;
 
 clean:
 	rm -f mycc *.o *~ tmp*

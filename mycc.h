@@ -148,7 +148,9 @@ typedef struct Function Function;
 struct Function {
   char *name;
   Vector *args;
+  Vector *arg_types;
   Type *return_type;
+  bool is_proto;
 };
 
 typedef struct Scope Scope;
@@ -191,8 +193,8 @@ void error_at(char *loc, char *fmt, ...);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
 void debug_type(Type *type);
-void debug_types(Scope *scope);
-void debug_structs(Scope *scope);
+void debug_scope(Scope *scope);
+void debug_functions();
 char *substring(char *str, int len);
 
 bool consume(char *op);
@@ -236,6 +238,7 @@ Node *unary_right();
 Node *primary();
 
 Type *type_int();
+bool same_type(Type *, Type *);
 Node *analyze(Node *node, bool cast_array);
 
 void gen(Node *node);

@@ -437,16 +437,57 @@ void debug_type(Type *type) {
   }
 }
 
-void debug_types(Scope *scope) {
-  for (int i = 0; i < scope->types->keys->len; i++) {
-    fprintf(stderr, "%s: ", scope->types->keys->data[i]);
-    debug_type(scope->types->vals->data[i]);
+void debug_scope(Scope *scope) {
+  debug("debug scopes:");
+  Scope *sc = scope;
+  while (sc) {
+    debug("scope:");
+
+    debug("type:");
+    for (int i = 0; i < sc->types->keys->len; i++) {
+      fprintf(stderr, "- %s: ", sc->types->keys->data[i]);
+      debug_type(sc->types->vals->data[i]);
+    }
+
+    debug("struct:");
+    for (int i = 0; i < sc->structs->keys->len; i++) {
+      fprintf(stderr, "- %s: ", sc->structs->keys->data[i]);
+      debug_type(sc->structs->vals->data[i]);
+    }
+
+    debug("enum:");
+    for (int i = 0; i < sc->enums->keys->len; i++) {
+      fprintf(stderr, "- %s: ", sc->enums->keys->data[i]);
+      debug_type(sc->enums->vals->data[i]);
+    }
+
+    debug("variable:");
+    for (int i = 0; i < sc->vars->keys->len; i++) {
+      fprintf(stderr, "- %s: ", sc->vars->keys->data[i]);
+      debug_type(((LVar *)(sc->vars->vals->data[i]))->type);
+    }
+
+    debug("");
+    sc = sc->parent;
   }
 }
 
-void debug_structs(Scope *scope) {
-  for (int i = 0; i < scope->structs->keys->len; i++) {
-    fprintf(stderr, "%s: ", scope->structs->keys->data[i]);
-    debug_type(scope->structs->vals->data[i]);
+void debug_functions() {
+  for (int i = 0; i < functions->keys->len; i++) {
+    Function *func = functions->vals->data[i];
+    fprintf(stderr, "%s: ", functions->keys->data[i]);
+    debug_type(func->return_type);
+
+    for (int j = 0; j < func->arg_types->len; j++) {
+      Type *type = func->arg_types->data[j];
+      Node *arg = func->args->data[j];
+      if (func->args->len)
+        fprintf(stderr, "- %s %d: ", arg->lvar->name, arg->lvar->offset);
+      else
+        fprintf(stderr, "- :");
+      debug_type(type);
+    }
+
+    debug("");
   }
 }

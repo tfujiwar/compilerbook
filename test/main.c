@@ -19,6 +19,8 @@ struct Struct {
   char k;
 };
 
+int function(int, char, struct Struct *);
+
 int assert(char *msg, int a, int b) {
   if (a != b) printf("%s: %d != %d\n", msg, a, b);
   return 0;
@@ -369,5 +371,17 @@ int main() {
     assert("sizeof(my_enum_4)", sizeof(my_enum_4), 4);
   }
 
+  {
+    struct Struct str;
+    str.i = 3;
+    str.j = 4;
+    str.k = 5;
+    assert("function(1, 2, *str)", function(1, 2, &str), 15);
+  }
+
   return 0;
+}
+
+int function(int a, char b, struct Struct *c) {
+  return a + b + c->i + c->j + c->k;
 }

@@ -23,8 +23,6 @@ int main(int argc, char **argv) {
   }
 
   token = tokenize();
-  // debug("");
-  // debug_token(token);
 
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
@@ -53,12 +51,14 @@ int main(int argc, char **argv) {
   printf("  .text\n\n");
   for (int i = 0; code[i]; i++) {
     if (code[i]->kind != ND_DECLARE_GVAR) {
-      // debug_node(code[i], "", "");
       code[i] = analyze(code[i], true);
       // debug_node(code[i], "", "");
       gen(code[i]);
     }
   }
+
+  debug_scope(global);
+  debug_functions();
 
   return 0;
 }

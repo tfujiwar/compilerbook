@@ -183,6 +183,7 @@ Function *new_function(char *name, Type *type) {
   func->name = name;
   func->return_type = type;
   func->args = new_vec();
+  func->arg_types = new_vec();
   return func;
 }
 
@@ -443,47 +444,94 @@ Node *function() {
   }
 
   // Function
-  node = new_node(ND_FUNC, NULL, NULL);
-  node->func = new_function(ident->str, ty);
-  map_put(functions, node->func->name, node->func);
+  Function *func = map_get(functions, ident->str);
+  if (func && !func->is_proto) error_at(ident->at, "function already defined");
+  if (!func) {
+    func = new_function(ident->str, ty);
+    map_put(functions, func->name, func);
+  }
 
   // Function args
-  scope = new_scope(scope);
-  offset = 0;
+  func->is_proto = false;
+  Vector *arg_names = new_vec();
+  Vector *arg_types = new_vec();
+  Type *arg_ty;
 
-  while (ty = type()) {
+  while (arg_ty = type()) {
+    vec_push(arg_types, arg_ty);
+
     Token *ident = consume_ident();
-    Node *arg = new_node(ND_LVAR, NULL, NULL);
-    LVar *lvar = new_var(ident->str);
-    offset += ty->size;
-    lvar->is_global = false;
-    lvar->next = locals;
-    lvar->offset = offset;
-    lvar->type = ty;
-    locals = lvar;
-
-    arg->lvar = lvar;
-
-    vec_push(node->func->args, arg);
+    if (ident) vec_push(arg_names, ident->str);
+    else func->is_proto = true;
 
     if (!consume(",")) break;
   }
   expect(")");
 
   // Function body
-  expect("{");
-  Node *block = new_node(ND_BLOCK, NULL, NULL);
-  block->scope = scope;
-  block->children = new_vec();
-  while (!consume("}")) {
-    vec_push(block->children, stmt());
+  if (consume("{")) {
+    if (func->is_proto) error_at(ident->at, "argument name missing");
+
+    if (func->arg_types->len) {
+      if (arg_types->len != func->arg_types->len)
+        error_at(ident->at, "inconsistent argument types");
+
+      for (int i = 0; i < arg_types->len; i++)
+        if (!same_type(vec_get(arg_types, i), vec_get(func->arg_types, i)))
+          error_at(ident->at, "inconsistent argument types");
+
+    } else {
+      func->arg_types = arg_types;
+    }
+
+    scope = new_scope(scope);
+    offset = 0;
+
+    for (int i = 0; i < func->arg_types->len; i++) {
+      Node *arg = new_node(ND_LVAR, NULL, NULL);
+      LVar *lvar = new_var(vec_get(arg_names, i));
+      lvar->is_global = false;
+      lvar->next = locals;
+      lvar->type = vec_get(func->arg_types, i);
+      offset += lvar->type->size;
+      lvar->offset = offset;
+      locals = lvar;
+      arg->lvar = lvar;
+      vec_push(func->args, arg);
+    }
+
+    node = new_node(ND_FUNC, NULL, NULL);
+    Node *block = new_node(ND_BLOCK, NULL, NULL);
+    block->scope = scope;
+    block->children = new_vec();
+    while (!consume("}")) {
+      vec_push(block->children, stmt());
+    }
+
+    scope = scope->parent;
+    node->val = offset;
+
+    node->func = func;
+    node->body = block;
+    return node;
   }
 
-  scope = scope->parent;
-  node->val = offset;
+  // Function prototype
+  expect(";");
 
-  node->body = block;
-  return node;
+  if (func->arg_types->len) {
+    if (arg_types->len != func->arg_types->len)
+      error_at(ident->at, "inconsistent argument types");
+
+    for (int i = 0; i < arg_types->len; i++)
+      if (!same_type(vec_get(arg_types, i), vec_get(func->arg_types, i)))
+        error_at(ident->at, "inconsistent argument types");
+
+  } else {
+    func->arg_types = arg_types;
+  }
+
+  return new_node(ND_DECLARE, NULL, NULL);
 }
 
 Node *stmt() {
