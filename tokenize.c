@@ -159,6 +159,13 @@ Token *tokenize() {
       continue;
     }
 
+    if (*p == '\'' ) {
+      cur = new_token(TK_NUM, cur, p + 1, 1);
+      cur->val = *(p + 1);
+      p += 3;
+      continue;
+    }
+
     error_at(p, "failed to tokenize");
   }
 

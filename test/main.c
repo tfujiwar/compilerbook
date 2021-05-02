@@ -47,6 +47,7 @@ int sum(int *a, int len) {
 int main() {
   { assert("0", 0, 0); }
   { assert("42", 42, 42); }
+  { assert("'A'", 'A', 65); }
 
   { assert("5+20-4", 5+20-4, 21); }
   { assert("12 + 34 - 5 ", 12 + 34 - 5 , 41); }
