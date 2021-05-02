@@ -287,6 +287,19 @@ void gen(Node *node) {
     printf("  push 0\n");  // dummy
     return;
 
+  case ND_DO_WHILE:
+    printf("  # ND_DO_WHILE\n");
+    l = labels++;
+    printf(".Lbegin%03d:\n", l);
+    gen(node->body);
+    printf("  pop rax\n");
+    gen(node->cond);
+    printf("  pop rax\n");
+    printf("  cmp rax, 0\n");
+    printf("  jne .Lbegin%03d\n", l);
+    printf("  push 0\n");  // dummy
+    return;
+
   case ND_BLOCK:
     printf("  # ND_BLOCK\n");
     for (int i = 0; i < node->children->len; i++) {

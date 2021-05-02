@@ -131,6 +131,13 @@ int main() {
   { int ans; int i; ans=0; for (i=1; i<=10; i=i+1) ans=ans+i; assert("ans", ans, 55); }
   { int a; a=0; while (a<10) a=a+1; assert("a", a, 10); }
 
+  {
+    int i = 1;
+    int do_while_ans = 0;
+    do { do_while_ans += i; } while (i++ < 9);
+    assert("do_while_ans", do_while_ans, 45);
+  }
+
   { int a; { a=1; a=a+1; }  assert("a", a, 2); }
   { int a; { a=1; {a=a+1; a=a+1; } a=a+1; }  assert("a", a, 4); }
 

@@ -589,6 +589,19 @@ Node *stmt() {
     return node;
   }
 
+  // Do While statement
+  if (consume_token(TK_DO)) {
+    debug("here");
+    Node *node = new_node(ND_DO_WHILE, NULL, NULL);
+    node->body = stmt();
+    expect_token(TK_WHILE);
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    expect(";");
+    return node;
+  }
+
   // Block
   if (consume("{")) {
     scope = new_scope(scope);

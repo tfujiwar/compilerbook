@@ -271,6 +271,7 @@ Node *analyze(Node *node, bool cast_array) {
     return node;
 
   case ND_WHILE:
+  case ND_DO_WHILE:
     node->cond = analyze(node->cond, true);
     node->body = analyze(node->body, true);
     return node;

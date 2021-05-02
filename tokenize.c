@@ -126,6 +126,12 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "do", 2) == 0 && !is_ident_char(p[2])) {
+      cur = new_token(TK_DO, cur, p, 2);
+      p += 2;
+      continue;
+    }
+
     if (memcmp(p, "sizeof", 6) == 0 && !is_ident_char(p[6])) {
       cur = new_token(TK_SIZEOF, cur, p, 6);
       p += 6;

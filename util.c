@@ -141,6 +141,9 @@ void debug_token(Token *token) {
     case TK_WHILE:
       fprintf(stderr, "WHILE ");
       break;
+    case TK_DO:
+      fprintf(stderr, "DO ");
+      break;
     case TK_EOF:
       fprintf(stderr, "EOF\n");
       break;
@@ -313,6 +316,7 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_WHILE:
+  case ND_DO_WHILE:
     sprintf(p11, "%sWHILE ───┬ ", pre1);
     sprintf(p12, "%s         │ ", pre2);
     sprintf(p21, "%s         └ ", pre2);
