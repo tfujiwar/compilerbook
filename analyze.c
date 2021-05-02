@@ -182,6 +182,45 @@ Node *analyze(Node *node, bool cast_array) {
     node->lhs = analyze(node->lhs, true);
     node->rhs = analyze(node->rhs, true);
     node->type = node->lhs->type;
+
+    if (node->type->ty == STRUCT) {
+      Node *dummy = new_node_num(0);
+      Node *comma = new_node(ND_COMMA, dummy, NULL);
+      dummy->type = type_int();
+
+      for (int i = 0; i < node->type->strct->member->keys->len; i++) {
+        Member *member = node->type->strct->member->vals->data[i];
+
+        Node *offset = new_node_num(member->offset);
+        offset->type = type_int();
+
+        Node *lhs_base = new_node(ND_ADDR, node->lhs, NULL);
+        Node *rhs_base = new_node(ND_ADDR, node->rhs, NULL);
+        lhs_base->type = ptr_to(node->lhs->type);
+        rhs_base->type = ptr_to(node->rhs->type);
+
+        Node *lhs_addr = new_node(ND_ADD, lhs_base, offset);
+        Node *rhs_addr = new_node(ND_ADD, rhs_base, offset);
+        lhs_addr->type = ptr_to(member->type);
+        rhs_addr->type = ptr_to(member->type);
+
+        Node *lhs_deref = new_node(ND_DEREF, lhs_addr, NULL);
+        Node *rhs_deref = new_node(ND_DEREF, rhs_addr, NULL);
+        lhs_deref->type = member->type;
+        rhs_deref->type = member->type;
+
+        comma->rhs = new_node(ND_ASSIGN, lhs_deref, rhs_deref);
+        comma->rhs->type = member->type;
+
+        Node *next_comma = new_node(ND_COMMA, NULL, NULL);
+        next_comma->lhs = comma;
+        comma = next_comma;
+      }
+      comma->rhs = node->lhs;
+      comma->type = node->lhs->type;
+      return comma;
+
+    }
     return node;
 
   case ND_LVAR:

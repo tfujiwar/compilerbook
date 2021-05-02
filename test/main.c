@@ -273,6 +273,19 @@ int main() {
     assert("(&a)->k", (&a)->k, 3);
     assert("sizeof(a)", sizeof(a), 12);
 
+    struct Struct b;
+    b = a;
+    assert("b.i", b.i, 1);
+    assert("b.j", b.j, 2);
+    assert("b.k", b.k, 3);
+
+    // TODO
+    // struct Struct c;
+    // c = b = a;
+    // assert("c.i", c.i, 1);
+    // assert("c.j", c.j, 2);
+    // assert("c.k", c.k, 3);
+
     struct Struct arr[4];
     arr[0].i = 1;
     arr[0].j = 2;
@@ -343,9 +356,9 @@ int main() {
 
     enum MyEnum2 { A2, B2 = 10, C2 };
     enum MyEnum2 my_enum_2 = B2;
-    assert("A1", A2, 0);
-    assert("B1", B2, 10);
-    assert("C1", C2, 11);
+    assert("A2", A2, 0);
+    assert("B2", B2, 10);
+    assert("C2", C2, 11);
     assert("my_enum_2", my_enum_2, 10);
 
     enum { A3, B3, C3, } my_enum_3 = A3;

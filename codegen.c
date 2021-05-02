@@ -10,6 +10,8 @@ char *word_ptr(Node *node) {
       return "DWORD PTR";
     case 8:
       return "QWORD PTR";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -23,6 +25,8 @@ char *reg_a(Node *node) {
       return "eax";
     case 8:
       return "rax";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -36,6 +40,8 @@ char *reg_b(Node *node) {
       return "ebx";
     case 8:
       return "rbx";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -49,6 +55,8 @@ char *reg_c(Node *node) {
       return "ecx";
     case 8:
       return "rcx";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -62,6 +70,8 @@ char *reg_d(Node *node) {
       return "edx";
     case 8:
       return "rdx";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -75,6 +85,8 @@ char *reg_di(Node *node) {
       return "edi";
     case 8:
       return "rdi";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -88,6 +100,8 @@ char *reg_si(Node *node) {
       return "esi";
     case 8:
       return "rsi";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -101,6 +115,8 @@ char *reg_8(Node *node) {
       return "r8d";
     case 8:
       return "r8";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -114,6 +130,8 @@ char *reg_9(Node *node) {
       return "r9d";
     case 8:
       return "r9";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -127,6 +145,8 @@ char *byte(Type *type) {
       return ".long";
     case 8:
       return ".quad";
+    default:
+      error("invalid type size");
   }
 }
 
@@ -157,6 +177,14 @@ void gen(Node *node) {
 
   case ND_LVAR:
     printf("  # ND_LVAR\n");
+
+    if (node->type->ty == STRUCT) {
+      // TODO
+      printf("  mov rax, 0\n");
+      printf("  push rax\n");
+      return;
+    }
+
     gen_lval(node);
     printf("  pop rax\n");
     if (node->type->size < 4) printf("  movsx eax, %s [rax]\n", word_ptr(node));
