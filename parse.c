@@ -547,6 +547,7 @@ Node *stmt() {
   // If statement
   if (consume_token(TK_IF)) {
     Node *node = new_node(ND_IF, NULL, NULL);
+    node->val = labels++;
     expect("(");
     node->cond = expr();
     expect(")");
@@ -560,6 +561,7 @@ Node *stmt() {
   // For statement
   if (consume_token(TK_FOR)) {
     Node *node = new_node(ND_FOR, NULL, NULL);
+    node->val = labels++;
     scope = new_scope(scope);
     node->scope = scope;
     expect("(");
@@ -582,6 +584,7 @@ Node *stmt() {
   // While statement
   if (consume_token(TK_WHILE)) {
     Node *node = new_node(ND_WHILE, NULL, NULL);
+    node->val = labels++;
     expect("(");
     node->cond = expr();
     expect(")");
@@ -593,6 +596,7 @@ Node *stmt() {
   if (consume_token(TK_DO)) {
     debug("here");
     Node *node = new_node(ND_DO_WHILE, NULL, NULL);
+    node->val = labels++;
     node->body = stmt();
     expect_token(TK_WHILE);
     expect("(");
@@ -833,6 +837,7 @@ Node *conditional() {
   Node *node = logical_or();
   if (consume("?")) {
     Node *nd = new_node(ND_CONDITIONAL, NULL, NULL);
+    nd->val = labels++;
     nd->cond = node;
     nd->body = conditional();
     expect(":");
@@ -846,20 +851,24 @@ Node *conditional() {
 Node *logical_or() {
   Node *node = logical_and();
   while (true) {
-    if (consume("||"))
+    if (consume("||")) {
       node = new_node(ND_LOGICAL_OR, node, logical_and());
-    else
+      node->val = labels++;
+    } else {
       return node;
+    }
   }
 }
 
 Node *logical_and() {
   Node *node = bitwise_or();
   while (true) {
-    if (consume("&&"))
+    if (consume("&&")) {
       node = new_node(ND_LOGICAL_AND, node, bitwise_or());
-    else
+      node->val = labels++;
+    } else {
       return node;
+    }
   }
 }
 

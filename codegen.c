@@ -230,36 +230,34 @@ void gen(Node *node) {
 
   case ND_IF:
     printf("  # ND_IF\n");
-    l = labels++;
     gen(node->cond);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  je .Lelse%03d\n", l);
+    printf("  je .Lelse%03d\n", node->val);
     gen(node->body);
     printf("  pop rax\n");
-    printf("  jmp .Lend%03d\n", l);
-    printf(".Lelse%03d:\n", l);
+    printf("  jmp .Lend%03d\n", node->val);
+    printf(".Lelse%03d:\n", node->val);
     if (node->els) {
       gen(node->els);
       printf("  pop rax\n");
     }
-    printf(".Lend%03d:\n", l);
+    printf(".Lend%03d:\n", node->val);
     printf("  push 0\n");  // dummy
     return;
 
   case ND_FOR:
     printf("  # ND_FOR\n");
-    l = labels++;
     if (node->init){
       gen(node->init);
       printf("  pop rax\n");
     }
-    printf(".Lbegin%03d:\n", l);
+    printf(".Lbegin%03d:\n", node->val);
     if (node->cond) {
       gen(node->cond);
       printf("  pop rax\n");
       printf("  cmp rax, 0\n");
-      printf("  je .Lend%03d\n", l);
+      printf("  je .Lend%03d\n", node->val);
     }
     gen(node->body);
     printf("  pop rax\n");
@@ -267,36 +265,34 @@ void gen(Node *node) {
       gen(node->inc);
       printf("  pop rax\n");
     }
-    printf("  jmp .Lbegin%03d\n", l);
-    printf(".Lend%03d:\n", l);
+    printf("  jmp .Lbegin%03d\n", node->val);
+    printf(".Lend%03d:\n", node->val);
     printf("  push 0\n");  // dummy
     return;
 
   case ND_WHILE:
     printf("  # ND_WHILE\n");
-    l = labels++;
-    printf(".Lbegin%03d:\n", l);
+    printf(".Lbegin%03d:\n", node->val);
     gen(node->cond);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  je .Lend%03d\n", l);
+    printf("  je .Lend%03d\n", node->val);
     gen(node->body);
     printf("  pop rax\n");
-    printf("  jmp .Lbegin%03d\n", l);
-    printf(".Lend%03d:\n", l);
+    printf("  jmp .Lbegin%03d\n", node->val);
+    printf(".Lend%03d:\n", node->val);
     printf("  push 0\n");  // dummy
     return;
 
   case ND_DO_WHILE:
     printf("  # ND_DO_WHILE\n");
-    l = labels++;
-    printf(".Lbegin%03d:\n", l);
+    printf(".Lbegin%03d:\n", node->val);
     gen(node->body);
     printf("  pop rax\n");
     gen(node->cond);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  jne .Lbegin%03d\n", l);
+    printf("  jne .Lbegin%03d\n", node->val);
     printf("  push 0\n");  // dummy
     return;
 
@@ -429,50 +425,47 @@ void gen(Node *node) {
     return;
 
   case ND_LOGICAL_AND:
-    l = labels++;
     gen(node->lhs);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  je .Lfalse%03d\n", l);
+    printf("  je .Lfalse%03d\n", node->val);
     gen(node->rhs);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  je .Lfalse%03d\n", l);
+    printf("  je .Lfalse%03d\n", node->val);
     printf("  push 1\n");
-    printf("  jmp .Lend%03d\n", l);
-    printf(".Lfalse%03d:\n", l);
+    printf("  jmp .Lend%03d\n", node->val);
+    printf(".Lfalse%03d:\n", node->val);
     printf("  push 0\n");
-    printf(".Lend%03d:\n", l);
+    printf(".Lend%03d:\n", node->val);
     return;
 
   case ND_LOGICAL_OR:
-    l = labels++;
     gen(node->lhs);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  jne .Ltrue%03d\n", l);
+    printf("  jne .Ltrue%03d\n", node->val);
     gen(node->rhs);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  jne .Ltrue%03d\n", l);
+    printf("  jne .Ltrue%03d\n", node->val);
     printf("  push 0\n");
-    printf("  jmp .Lend%03d\n", l);
-    printf(".Ltrue%03d:\n", l);
+    printf("  jmp .Lend%03d\n", node->val);
+    printf(".Ltrue%03d:\n", node->val);
     printf("  push 1\n");
-    printf(".Lend%03d:\n", l);
+    printf(".Lend%03d:\n", node->val);
     return;
 
   case ND_CONDITIONAL:
-    l = labels++;
     gen(node->cond);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
-    printf("  je .Lelse%03d\n", l);
+    printf("  je .Lelse%03d\n", node->val);
     gen(node->body);
-    printf("  jmp .Lend%03d\n", l);
-    printf(".Lelse%03d:\n", l);
+    printf("  jmp .Lend%03d\n", node->val);
+    printf(".Lelse%03d:\n", node->val);
     gen(node->els);
-    printf(".Lend%03d:\n", l);
+    printf(".Lend%03d:\n", node->val);
     return;
 
   case ND_COMMA:
