@@ -11,6 +11,7 @@ Scope *new_scope(Scope *parent) {
   scope->types = new_map();
   scope->structs = new_map();
   scope->enums = new_map();
+  scope->enum_consts = new_map();
   return scope;
 }
 
@@ -116,6 +117,16 @@ Type *find_enum(char *name) {
   Scope *sc = scope;
   while (sc) {
     if (type = map_get(sc->enums, name)) return type;
+    sc = sc->parent;
+  }
+  return NULL;
+}
+
+int *find_enum_consts(char *name) {
+  int *val;
+  Scope *sc = scope;
+  while (sc) {
+    if (val = map_get(sc->enum_consts, name)) return val;
     sc = sc->parent;
   }
   return NULL;
@@ -270,6 +281,10 @@ Type *type() {
             num = specified_num->val;
           }
         }
+
+        int *val = calloc(1, sizeof(int));
+        *val = num;
+        map_put(scope->enum_consts, id->str, val);
 
         if (!consume(",")) {
           expect("}");
@@ -980,6 +995,14 @@ Node *primary() {
     if (func) {
       node->kind = ND_FUNC_NAME;
       node->func = func;
+      return node;
+    }
+
+    // Enum constants
+    int *enum_const = map_get(scope->enum_consts, name);
+    if (enum_const) {
+      node->kind = ND_NUM;
+      node->val = *enum_const;
       return node;
     }
 

@@ -336,11 +336,23 @@ int main() {
 
   {
     enum MyEnum1 { A1, B1, C1 } my_enum_1;
+    assert("A1", A1, 0);
+    assert("B1", B1, 1);
+    assert("C1", C1, 2);
 
     enum MyEnum2 { A2, B2 = 10, C2 };
-    enum MyEnum2 my_enum_2;
+    enum MyEnum2 my_enum_2 = B2;
+    assert("A1", A2, 0);
+    assert("B1", B2, 10);
+    assert("C1", C2, 11);
+    assert("my_enum_2", my_enum_2, 10);
 
-    enum { A3, B3, C3, } my_enum_3;
+    enum { A3, B3, C3, } my_enum_3 = A3;
+    assert("my_enum_3", my_enum_3, 0);
+
+    typedef enum { A4, B5, C6 } MyEnum4;
+    MyEnum4 my_enum_4;
+    assert("sizeof(my_enum_4)", sizeof(my_enum_4), 4);
   }
 
   return 0;

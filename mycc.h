@@ -159,6 +159,7 @@ struct Scope {
   Map *types;
   Map *structs;
   Map *enums;
+  Map *enum_consts;
 };
 
 typedef struct Node Node;
