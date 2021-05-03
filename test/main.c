@@ -428,6 +428,81 @@ int main() {
     assert("case_ans", case_ans, 6);
   }
 
+  {
+    int i = 1;
+    int case_ans = 0;
+    switch (i) {
+    case 1:
+      case_ans += 1;
+      break;
+    case 2:
+      case_ans += 2;
+      break;
+    default:
+      case_ans += 4;
+    }
+    assert("case_ans", case_ans, 1);
+  }
+
+  {
+    int i = 2;
+    int case_ans = 0;
+    switch (i) {
+    case 1:
+      case_ans += 1;
+      break;
+    case 2:
+      case_ans += 2;
+      break;
+    default:
+      case_ans += 4;
+    }
+    assert("case_ans", case_ans, 2);
+  }
+
+  {
+    int i = 10;
+    int j = 1;
+    int case_ans = 0;
+    switch (i) {
+    case 10:
+      switch (j) {
+        case 1:
+          case_ans += 1;
+          break;
+        case 2:
+          case_ans += 2;
+          break;
+      }
+      case_ans += 10;
+      break;
+    case 20:
+      switch (j) {
+        case 1:
+          case_ans += 1;
+          break;
+        case 2:
+          case_ans += 2;
+          break;
+      }
+      case_ans += 20;
+      break;
+    }
+    assert("case_ans", case_ans, 11);
+  }
+
+  {
+    int break_ans = 0;
+    for (int i = 1;; i++) {
+      for (int j = 1;; j++) {
+        break_ans++;
+        if (j == 5) break;
+      }
+      if (i == 3) break;
+    }
+    assert("break_ans", break_ans, 15);
+  }
+
   return 0;
 }
 

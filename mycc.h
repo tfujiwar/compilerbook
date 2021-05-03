@@ -197,6 +197,20 @@ struct Node {
   Map *labels;
 };
 
+typedef struct SwitchScope SwitchScope;
+
+struct SwitchScope {
+  Node *node;
+  SwitchScope *parent;
+};
+
+typedef struct BreakScope BreakScope;
+
+struct BreakScope {
+  Node *node;
+  BreakScope *parent;
+};
+
 char *read_file(char *path);
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
@@ -219,6 +233,8 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Scope *new_scope(Scope *parent);
+SwitchScope *new_switch_scope(SwitchScope *parent, Node *node);
+BreakScope *new_break_scope(BreakScope *parent, Node *node);
 Function *new_function(char *name, Type *type);
 Struct *new_struct(char *name);
 Member *new_member(char *name, Type *type, int offset);
@@ -266,3 +282,5 @@ extern Map *functions;
 extern Map *strings;
 extern Scope *global;
 extern Scope *scope;
+extern SwitchScope *sw_scope;
+extern BreakScope *br_scope;

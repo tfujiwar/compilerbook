@@ -9,6 +9,8 @@ Map *functions;
 Map *strings;
 Scope *global;
 Scope *scope;
+SwitchScope *sw_scope;
+BreakScope *br_scope;
 int labels = 0;
 
 int main(int argc, char **argv) {
@@ -32,6 +34,8 @@ int main(int argc, char **argv) {
   strings = new_map();
   global = new_scope(NULL);
   scope = global;
+  sw_scope = new_switch_scope(NULL, NULL);
+  br_scope = new_break_scope(NULL, NULL);
   program();
 
   printf(".intel_syntax noprefix\n");

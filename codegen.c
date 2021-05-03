@@ -293,6 +293,7 @@ void gen(Node *node) {
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
     printf("  jne .Lbegin%03d\n", node->val);
+    printf(".Lend%03d:\n", node->val);
     printf("  push 0\n");  // dummy
     return;
 
@@ -322,6 +323,10 @@ void gen(Node *node) {
   case ND_DEFAULT:
     printf(".Ldefault%03d:\n", node->val);
     printf("  push 0\n");  // dummy
+    return;
+
+  case ND_BREAK:
+    printf("  jmp .Lend%03d\n", node->val);
     return;
 
   case ND_BLOCK:

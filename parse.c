@@ -15,6 +15,20 @@ Scope *new_scope(Scope *parent) {
   return scope;
 }
 
+SwitchScope *new_switch_scope(SwitchScope *parent, Node *node) {
+  SwitchScope *scope = calloc(1, sizeof(SwitchScope));
+  scope->parent = parent;
+  scope->node = node;
+  return scope;
+}
+
+BreakScope *new_break_scope(BreakScope *parent, Node *node) {
+  BreakScope *scope = calloc(1, sizeof(BreakScope));
+  scope->parent = parent;
+  scope->node = node;
+  return scope;
+}
+
 LVar *new_var(char *name) {
   LVar *lvar = calloc(1, sizeof(LVar));
   lvar->name = name;
@@ -562,8 +576,12 @@ Node *stmt() {
   if (consume_token(TK_FOR)) {
     Node *node = new_node(ND_FOR, NULL, NULL);
     node->val = labels++;
+
     scope = new_scope(scope);
     node->scope = scope;
+
+    br_scope = new_break_scope(br_scope, node);
+
     expect("(");
     if (!consume(";")) {
       node->init = stmt();
@@ -577,6 +595,8 @@ Node *stmt() {
       expect(")");
     }
     node->body = stmt();
+
+    br_scope = br_scope->parent;
     scope = scope->parent;
     return node;
   }
@@ -584,17 +604,23 @@ Node *stmt() {
   // While statement
   if (consume_token(TK_WHILE)) {
     Node *node = new_node(ND_WHILE, NULL, NULL);
+    br_scope = new_break_scope(br_scope, node);
+
     node->val = labels++;
     expect("(");
     node->cond = expr();
     expect(")");
     node->body = stmt();
+
+    br_scope = br_scope->parent;
     return node;
   }
 
   // Do While statement
   if (consume_token(TK_DO)) {
     Node *node = new_node(ND_DO_WHILE, NULL, NULL);
+    br_scope = new_break_scope(br_scope, node);
+
     node->val = labels++;
     node->body = stmt();
     expect_token(TK_WHILE);
@@ -602,17 +628,25 @@ Node *stmt() {
     node->cond = expr();
     expect(")");
     expect(";");
+
+    br_scope = br_scope->parent;
     return node;
   }
 
   // Switch statement
   if (consume_token(TK_SWITCH)) {
     Node *node = new_node(ND_SWITCH, NULL, NULL);
+    sw_scope = new_switch_scope(sw_scope, node);
+    br_scope = new_break_scope(br_scope, node);
+
     node->val = labels++;
     expect("(");
     node->cond = expr();
     expect(")");
     node->body = stmt();
+
+    br_scope = br_scope->parent;
+    sw_scope = sw_scope->parent;
     return node;
   }
 
@@ -630,6 +664,14 @@ Node *stmt() {
     Node *node = new_node(ND_DEFAULT, NULL, NULL);
     node->val = labels++;
     expect(":");
+    return node;
+  }
+
+  // Break statement
+  if (consume_token(TK_BREAK)) {
+    Node *node = new_node(ND_BREAK, NULL, NULL);
+    node->val = br_scope->node->val;
+    expect(";");
     return node;
   }
 

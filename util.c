@@ -268,6 +268,10 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     fprintf(stderr, "%sDEFAULT\n", pre1);
     return;
 
+  case ND_BREAK:
+    fprintf(stderr, "%sBREAK\n", pre1);
+    return;
+
   case ND_CASE:
     sprintf(p11, "%sCASE ───── ", pre1);
     sprintf(p12, "%s           ", pre2);
@@ -438,6 +442,9 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_SHIFT_LEFT: label = "<< "; break;
   case ND_SHIFT_RIGHT: label = ">> "; break;
   case ND_COMMA: label = ",  "; break;
+
+  default:
+    error("failed to visualize node: %d", node->kind);
   }
 
   sprintf(p11, "%s%s(%s) ┬ ", pre1, label, type);

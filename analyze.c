@@ -301,6 +301,7 @@ Node *analyze(Node *node, bool cast_array) {
 
   case ND_CASE:
   case ND_DEFAULT:
+  case ND_BREAK:
     return node;
 
   case ND_BLOCK:
@@ -426,5 +427,8 @@ Node *analyze(Node *node, bool cast_array) {
     nd->type = member->type;
 
     return nd;
+
+  default:
+    error("failed to analyze node: %d", node->kind);
   }
 }
