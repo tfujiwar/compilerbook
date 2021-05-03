@@ -132,6 +132,30 @@ Token *tokenize() {
       continue;
     }
 
+    if (memcmp(p, "switch", 6) == 0 && !is_ident_char(p[6])) {
+      cur = new_token(TK_SWITCH, cur, p, 6);
+      p += 6;
+      continue;
+    }
+
+    if (memcmp(p, "case", 4) == 0 && !is_ident_char(p[4])) {
+      cur = new_token(TK_CASE, cur, p, 4);
+      p += 4;
+      continue;
+    }
+
+    if (memcmp(p, "default", 7) == 0 && !is_ident_char(p[7])) {
+      cur = new_token(TK_DEFAULT, cur, p, 7);
+      p += 7;
+      continue;
+    }
+
+    if (memcmp(p, "break", 5) == 0 && !is_ident_char(p[5])) {
+      cur = new_token(TK_BREAK, cur, p, 5);
+      p += 5;
+      continue;
+    }
+
     if (memcmp(p, "sizeof", 6) == 0 && !is_ident_char(p[6])) {
       cur = new_token(TK_SIZEOF, cur, p, 6);
       p += 6;

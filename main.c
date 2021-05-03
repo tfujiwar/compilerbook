@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
   }
 
   token = tokenize();
+  debug_token(token);
 
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
@@ -52,7 +53,7 @@ int main(int argc, char **argv) {
   for (int i = 0; code[i]; i++) {
     if (code[i]->kind != ND_DECLARE_GVAR) {
       code[i] = analyze(code[i], true);
-      // debug_node(code[i], "", "");
+      debug_node(code[i], "", "");
       gen(code[i]);
     }
   }

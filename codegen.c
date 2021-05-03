@@ -296,6 +296,34 @@ void gen(Node *node) {
     printf("  push 0\n");  // dummy
     return;
 
+  case ND_SWITCH:
+    gen(node->cond);
+    printf("  pop rax\n");
+    for (int i = 0; i < node->labels->keys->len; i++) {
+      char *label = node->labels->keys->data[i];
+      char *value = node->labels->vals->data[i];
+      if (value) {
+        printf("  cmp rax, %d\n", *value);
+        printf("  je %s\n", label);
+      } else {
+        printf("  jmp %s\n", label);
+      }
+    }
+    gen(node->body);
+    printf(".Lend%03d:\n", node->val);
+    printf("  push 0\n");  // dummy
+    return;
+
+  case ND_CASE:
+    printf(".Lcase%03d:\n", node->val);
+    printf("  push 0\n");  // dummy
+    return;
+
+  case ND_DEFAULT:
+    printf(".Ldefault%03d:\n", node->val);
+    printf("  push 0\n");  // dummy
+    return;
+
   case ND_BLOCK:
     printf("  # ND_BLOCK\n");
     for (int i = 0; i < node->children->len; i++) {

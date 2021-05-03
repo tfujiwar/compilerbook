@@ -276,6 +276,33 @@ Node *analyze(Node *node, bool cast_array) {
     node->body = analyze(node->body, true);
     return node;
 
+  case ND_SWITCH:
+    node->cond = analyze(node->cond, true);
+    node->labels = new_map();
+
+    for (int i = 0; i < node->body->children->len; i++) {
+      Node *child = node->body->children->data[i];
+
+      if (child->kind == ND_CASE) {
+        if (child->lhs->kind != ND_NUM) error("constant value expected in case statement");
+        char *label = calloc(1, sizeof(char) * 10);
+        sprintf(label, ".Lcase%03d", child->val);
+        map_put(node->labels, label, &(child->lhs->val));
+      }
+      if (child->kind == ND_DEFAULT) {
+        char *label = calloc(1, sizeof(char) * 13);
+        sprintf(label, ".Ldefault%03d", child->val);
+        map_put(node->labels, label, NULL);
+      }
+    }
+
+    node->body = analyze(node->body, true);
+    return node;
+
+  case ND_CASE:
+  case ND_DEFAULT:
+    return node;
+
   case ND_BLOCK:
     scope = node->scope;
     for (int i = 0; i < node->children->len; i++) {

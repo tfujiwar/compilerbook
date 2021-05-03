@@ -144,6 +144,18 @@ void debug_token(Token *token) {
     case TK_DO:
       fprintf(stderr, "DO ");
       break;
+    case TK_SWITCH:
+      fprintf(stderr, "SWITCH ");
+      break;
+    case TK_CASE:
+      fprintf(stderr, "CASE ");
+      break;
+    case TK_BREAK:
+      fprintf(stderr, "BREAK ");
+      break;
+    case TK_DEFAULT:
+      fprintf(stderr, "DEFAULT ");
+      break;
     case TK_EOF:
       fprintf(stderr, "EOF\n");
       break;
@@ -252,6 +264,16 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     fprintf(stderr, "%sSTRING\n", pre1);
     return;
 
+  case ND_DEFAULT:
+    fprintf(stderr, "%sDEFAULT\n", pre1);
+    return;
+
+  case ND_CASE:
+    sprintf(p11, "%sCASE ───── ", pre1);
+    sprintf(p12, "%s           ", pre2);
+    debug_node(node->lhs, p11, p12);
+    return;
+
   case ND_RETURN:
     sprintf(p11, "%sRET ────── ", pre1);
     sprintf(p12, "%s           ", pre2);
@@ -318,6 +340,15 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_WHILE:
   case ND_DO_WHILE:
     sprintf(p11, "%sWHILE ───┬ ", pre1);
+    sprintf(p12, "%s         │ ", pre2);
+    sprintf(p21, "%s         └ ", pre2);
+    sprintf(p22, "%s           ", pre2);
+    debug_node(node->cond, p11, p12);
+    debug_node(node->body, p21, p22);
+    return;
+
+  case ND_SWITCH:
+    sprintf(p11, "%sSWITCH ──┬ ", pre1);
     sprintf(p12, "%s         │ ", pre2);
     sprintf(p21, "%s         └ ", pre2);
     sprintf(p22, "%s           ", pre2);

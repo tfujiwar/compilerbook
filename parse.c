@@ -594,7 +594,6 @@ Node *stmt() {
 
   // Do While statement
   if (consume_token(TK_DO)) {
-    debug("here");
     Node *node = new_node(ND_DO_WHILE, NULL, NULL);
     node->val = labels++;
     node->body = stmt();
@@ -603,6 +602,34 @@ Node *stmt() {
     node->cond = expr();
     expect(")");
     expect(";");
+    return node;
+  }
+
+  // Switch statement
+  if (consume_token(TK_SWITCH)) {
+    Node *node = new_node(ND_SWITCH, NULL, NULL);
+    node->val = labels++;
+    expect("(");
+    node->cond = expr();
+    expect(")");
+    node->body = stmt();
+    return node;
+  }
+
+  // Case statement
+  if (consume_token(TK_CASE)) {
+    Node *node = new_node(ND_CASE, NULL, NULL);
+    node->val = labels++;
+    node->lhs = expr();
+    expect(":");
+    return node;
+  }
+
+  // Default statement
+  if (consume_token(TK_DEFAULT)) {
+    Node *node = new_node(ND_DEFAULT, NULL, NULL);
+    node->val = labels++;
+    expect(":");
     return node;
   }
 

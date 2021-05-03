@@ -39,6 +39,10 @@ typedef enum {
   TK_FOR,
   TK_WHILE,
   TK_DO,
+  TK_SWITCH,
+  TK_CASE,
+  TK_BREAK,
+  TK_DEFAULT,
   TK_EOF,
   TK_VOID,
   TK_CHAR,
@@ -69,6 +73,10 @@ typedef enum {
   ND_FOR,
   ND_WHILE,
   ND_DO_WHILE,
+  ND_SWITCH,
+  ND_CASE,
+  ND_BREAK,
+  ND_DEFAULT,
   ND_BLOCK,
   ND_FUNC,
   ND_FUNC_NAME,
@@ -186,6 +194,7 @@ struct Node {
   LVar *lvar;
   Function *func;
   Scope *scope;
+  Map *labels;
 };
 
 char *read_file(char *path);

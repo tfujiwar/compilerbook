@@ -386,6 +386,48 @@ int main() {
     assert("function(1, 2, *str)", function(1, 2, &str), 15);
   }
 
+  {
+    int i = 0;
+    int case_ans = 0;
+    switch (i) {
+    case 1:
+      case_ans += 1;
+    case 2:
+      case_ans += 2;
+    default:
+      case_ans += 4;
+    }
+    assert("case_ans", case_ans, 4);
+  }
+
+  {
+    int i = 1;
+    int case_ans = 0;
+    switch (i) {
+    case 1:
+      case_ans += 1;
+    case 2:
+      case_ans += 2;
+    default:
+      case_ans += 4;
+    }
+    assert("case_ans", case_ans, 7);
+  }
+
+  {
+    int i = 2;
+    int case_ans = 0;
+    switch (i) {
+    case 1:
+      case_ans += 1;
+    case 2:
+      case_ans += 2;
+    default:
+      case_ans += 4;
+    }
+    assert("case_ans", case_ans, 6);
+  }
+
   return 0;
 }
 
