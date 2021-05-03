@@ -239,16 +239,16 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     cur = node->child;
     while (cur) {
       if (cur == node->child && !cur->next) {
-        sprintf(p11, "%sDECL ───── ", pre1);
+        sprintf(p11, "%sDECL ----- ", pre1);
         sprintf(p12, "%s           ", pre2);
       } else if (cur == node->child) {
-        sprintf(p11, "%sDECL ────┬ ", pre1);
-        sprintf(p12, "%s         │ ", pre2);
+        sprintf(p11, "%sDECL ----+ ", pre1);
+        sprintf(p12, "%s         | ", pre2);
       } else if (cur->next) {
-        sprintf(p11, "%s         ├ ", pre2);
-        sprintf(p12, "%s         │ ", pre2);
+        sprintf(p11, "%s         L ", pre2);
+        sprintf(p12, "%s         | ", pre2);
       } else {
-        sprintf(p11, "%s         └ ", pre2);
+        sprintf(p11, "%s         L ", pre2);
         sprintf(p12, "%s           ", pre2);
       }
       debug_node(cur, p11, p12);
@@ -273,53 +273,53 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_CASE:
-    sprintf(p11, "%sCASE ───── ", pre1);
+    sprintf(p11, "%sCASE ----- ", pre1);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->lhs, p11, p12);
     return;
 
   case ND_RETURN:
-    sprintf(p11, "%sRET ────── ", pre1);
+    sprintf(p11, "%sRET ------ ", pre1);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->lhs, p11, p12);
     return;
 
   case ND_FUNC:
-    sprintf(p11, "%sFUNC ───── ", pre1);
+    sprintf(p11, "%sFUNC ----- ", pre1);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->body, p11, p12);
     return;
 
   case ND_ADDR:
-    sprintf(p11, "%sADR(%s) ─ ", pre1, type);
+    sprintf(p11, "%sADR(%s) - ", pre1, type);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->lhs, p11, p12);
     return;
 
   case ND_DEREF:
-    sprintf(p11, "%sDER(%s) ─ ", pre1, type);
+    sprintf(p11, "%sDER(%s) - ", pre1, type);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->lhs, p11, p12);
     return;
 
   case ND_SIZEOF:
-    sprintf(p11, "%sSIZEOF ─── ", pre1);
+    sprintf(p11, "%sSIZEOF --- ", pre1);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->lhs, p11, p12);
     return;
 
   case ND_BITWISE_NOT:
-    sprintf(p11, "%s~ ──────── ", pre1);
+    sprintf(p11, "%s~ -------- ", pre1);
     sprintf(p12, "%s           ", pre2);
     debug_node(node->lhs, p11, p12);
     return;
 
   case ND_IF:
-    sprintf(p11, "%sIF ──────┬ ", pre1);
-    sprintf(p12, "%s         │ ", pre2);
-    sprintf(p21, "%s         ├ ", pre2);
-    sprintf(p22, "%s         │ ", pre2);
-    sprintf(p31, "%s         └ ", pre2);
+    sprintf(p11, "%sIF ------+ ", pre1);
+    sprintf(p12, "%s         | ", pre2);
+    sprintf(p21, "%s         L ", pre2);
+    sprintf(p22, "%s         | ", pre2);
+    sprintf(p31, "%s         L ", pre2);
     sprintf(p32, "%s           ", pre2);
     debug_node(node->cond, p11, p12);
     debug_node(node->body, p21, p22);
@@ -327,13 +327,13 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_FOR:
-    sprintf(p11, "%sFOR ─────┬ ", pre1);
-    sprintf(p12, "%s         │ ", pre2);
-    sprintf(p21, "%s         ├ ", pre2);
-    sprintf(p22, "%s         │ ", pre2);
-    sprintf(p31, "%s         ├ ", pre2);
-    sprintf(p32, "%s         │ ", pre2);
-    sprintf(p41, "%s         └ ", pre2);
+    sprintf(p11, "%sFOR -----+ ", pre1);
+    sprintf(p12, "%s         | ", pre2);
+    sprintf(p21, "%s         L ", pre2);
+    sprintf(p22, "%s         | ", pre2);
+    sprintf(p31, "%s         L ", pre2);
+    sprintf(p32, "%s         | ", pre2);
+    sprintf(p41, "%s         L ", pre2);
     sprintf(p42, "%s           ", pre2);
     debug_node(node->init, p11, p12);
     debug_node(node->cond, p21, p22);
@@ -343,29 +343,29 @@ void debug_node(Node *node, char *pre1, char *pre2) {
 
   case ND_WHILE:
   case ND_DO_WHILE:
-    sprintf(p11, "%sWHILE ───┬ ", pre1);
-    sprintf(p12, "%s         │ ", pre2);
-    sprintf(p21, "%s         └ ", pre2);
+    sprintf(p11, "%sWHILE ---+ ", pre1);
+    sprintf(p12, "%s         | ", pre2);
+    sprintf(p21, "%s         L ", pre2);
     sprintf(p22, "%s           ", pre2);
     debug_node(node->cond, p11, p12);
     debug_node(node->body, p21, p22);
     return;
 
   case ND_SWITCH:
-    sprintf(p11, "%sSWITCH ──┬ ", pre1);
-    sprintf(p12, "%s         │ ", pre2);
-    sprintf(p21, "%s         └ ", pre2);
+    sprintf(p11, "%sSWITCH --+ ", pre1);
+    sprintf(p12, "%s         | ", pre2);
+    sprintf(p21, "%s         L ", pre2);
     sprintf(p22, "%s           ", pre2);
     debug_node(node->cond, p11, p12);
     debug_node(node->body, p21, p22);
     return;
 
   case ND_CONDITIONAL:
-    sprintf(p11, "%sCOND ────┬ ", pre1);
-    sprintf(p12, "%s         │ ", pre2);
-    sprintf(p21, "%s         ├ ", pre2);
-    sprintf(p22, "%s         │ ", pre2);
-    sprintf(p31, "%s         └ ", pre2);
+    sprintf(p11, "%sCOND ----+ ", pre1);
+    sprintf(p12, "%s         | ", pre2);
+    sprintf(p21, "%s         L ", pre2);
+    sprintf(p22, "%s         | ", pre2);
+    sprintf(p31, "%s         L ", pre2);
     sprintf(p32, "%s           ", pre2);
     debug_node(node->cond, p11, p12);
     debug_node(node->body, p21, p22);
@@ -375,16 +375,16 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_BLOCK:
     for (int i = 0; i < node->children->len; i++) {
       if (node->children->len == 1) {
-        sprintf(p11, "%sBLOCK ──── ", pre1);
+        sprintf(p11, "%sBLOCK ---- ", pre1);
         sprintf(p12, "%s           ", pre2);
       } else if (i == 0) {
-        sprintf(p11, "%sBLOCK ───┬ ", pre1);
-        sprintf(p12, "%s         │ ", pre2);
+        sprintf(p11, "%sBLOCK ---+ ", pre1);
+        sprintf(p12, "%s         | ", pre2);
       } else if (i != node->children->len - 1) {
-        sprintf(p11, "%s         ├ ", pre2);
-        sprintf(p12, "%s         │ ", pre2);
+        sprintf(p11, "%s         L ", pre2);
+        sprintf(p12, "%s         | ", pre2);
       } else {
-        sprintf(p11, "%s         └ ", pre2);
+        sprintf(p11, "%s         L ", pre2);
         sprintf(p12, "%s           ", pre2);
       }
       debug_node(vec_get(node->children, i), p11, p12);
@@ -394,16 +394,16 @@ void debug_node(Node *node, char *pre1, char *pre2) {
   case ND_CALL:
     for (int i = 0; i < node->children->len; i++) {
       if (node->children->len == 1) {
-        sprintf(p11, "%sCAL(%s) ─ ", pre1, type);
+        sprintf(p11, "%sCAL(%s) - ", pre1, type);
         sprintf(p12, "%s           ", pre2);
       } else if (i == 0) {
-        sprintf(p11, "%sCAL(%s) ┬ ", pre1, type);
-        sprintf(p12, "%s         │ ", pre2);
+        sprintf(p11, "%sCAL(%s) + ", pre1, type);
+        sprintf(p12, "%s         | ", pre2);
       } else if (i != node->children->len - 1) {
-        sprintf(p11, "%s         ├ ", pre2);
-        sprintf(p12, "%s         │ ", pre2);
+        sprintf(p11, "%s         L ", pre2);
+        sprintf(p12, "%s         | ", pre2);
       } else {
-        sprintf(p11, "%s         └ ", pre2);
+        sprintf(p11, "%s         L ", pre2);
         sprintf(p12, "%s           ", pre2);
       }
       debug_node(vec_get(node->children, i), p11, p12);
@@ -411,15 +411,15 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_DOT:
-    fprintf(stderr, "%sDOT ─────┬ %s\n", pre1, node->name);
-    sprintf(p21, "%s         └ ", pre2);
+    fprintf(stderr, "%sDOT -----+ %s\n", pre1, node->name);
+    sprintf(p21, "%s         L ", pre2);
     sprintf(p22, "%s           ", pre2);
     debug_node(node->lhs, p21, p22);
     return;
 
   case ND_ARROW:
-    fprintf(stderr, "%sARROW ───┬ %s\n", pre1, node->name);
-    sprintf(p21, "%s         └ ", pre2);
+    fprintf(stderr, "%sARROW ---+ %s\n", pre1, node->name);
+    sprintf(p21, "%s         L ", pre2);
     sprintf(p22, "%s           ", pre2);
     debug_node(node->lhs, p21, p22);
     return;
@@ -447,9 +447,9 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     error("failed to visualize node: %d", node->kind);
   }
 
-  sprintf(p11, "%s%s(%s) ┬ ", pre1, label, type);
-  sprintf(p12, "%s         │ ", pre2);
-  sprintf(p21, "%s         └ ", pre2);
+  sprintf(p11, "%s%s(%s) + ", pre1, label, type);
+  sprintf(p12, "%s         | ", pre2);
+  sprintf(p21, "%s         L ", pre2);
   sprintf(p22, "%s           ", pre2);
   debug_node(node->lhs, p11, p12);
   debug_node(node->rhs, p21, p22);
