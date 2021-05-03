@@ -636,6 +636,8 @@ Node *stmt() {
   // Switch statement
   if (consume_token(TK_SWITCH)) {
     Node *node = new_node(ND_SWITCH, NULL, NULL);
+    node->labels = new_map();
+
     sw_scope = new_switch_scope(sw_scope, node);
     br_scope = new_break_scope(br_scope, node);
 
@@ -656,6 +658,12 @@ Node *stmt() {
     node->val = labels++;
     node->lhs = expr();
     expect(":");
+
+    if (node->lhs->kind != ND_NUM) error("constant value expected in case statement");
+    char *label = calloc(1, sizeof(char) * 10);
+    sprintf(label, ".Lcase%03d", node->val);
+    map_put(sw_scope->node->labels, label, &(node->lhs->val));
+
     return node;
   }
 
@@ -664,6 +672,11 @@ Node *stmt() {
     Node *node = new_node(ND_DEFAULT, NULL, NULL);
     node->val = labels++;
     expect(":");
+
+    char *label = calloc(1, sizeof(char) * 13);
+    sprintf(label, ".Ldefault%03d", node->val);
+    map_put(sw_scope->node->labels, label, NULL);
+
     return node;
   }
 

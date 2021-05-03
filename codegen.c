@@ -310,6 +310,7 @@ void gen(Node *node) {
         printf("  jmp %s\n", label);
       }
     }
+    printf("  jmp .Lend%03d\n", node->val);
     gen(node->body);
     printf(".Lend%03d:\n", node->val);
     printf("  push 0\n");  // dummy

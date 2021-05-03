@@ -503,6 +503,21 @@ int main() {
     assert("break_ans", break_ans, 15);
   }
 
+  {
+    int i = 0;
+    int break_for_ans = 0;
+    switch (i) {
+      for (int j = 0; j < 5; j++) {
+        case 0:
+          break_for_ans++;
+          break;
+      }
+      case 1:
+        break_for_ans += 10;
+    }
+    assert("break_for_ans", break_for_ans, 11);
+  }
+
   return 0;
 }
 
