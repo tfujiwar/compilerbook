@@ -6,6 +6,8 @@
 #define Y Z * 5
 #define Z (Y + 7)
 
+#define FUNC(A,B,C) A+B+C
+
 // this is line comment
 
 /*
@@ -531,6 +533,7 @@ int main() {
     int y = 2;
     assert("ONE", ONE, 1);
     assert("X_PLUS_Y", X_PLUS_Y, 3);
+    assert("FUNC(1,2,3)", FUNC(1,2,3), 6);
   }
 
   return 0;

@@ -219,6 +219,7 @@ struct Macro {
   Token *from;
   Token *to;
   bool used;
+  Vector *params;
 };
 
 char *read_file(char *path);
