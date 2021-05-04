@@ -98,7 +98,7 @@ Token *replace_macro_params(Token *from, Token *to, Macro *macro) {
   from = copy_tokens(from);
   to = copy_tokens(to);
 
-  Token *from_cur = from->next->next;
+  Token *from_cur = from->next->next;  // MACRO -> ( -> PARAM1
   if (!from_cur) error("failed to replace macro params");
 
   Token head;
@@ -111,14 +111,16 @@ Token *replace_macro_params(Token *from, Token *to, Macro *macro) {
     // Move from_cur to the next param
     Token *param_start = from_cur;
     int depth = 0;
+
+    if (strcmp(from_cur->str, "(") == 0) depth++;
     while (from_cur->next) {
       if (strcmp(from_cur->next->str, "(") == 0) depth++;
       else if (depth != 0 && strcmp(from_cur->next->str, ")") == 0) depth--;
-      else if (depth == 0 && (strcmp(from_cur->next->str, ")") == 0) || (strcmp(from_cur->next->str, ",") == 0)) break;
+      else if (depth == 0 && (strcmp(from_cur->next->str, ")") == 0 || strcmp(from_cur->next->str, ",") == 0)) break;
       from_cur = from_cur->next;
     }
     Token *param_end = from_cur;
-    from_cur = from_cur->next->next;
+    from_cur = from_cur->next->next;  // ... -> , -> PARAM2 -> ...
 
     // Replace the param
     Token *to_cur = &head;
