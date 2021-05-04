@@ -158,8 +158,6 @@ Token *apply_macros(Token *token, Token *until) {
       if (strcmp(tok->next->str, m->from->str) != 0) continue;
 
       Token *replace_begin = copy_tokens(m->to);
-      Token *replace_end = replace_begin;
-      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
 
       // begin -> MACRO -> end
       Token *begin = tok;
@@ -179,13 +177,20 @@ Token *apply_macros(Token *token, Token *until) {
         end = end->next;  // MACRO -> ( -> ... -> ... -> ) -> ...
       }
 
+      Token *replace_end = replace_begin;
+      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+
       // Apply macros to replacing tokens
       m->used = true;
       replace_begin = apply_macros(replace_begin, replace_end);
       m->used = false;
 
+      replace_end = replace_begin;
+      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+
       replace_tokens(begin, end, replace_begin, replace_end);
       tok = replace_end;
+
       replaced = true;
       break;
     }
