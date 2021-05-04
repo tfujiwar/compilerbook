@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
   token = tokenize(user_input);
   debug_token(token);
 
-  token = apply_macros();
+  token = apply_macros(token, NULL);
   debug_token(token);
 
   locals = calloc(1, sizeof(LVar));

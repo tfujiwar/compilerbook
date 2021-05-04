@@ -1,5 +1,27 @@
 #include "mycc.h"
 
+Token *copy_tokens(Token *token) {
+  Token head;
+  head.next = NULL;
+
+  Token *src = token;
+  Token *prev = &head;
+
+  while (src) {
+    Token *dst = calloc(1, sizeof(Token));
+    dst->kind = src->kind;
+    dst->at = src->at;
+    dst->str = src->str;
+    dst->val = src->val;
+    prev->next = dst;
+
+    src = src->next;
+    prev = prev->next;
+  }
+
+  return head.next;
+}
+
 void preprocess(char *user_input) {
   char *p = user_input;
   Token head;
@@ -43,26 +65,41 @@ void preprocess(char *user_input) {
   }
 }
 
-Token *apply_macros() {
+Token *apply_macros(Token *token, Token *until) {
   Token head;
   head.next = token;
   Token *prev = &head;
   Token *tok = token;
   while (tok) {
     if (tok->kind == TK_IDENT) {
+      bool replaced = false;
+
       for (int i = 0; i < macros->keys->len; i++) {
         Macro *m = macros->vals->data[i];
+        if (m->used) continue;
+
         if (strcmp(tok->str, m->from->str) == 0) {
-          Token *end = m->to;
+          Token *to = copy_tokens(m->to);
+          Token *end = to;
           while (end->next && end->next->kind != TK_EOF) end = end->next;
-          prev->next = m->to;
+
+          // Recurse
+          m->used = true;
+          to = apply_macros(to, end->next);
+          m->used = false;
+
+          // Replace
+          prev->next = to;
           end->next = tok->next;
 
           prev = end;
           tok = end->next;
-          continue;
+
+          replaced = true;
+          break;
         }
       }
+      if (replaced) continue;
     }
     prev = tok;
     tok = tok->next;

@@ -218,6 +218,7 @@ struct Macro {
   enum {OBJECT, FUNCTION} ty;
   Token *from;
   Token *to;
+  bool used;
 };
 
 char *read_file(char *path);
@@ -239,7 +240,7 @@ bool at_eof();
 bool is_ident_char(char c);
 
 void preprocess(char *user_input);
-Token *apply_macros();
+Token *apply_macros(Token *token, Token *until);
 
 Token *tokenize();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);

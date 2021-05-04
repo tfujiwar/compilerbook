@@ -1,5 +1,10 @@
 #define ONE 1
 #define X_PLUS_Y (x+y)
+#define X_PLUS_ONE (x+ONE)
+
+#define X Y >= Z
+#define Y Z * 5
+#define Z (Y + 7)
 
 // this is line comment
 
