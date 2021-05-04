@@ -1,3 +1,6 @@
+#define ONE 1
+#define X_PLUS_Y (x+y)
+
 // this is line comment
 
 /*
@@ -516,6 +519,13 @@ int main() {
         break_for_ans += 10;
     }
     assert("break_for_ans", break_for_ans, 11);
+  }
+
+  {
+    int x = 1;
+    int y = 2;
+    assert("ONE", ONE, 1);
+    assert("X_PLUS_Y", X_PLUS_Y, 3);
   }
 
   return 0;

@@ -533,3 +533,15 @@ void debug_functions() {
     debug("");
   }
 }
+
+void debug_macros() {
+  for (int i = 0; i < macros->keys->len; i++) {
+    Macro *macro = macros->vals->data[i];
+    debug("%s:", macros->keys->data[i]);
+    fprintf(stderr, "- from : ");
+    debug_token(macro->from);
+    debug("");
+    fprintf(stderr, "- to   : ");
+    debug_token(macro->to);
+  }
+}

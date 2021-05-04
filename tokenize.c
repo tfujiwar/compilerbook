@@ -16,7 +16,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   return tok;
 }
 
-Token *tokenize() {
+Token *tokenize(char *user_input) {
   char *p = user_input;
   Token head;
   head.next = NULL;
@@ -37,6 +37,12 @@ Token *tokenize() {
   while (*p) {
     if (isspace(*p)) {
       p++;
+      continue;
+    }
+
+    if (*p == '#') {
+      p++;
+      while (*p != '\n' && *p != '\0') p++;
       continue;
     }
 

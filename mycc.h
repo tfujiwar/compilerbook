@@ -211,6 +211,15 @@ struct BreakScope {
   BreakScope *parent;
 };
 
+typedef struct Macro Macro;
+
+struct Macro {
+  char *name;
+  enum {OBJECT, FUNCTION} ty;
+  Token *from;
+  Token *to;
+};
+
 char *read_file(char *path);
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
@@ -220,6 +229,7 @@ void debug_node(Node *node, char *pre1, char *pre2);
 void debug_type(Type *type);
 void debug_scope(Scope *scope);
 void debug_functions();
+void debug_macros();
 char *substring(char *str, int len);
 
 bool consume(char *op);
@@ -227,6 +237,9 @@ void expect(char *op);
 int expect_number();
 bool at_eof();
 bool is_ident_char(char c);
+
+void preprocess(char *user_input);
+Token *apply_macros();
 
 Token *tokenize();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);
@@ -284,3 +297,4 @@ extern Scope *global;
 extern Scope *scope;
 extern SwitchScope *sw_scope;
 extern BreakScope *br_scope;
+extern Map *macros;

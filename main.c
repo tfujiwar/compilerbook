@@ -11,7 +11,9 @@ Scope *global;
 Scope *scope;
 SwitchScope *sw_scope;
 BreakScope *br_scope;
+Map *macros;
 int labels = 0;
+
 
 int main(int argc, char **argv) {
   if (argc == 2) {
@@ -24,7 +26,14 @@ int main(int argc, char **argv) {
     error("incorrect number of argument");
   }
 
-  token = tokenize();
+  macros = new_map();
+  preprocess(user_input);
+  debug_macros();
+
+  token = tokenize(user_input);
+  debug_token(token);
+
+  token = apply_macros();
   debug_token(token);
 
   locals = calloc(1, sizeof(LVar));
