@@ -89,6 +89,11 @@ void preprocess(char *user_input) {
   }
 }
 
+void replace_tokens(Token *begin, Token *end, Token *replace_begin, Token *replace_end) {
+  begin->next = replace_begin;
+  replace_end->next = end;
+}
+
 Token *replace_macro_params(Token *from, Token *to, Macro *macro) {
   from = copy_tokens(from);
   to = copy_tokens(to);
@@ -132,53 +137,59 @@ Token *replace_macro_params(Token *from, Token *to, Macro *macro) {
 Token *apply_macros(Token *token, Token *until) {
   Token head;
   head.next = token;
-  Token *prev = &head;
-  Token *tok = token;
-  while (tok) {
-    if (tok->kind == TK_IDENT) {
-      bool replaced = false;
+  Token *tok = &head;
 
-      for (int i = 0; i < macros->keys->len; i++) {
-        Macro *m = macros->vals->data[i];
-        if (m->used) continue;
-
-        if (strcmp(tok->str, m->from->str) == 0) {
-          Token *to = copy_tokens(m->to);
-
-          if (m->ty == FUNCTION) {
-            to = replace_macro_params(tok, to, m);
-            int depth = 0;
-            tok = tok->next->next;  // consume (
-            while (tok) {
-              if (strcmp(tok->str, "(") == 0) depth++;
-              else if (depth != 0 && strcmp(tok->str, ")") == 0) depth--;
-              else if (depth == 0 && strcmp(tok->str, ")") == 0) break;
-              tok = tok->next;
-            }
-          }
-
-          Token *end = to;
-          while (end->next && end->next->kind != TK_EOF) end = end->next;
-
-          // Recurse
-          m->used = true;
-          to = apply_macros(to, end->next);
-          m->used = false;
-
-          // Replace
-          prev->next = to;
-          end->next = tok->next;
-
-          prev = end;
-          tok = end->next;
-
-          replaced = true;
-          break;
-        }
-      }
-      if (replaced) continue;
+  // For all tokens
+  while(tok && tok->next && tok != until) {
+    if (tok->next->kind != TK_IDENT) {
+      tok = tok->next;
+      continue;
     }
-    prev = tok;
+
+    // For all macros
+    bool replaced = false;
+    for (int i = 0; i < macros->keys->len; i++) {
+      Macro *m = macros->vals->data[i];
+
+      // Skip if macro is already applied
+      if (m->used) continue;
+
+      // Skip if macro doesn't match
+      if (strcmp(tok->next->str, m->from->str) != 0) continue;
+
+      Token *replace_begin = copy_tokens(m->to);
+      Token *replace_end = replace_begin;
+      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+
+      // begin -> MACRO -> end
+      Token *begin = tok;
+      Token *end = tok->next->next;
+
+      if (m->ty == FUNCTION) {
+        replace_begin = replace_macro_params(tok->next, replace_begin, m);
+
+        int depth = 0;
+        end = tok->next->next->next;  // tok -> MACRO -> ( -> PARAM1
+
+        for (; end; end = end->next) {
+          if (strcmp(end->str, "(") == 0) depth++;
+          else if (depth != 0 && strcmp(end->str, ")") == 0) depth--;
+          else if (depth == 0 && strcmp(end->str, ")") == 0) break;
+        }
+        end = end->next;  // MACRO -> ( -> ... -> ... -> ) -> ...
+      }
+
+      // Apply macros to replacing tokens
+      m->used = true;
+      replace_begin = apply_macros(replace_begin, replace_end);
+      m->used = false;
+
+      replace_tokens(begin, end, replace_begin, replace_end);
+      tok = replace_end;
+      replaced = true;
+      break;
+    }
+    if (replaced) continue;
     tok = tok->next;
   }
 

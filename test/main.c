@@ -8,6 +8,15 @@
 
 #define FUNC(A,B,C) A+B+C
 
+// #define foo foo a bar b baz c
+// #define bar foo 1
+// #define baz bar 2
+// % foo %  // foo a foo 1 b foo 1 2 c
+
+// #define foo(a, b) foo a bar str(b)
+// #define bar foo bar 1
+// % foo(bar, (1, 2, 3)) %  // foo foo bar 1 foo bar 1 str((1, 2, 3))
+
 // this is line comment
 
 /*
