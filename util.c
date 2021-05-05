@@ -171,6 +171,9 @@ void debug_token(Token *token) {
     case TK_SIZEOF:
       fprintf(stderr, "SIZEOF ");
       break;
+    case TK_DEFINED:
+      fprintf(stderr, "DEFINED ");
+      break;
     case TK_STRING:
       fprintf(stderr, "STRING ");
       break;

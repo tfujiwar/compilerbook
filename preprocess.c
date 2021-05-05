@@ -120,9 +120,9 @@ Token *replace_defined(Token *token) {
     }
 
     // move cur to "defined"
+    Token *begin = cur;
     cur = cur->next;
 
-    Token *begin = cur;
     Token *end;
     char *name;
 
@@ -136,10 +136,12 @@ Token *replace_defined(Token *token) {
 
     Token *replace;
     if (map_get(macros, name)) {
-      replace = new_token(TK_NUM, &head, "1", 1);
+      Token dummy;
+      replace = new_token(TK_NUM, &dummy, "1", 1);
       replace->val = 1;
     } else {
-      replace = new_token(TK_NUM, &head, "0", 1);
+      Token dummy;
+      replace = new_token(TK_NUM, &dummy, "0", 1);
       replace->val = 0;
     }
 
@@ -254,6 +256,37 @@ char* preprocess(char *user_input) {
 
       } else {
         if_block->active = false;
+      }
+
+      p = eol + 1;
+      continue;
+    }
+
+    // elif directive
+    if (strncmp(p, "elif", 4) == 0 && *(p+4) == ' ') {
+      p += 4;
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+
+      if (if_block->active) {
+        if (!if_block->true_found) {
+          token = tokenize(substring(p, eol - p + 1));
+          token = replace_defined(token);
+          token = apply_macros(token, NULL);
+          Node *node = conditional();
+
+          if (eval_node(node)) {
+            if_block->true_found = true;
+            output_enabled = true;
+          } else {
+            if_block->true_found = false;
+            output_enabled = false;
+          }
+
+        } else {
+          output_enabled = false;
+        }
       }
 
       p = eol + 1;

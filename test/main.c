@@ -654,6 +654,43 @@ int main() {
     assert("if_macro_calc", if_defined, 1);
   }
 
+  {
+    int if_elif_macro = 0;
+#if defined ONE
+    if_elif_macro += 1;
+#elif !defined NOTHING
+    if_elif_macro += 2;
+#else
+    if_elif_macro += 4;
+#endif
+    assert("if_elif_macro", if_elif_macro, 1);
+  }
+
+  {
+    int if_elif_macro = 0;
+#if !defined ONE
+    if_elif_macro += 1;
+#elif !defined NOTHING
+    if_elif_macro += 2;
+#else
+    if_elif_macro += 4;
+#endif
+    assert("if_elif_macro", if_elif_macro, 2);
+  }
+
+
+  {
+    int if_elif_macro = 0;
+#if !defined ONE
+    if_elif_macro += 1;
+#elif defined NOTHING
+    if_elif_macro += 2;
+#else
+    if_elif_macro += 4;
+#endif
+    assert("if_elif_macro", if_elif_macro, 4);
+  }
+
   return 0;
 }
 
