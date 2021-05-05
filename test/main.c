@@ -548,17 +548,23 @@ int main() {
   {
     int ifdef = 0;
 #ifdef ONE
-    ifdef += 1;
-#endif
+    ifdef += 1;  // added
+#else
     ifdef += 2;
+#endif
+    ifdef += 4;  // added
 #ifdef NOTHING
-    ifdef += 4;
+    ifdef += 8;
+#else
+    ifdef += 16;  // added
 #endif
 #ifndef NOTHING
-    ifdef += 8;
+    ifdef += 32;  // added
+#else
+    ifdef += 64;
 #endif
-    ifdef += 16;
-    assert("ifdef", ifdef, 27);
+    ifdef += 128;  // added
+    assert("ifdef", ifdef, 181);
   }
 
   return 0;

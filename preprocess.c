@@ -159,6 +159,17 @@ char* preprocess(char *user_input) {
       continue;
     }
 
+    if (strncmp(p, "else", 4) == 0 && isspace(*(p+4))) {
+      p += 4;
+      output_enabled = !if_block->true_found;
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+      p = eol + 1;
+
+      continue;
+    }
+
     if (strncmp(p, "endif", 5) == 0 && isspace(*(p+5))) {
       p += 5;
 
