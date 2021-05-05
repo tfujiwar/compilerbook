@@ -8,13 +8,6 @@ struct IfBlock {
   IfBlock* parent;
 };
 
-typedef struct Source Source;
-
-struct Source {
-  char *cur;
-  Source *parent;
-};
-
 bool file_exists(char *filename) {
   FILE *file = fopen(filename, "r");
   if (file) {
@@ -30,10 +23,11 @@ IfBlock *new_if_block(IfBlock *parent) {
   return if_block;
 }
 
-Source *new_source(Source *parent, char* cur) {
+Source *new_source(Source *parent, char* filename) {
   Source *source = calloc(1, sizeof(Source));
   source->parent = parent;
-  source->cur = cur;
+  source->head = read_file(filename);
+  source->cur = source->head;
   return source;
 }
 
@@ -174,15 +168,15 @@ Token *replace_defined(Token *token) {
   return head.next;
 }
 
-char* preprocess(char *user_input) {
+char* preprocess(Source *src) {
   Vector *include_paths = new_vec();
   vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include");
   vec_push(include_paths, "/usr/local/include");
   vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include-fixed");
   vec_push(include_paths, "/usr/include");
 
-  char *output = calloc(strlen(user_input), sizeof(char));
-  char *p = user_input;
+  char *output = calloc(strlen(src->head), sizeof(char));
+  char *p = src->head;
   char *q = output;
 
   Token head;
@@ -190,7 +184,7 @@ char* preprocess(char *user_input) {
 
   bool output_enabled = true;
   IfBlock *if_block = NULL;
-  Source *source = new_source(NULL, p);
+  Source *source = src;
 
   while (true) {
     // Return to parent source
@@ -248,7 +242,7 @@ char* preprocess(char *user_input) {
       p = eol + 1;
       source->cur = p;
 
-      source = new_source(source, read_file(filename));
+      source = new_source(source, filename);
       p = source->cur;
 
       continue;

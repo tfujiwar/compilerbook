@@ -1,7 +1,5 @@
 #include "mycc.h"
 
-char *filename;
-char *user_input;
 Token *token;
 Node *code[100];
 LVar *locals;
@@ -16,12 +14,9 @@ int labels = 0;
 
 
 int main(int argc, char **argv) {
+  Source *src;
   if (argc == 2) {
-    filename = "input";
-    user_input = argv[1];
-  } else if (argc == 3 && strcmp(argv[1], "-f") == 0) {
-    filename = argv[2];
-    user_input = read_file(argv[2]);
+    src = new_source(NULL, argv[1]);
   } else {
     error("incorrect number of argument");
   }
@@ -37,7 +32,7 @@ int main(int argc, char **argv) {
   sw_scope = new_switch_scope(NULL, NULL);
   br_scope = new_break_scope(NULL, NULL);
 
-  user_input = preprocess(user_input);
+  char *user_input = preprocess(src);
   debug_macros();
 
   token = tokenize(user_input);

@@ -41,24 +41,24 @@ void error_at(char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
 
-  char *begin = loc;
-  while (user_input < begin && begin[-1] != '\n')
-    begin--;
+  // char *begin = loc;
+  // while (user_input < begin && begin[-1] != '\n')
+  //   begin--;
 
-  char *end = loc;
-  while (*end != '\0' && *end != '\n')
-    end++;
+  // char *end = loc;
+  // while (*end != '\0' && *end != '\n')
+  //   end++;
 
-  int line = 1;
-  for (char *p = user_input; p < begin; p++)
-    if (*p == '\n') line++;
+  // int line = 1;
+  // for (char *p = user_input; p < begin; p++)
+  //   if (*p == '\n') line++;
 
-  int indent = fprintf(stderr, "%s:%d: ", filename, line);
-  fprintf(stderr, "%.*s\n", (int)(end - begin), begin);
+  // int indent = fprintf(stderr, "%s:%d: ", filename, line);
+  // fprintf(stderr, "%.*s\n", (int)(end - begin), begin);
 
-  int pos = loc - begin + indent;
-  fprintf(stderr, "%*s", pos, " ");
-  fprintf(stderr, "^ ");
+  // int pos = loc - begin + indent;
+  // fprintf(stderr, "%*s", pos, " ");
+  // fprintf(stderr, "^ ");
 
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");

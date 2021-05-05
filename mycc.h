@@ -102,6 +102,14 @@ typedef enum {
   ND_ARROW,
 } NodeKind;
 
+typedef struct Source Source;
+
+struct Source {
+  char *head;
+  char *cur;
+  Source *parent;
+};
+
 typedef struct Member Member;
 
 struct Member {
@@ -235,13 +243,15 @@ void debug_functions();
 void debug_macros();
 char *substring(char *str, int len);
 
+Source *new_source(Source *parent, char* cur);
+
 bool consume(char *op);
 void expect(char *op);
 int expect_number();
 bool at_eof();
 bool is_ident_char(char c);
 
-char* preprocess(char *user_input);
+char* preprocess(Source *src);
 Token *apply_macros(Token *token, Token *until);
 
 Token *tokenize();
@@ -288,8 +298,6 @@ void gen(Node *node);
 void gen_lval(Node *node);
 void gen_string();
 
-extern char *filename;
-extern char *user_input;
 extern Token *token;
 extern Node *code[];
 extern LVar *locals;
