@@ -559,12 +559,20 @@ int main() {
     ifdef += 16;  // added
 #endif
 #ifndef NOTHING
+#  ifdef ONE
     ifdef += 32;  // added
-#else
+#  else
     ifdef += 64;
+#  endif
+#else
+#  ifdef ONE
+    ifdef += 128;
+#  else
+    ifdef += 256;
+#  endif
 #endif
-    ifdef += 128;  // added
-    assert("ifdef", ifdef, 181);
+    ifdef += 512;  // added
+    assert("ifdef", ifdef, 565);
   }
 
   return 0;

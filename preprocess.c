@@ -3,6 +3,7 @@
 typedef struct IfBlock IfBlock;
 
 struct IfBlock {
+  bool active;
   bool true_found;
   IfBlock* parent;
 };
@@ -121,16 +122,24 @@ char* preprocess(char *user_input) {
       continue;
     }
 
+    // ifdef directive
     if (strncmp(p, "ifdef", 5) == 0 && *(p+5) == ' ') {
       p += 5;
       if_block = new_if_block(if_block);
 
-      if (map_get(macros, next_ident(p))) {
-        if_block->true_found = true;
-        output_enabled = true;
+      if (output_enabled) {
+        if_block->active = true;
+
+        if (map_get(macros, next_ident(p))) {
+          if_block->true_found = true;
+          output_enabled = true;
+        } else {
+          if_block->true_found = false;
+          output_enabled = false;
+        }
+
       } else {
-        if_block->true_found = false;
-        output_enabled = false;
+        if_block->active = false;
       }
 
       char *eol = strchr(p, '\n');
@@ -140,16 +149,24 @@ char* preprocess(char *user_input) {
       continue;
     }
 
+    // ifndef directive
     if (strncmp(p, "ifndef", 6) == 0 && *(p+6) == ' ') {
       p += 6;
       if_block = new_if_block(if_block);
 
-      if (!map_get(macros, next_ident(p))) {
-        if_block->true_found = true;
-        output_enabled = true;
+      if (output_enabled) {
+        if_block->active = true;
+
+        if (!map_get(macros, next_ident(p))) {
+          if_block->true_found = true;
+          output_enabled = true;
+        } else {
+          if_block->true_found = false;
+          output_enabled = false;
+        }
+
       } else {
-        if_block->true_found = false;
-        output_enabled = false;
+        if_block->active = false;
       }
 
       char *eol = strchr(p, '\n');
@@ -159,9 +176,12 @@ char* preprocess(char *user_input) {
       continue;
     }
 
+    // else directive
     if (strncmp(p, "else", 4) == 0 && isspace(*(p+4))) {
       p += 4;
-      output_enabled = !if_block->true_found;
+      if (if_block->active) {
+        output_enabled = !if_block->true_found;
+      }
 
       char *eol = strchr(p, '\n');
       if (!eol) break;
@@ -170,10 +190,14 @@ char* preprocess(char *user_input) {
       continue;
     }
 
+    // endif directive
     if (strncmp(p, "endif", 5) == 0 && isspace(*(p+5))) {
       p += 5;
 
-      output_enabled = true;
+      if (if_block->active) {
+        output_enabled = true;
+      }
+
       if_block = if_block->parent;
 
       char *eol = strchr(p, '\n');
