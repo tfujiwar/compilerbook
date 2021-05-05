@@ -168,6 +168,12 @@ Token *tokenize(char *user_input) {
       continue;
     }
 
+    if (memcmp(p, "defined", 7) == 0 && !is_ident_char(p[7])) {
+      cur = new_token(TK_DEFINED, cur, p, 7);
+      p += 7;
+      continue;
+    }
+
     if (memcmp(p, "struct", 6) == 0 && !is_ident_char(p[6])) {
       cur = new_token(TK_STRUCT, cur, p, 6);
       p += 6;

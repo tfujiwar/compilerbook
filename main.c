@@ -27,15 +27,6 @@ int main(int argc, char **argv) {
   }
 
   macros = new_map();
-  user_input = preprocess(user_input);
-  debug_macros();
-
-  token = tokenize(user_input);
-  debug_token(token);
-
-  token = apply_macros(token, NULL);
-  debug_token(token);
-
   locals = calloc(1, sizeof(LVar));
   locals->offset = 0;
   functions = new_map();
@@ -45,6 +36,16 @@ int main(int argc, char **argv) {
   scope = global;
   sw_scope = new_switch_scope(NULL, NULL);
   br_scope = new_break_scope(NULL, NULL);
+
+  user_input = preprocess(user_input);
+  debug_macros();
+
+  token = tokenize(user_input);
+  debug_token(token);
+
+  token = apply_macros(token, NULL);
+  debug_token(token);
+
   program();
 
   printf(".intel_syntax noprefix\n");

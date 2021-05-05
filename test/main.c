@@ -643,6 +643,17 @@ int main() {
     assert("if_macro_calc", if_macro_calc, 65453);
   }
 
+  {
+    int if_defined = 0;
+#if defined ONE
+    if_defined += 1;
+#endif
+#if defined NOTHING
+    if_defined += 2;
+#endif
+    assert("if_macro_calc", if_defined, 1);
+  }
+
   return 0;
 }
 

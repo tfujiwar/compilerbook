@@ -52,6 +52,7 @@ typedef enum {
   TK_STRUCT,
   TK_ENUM,
   TK_TYPEDEF,
+  TK_DEFINED,
 } TokenKind;
 
 typedef enum {

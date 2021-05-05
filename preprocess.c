@@ -43,6 +43,11 @@ Token *copy_tokens(Token *token) {
   return head.next;
 }
 
+void replace_tokens(Token *begin, Token *end, Token *replace_begin, Token *replace_end) {
+  begin->next = replace_begin;
+  replace_end->next = end;
+}
+
 int eval_node(Node *node) {
   switch (node->kind) {
   case ND_NUM:
@@ -102,6 +107,46 @@ int eval_node(Node *node) {
   default:
     error("not supported operator in macro conditions");
   }
+}
+
+Token *replace_defined(Token *token) {
+  Token head;
+  head.next = token;
+  Token *cur = &head;
+  while (cur->next) {
+    if (cur->next->kind != TK_DEFINED) {
+      cur = cur->next;
+      continue;
+    }
+
+    // move cur to "defined"
+    cur = cur->next;
+
+    Token *begin = cur;
+    Token *end;
+    char *name;
+
+    if (cur->next->kind == TK_IDENT) {
+      name = cur->next->str;
+      end = cur->next->next;  // next to macro_name
+    } else {
+      name = cur->next->next->str;
+      end = cur->next->next->next->next;  // next to ")"
+    }
+
+    Token *replace;
+    if (map_get(macros, name)) {
+      replace = new_token(TK_NUM, &head, "1", 1);
+      replace->val = 1;
+    } else {
+      replace = new_token(TK_NUM, &head, "0", 1);
+      replace->val = 0;
+    }
+
+    replace_tokens(begin, end, replace, replace);
+    cur = replace;
+  }
+  return head.next;
 }
 
 char* preprocess(char *user_input) {
@@ -195,6 +240,7 @@ char* preprocess(char *user_input) {
         if_block->active = true;
 
         token = tokenize(substring(p, eol - p + 1));
+        token = replace_defined(token);
         token = apply_macros(token, NULL);
         Node *node = conditional();
 
@@ -302,11 +348,6 @@ char* preprocess(char *user_input) {
     error_at(p, "failed to tokenize macro");
   }
   return output;
-}
-
-void replace_tokens(Token *begin, Token *end, Token *replace_begin, Token *replace_end) {
-  begin->next = replace_begin;
-  replace_end->next = end;
 }
 
 Token *replace_macro_params(Token *from, Token *to, Macro *macro) {
