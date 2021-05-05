@@ -554,8 +554,11 @@ int main() {
 #ifdef NOTHING
     ifdef += 4;
 #endif
+#ifndef NOTHING
     ifdef += 8;
-    assert("ifdef", ifdef, 11);
+#endif
+    ifdef += 16;
+    assert("ifdef", ifdef, 27);
   }
 
   return 0;

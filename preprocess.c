@@ -123,9 +123,28 @@ char* preprocess(char *user_input) {
 
     if (strncmp(p, "ifdef", 5) == 0 && *(p+5) == ' ') {
       p += 5;
-
       if_block = new_if_block(if_block);
+
       if (map_get(macros, next_ident(p))) {
+        if_block->true_found = true;
+        output_enabled = true;
+      } else {
+        if_block->true_found = false;
+        output_enabled = false;
+      }
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+      p = eol + 1;
+
+      continue;
+    }
+
+    if (strncmp(p, "ifndef", 6) == 0 && *(p+6) == ' ') {
+      p += 6;
+      if_block = new_if_block(if_block);
+
+      if (!map_get(macros, next_ident(p))) {
         if_block->true_found = true;
         output_enabled = true;
       } else {
