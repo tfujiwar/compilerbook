@@ -1,5 +1,25 @@
 #include "mycc.h"
 
+typedef struct IfBlock IfBlock;
+
+struct IfBlock {
+  bool true_found;
+  IfBlock* parent;
+};
+
+IfBlock *new_if_block(IfBlock *parent) {
+  IfBlock *if_block = calloc(1, sizeof(IfBlock));
+  if_block->parent = parent;
+  return if_block;
+}
+
+char *next_ident(char *cur) {
+  while (*cur == ' ') cur++;
+  char* begin = cur;
+  while (is_ident_char(*cur)) cur++;
+  return substring(begin, cur - begin);
+}
+
 Token *copy_tokens(Token *token) {
   Token head;
   head.next = NULL;
@@ -22,22 +42,38 @@ Token *copy_tokens(Token *token) {
   return head.next;
 }
 
-void preprocess(char *user_input) {
+char* preprocess(char *user_input) {
+  char *output = calloc(strlen(user_input), sizeof(char));
   char *p = user_input;
+  char *q = output;
+
   Token head;
   head.next = NULL;
 
+  bool output_enabled = true;
+  IfBlock *if_block = NULL;
+
   while (*p) {
+    // Not a macro directive
     if (*p != '#') {
       char *eol = strchr(p, '\n');
-      if (!eol) return;
-      p = eol + 1;
+      if (!eol) break;
+
+      int n = eol - p + 1;
+      if (output_enabled) {
+        memcpy(q, p, n);
+        q += n;
+      }
+
+      p += n;
       continue;
     }
 
+    // Read # and spaces
     p++;
     while (*p == ' ') p++;
 
+    // Define directive
     if (strncmp(p, "define", 6) == 0 && *(p+6) == ' ') {
       p += 6;
       while (*p == ' ') p++;
@@ -76,7 +112,7 @@ void preprocess(char *user_input) {
       while (isspace(*p)) p++;
 
       char *eol = strchr(p, '\n');
-      if (!eol) return;
+      if (!eol) break;
       macro->to = tokenize(substring(p, eol - p));
 
       map_put(macros, macro->name ,macro);
@@ -85,8 +121,41 @@ void preprocess(char *user_input) {
       continue;
     }
 
+    if (strncmp(p, "ifdef", 5) == 0 && *(p+5) == ' ') {
+      p += 5;
+
+      if_block = new_if_block(if_block);
+      if (map_get(macros, next_ident(p))) {
+        if_block->true_found = true;
+        output_enabled = true;
+      } else {
+        if_block->true_found = false;
+        output_enabled = false;
+      }
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+      p = eol + 1;
+
+      continue;
+    }
+
+    if (strncmp(p, "endif", 5) == 0 && isspace(*(p+5))) {
+      p += 5;
+
+      output_enabled = true;
+      if_block = if_block->parent;
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+      p = eol + 1;
+
+      continue;
+    }
+
     error_at(p, "failed to tokenize macro");
   }
+  return output;
 }
 
 void replace_tokens(Token *begin, Token *end, Token *replace_begin, Token *replace_end) {

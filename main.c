@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   }
 
   macros = new_map();
-  preprocess(user_input);
+  user_input = preprocess(user_input);
   debug_macros();
 
   token = tokenize(user_input);

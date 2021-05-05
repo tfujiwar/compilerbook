@@ -240,7 +240,7 @@ int expect_number();
 bool at_eof();
 bool is_ident_char(char c);
 
-void preprocess(char *user_input);
+char* preprocess(char *user_input);
 Token *apply_macros(Token *token, Token *until);
 
 Token *tokenize();

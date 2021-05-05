@@ -545,6 +545,19 @@ int main() {
     assert("FUNC(1,2,3)", FUNC(1,2,3), 9);
   }
 
+  {
+    int ifdef = 0;
+#ifdef ONE
+    ifdef += 1;
+#endif
+    ifdef += 2;
+#ifdef NOTHING
+    ifdef += 4;
+#endif
+    ifdef += 8;
+    assert("ifdef", ifdef, 11);
+  }
+
   return 0;
 }
 
