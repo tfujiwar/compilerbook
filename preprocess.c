@@ -8,10 +8,33 @@ struct IfBlock {
   IfBlock* parent;
 };
 
+typedef struct Source Source;
+
+struct Source {
+  char *cur;
+  Source *parent;
+};
+
+bool file_exists(char *filename) {
+  FILE *file = fopen(filename, "r");
+  if (file) {
+    fclose(file);
+    return true;
+  }
+  return false;
+}
+
 IfBlock *new_if_block(IfBlock *parent) {
   IfBlock *if_block = calloc(1, sizeof(IfBlock));
   if_block->parent = parent;
   return if_block;
+}
+
+Source *new_source(Source *parent, char* cur) {
+  Source *source = calloc(1, sizeof(Source));
+  source->parent = parent;
+  source->cur = cur;
+  return source;
 }
 
 char *next_ident(char *cur) {
@@ -152,6 +175,12 @@ Token *replace_defined(Token *token) {
 }
 
 char* preprocess(char *user_input) {
+  Vector *include_paths = new_vec();
+  vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include");
+  vec_push(include_paths, "/usr/local/include");
+  vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include-fixed");
+  vec_push(include_paths, "/usr/include");
+
   char *output = calloc(strlen(user_input), sizeof(char));
   char *p = user_input;
   char *q = output;
@@ -161,8 +190,17 @@ char* preprocess(char *user_input) {
 
   bool output_enabled = true;
   IfBlock *if_block = NULL;
+  Source *source = new_source(NULL, p);
 
-  while (*p) {
+  while (true) {
+    // Return to parent source
+    if (!*p) {
+      if (!source->parent) break;
+      source = source->parent;
+      p = source->cur;
+      continue;
+    }
+
     // Not a macro directive
     if (*p != '#') {
       char *eol = strchr(p, '\n');
@@ -181,6 +219,40 @@ char* preprocess(char *user_input) {
     // Read # and spaces
     p++;
     while (*p == ' ') p++;
+
+    // Include directive
+    if (strncmp(p, "include", 7) == 0 && (*(p+7) == ' ' || *(p+7) == '<' || *(p+7) == '"')) {
+      p += 7;
+      while (*p == ' ') p++;
+
+      char filename[64];
+
+      if (*p == '<') {
+        p++;
+        char *end = strchr(p, '>');
+        for (int i = 0; i < include_paths->len; i++) {
+          sprintf(filename, "%s/%s", include_paths->data[i], substring(p, end - p));
+          if (file_exists(filename)) break;
+        }
+
+      } else if (*p == '"') {
+        p++;
+        char *end = strchr(p, '"');
+        sprintf(filename, "%s", substring(p, end - p));
+
+      } else {
+        error("failed to parse include directive");
+      }
+
+      char *eol = strchr(p, '\n');
+      p = eol + 1;
+      source->cur = p;
+
+      source = new_source(source, read_file(filename));
+      p = source->cur;
+
+      continue;
+    }
 
     // Define directive
     if (strncmp(p, "define", 6) == 0 && *(p+6) == ' ') {

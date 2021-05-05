@@ -1,3 +1,5 @@
+#include "/src/test/common.h"
+
 #define ONE 1
 #define X_PLUS_Y (x+y)
 #define X_PLUS_ONE (x+ONE)
@@ -39,11 +41,6 @@ struct Struct {
 };
 
 int function(int, char, struct Struct *);
-
-int assert(char *msg, int a, int b) {
-  if (a != b) printf("%s: %d != %d\n", msg, a, b);
-  return 0;
-}
 
 int fii(int a, int b) {
   return a + b;
