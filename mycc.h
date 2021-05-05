@@ -304,7 +304,6 @@ extern LVar *locals;
 extern int labels;
 extern Map *functions;
 extern Map *strings;
-extern Scope *global;
 extern Scope *scope;
 extern SwitchScope *sw_scope;
 extern BreakScope *br_scope;

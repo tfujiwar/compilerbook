@@ -201,7 +201,8 @@ Token* preprocess(Source *src) {
 
       int n = eol - p + 1;
       if (output_enabled) {
-        token_cur->next = tokenize(substring(p, n));
+        Token *t = tokenize(substring(p, n));
+        token_cur->next = apply_macros(t, NULL);
         while (token_cur->next->kind != TK_EOF) {
           token_cur = token_cur->next;
         }

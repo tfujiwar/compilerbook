@@ -1,19 +1,19 @@
 #include "mycc.h"
 
+// Define global variables
 Token *token;
 Node *code[100];
 LVar *locals;
 Map *functions;
 Map *strings;
-Scope *global;
 Scope *scope;
 SwitchScope *sw_scope;
 BreakScope *br_scope;
 Map *macros;
 int labels = 0;
 
-
 int main(int argc, char **argv) {
+  // Read source code
   Source *src;
   if (argc == 2) {
     src = new_source(NULL, argv[1]);
@@ -21,25 +21,25 @@ int main(int argc, char **argv) {
     src = new_source(NULL, "test/main.c");
   }
 
-  macros = new_map();
+  // Initialize global variables
   locals = calloc(1, sizeof(LVar));
-  locals->offset = 0;
   functions = new_map();
-  map_put(functions, "printf", new_function("printf", type_int()));
   strings = new_map();
-  global = new_scope(NULL);
-  scope = global;
   sw_scope = new_switch_scope(NULL, NULL);
   br_scope = new_break_scope(NULL, NULL);
+  macros = new_map();
 
+  Scope *global = new_scope(NULL);
+  scope = global;
+
+  // Walkaround until reading stdio.h
+  map_put(functions, "printf", new_function("printf", type_int()));
+
+  // Construct AST
   token = preprocess(src);
-  debug_macros();
-
-  token = apply_macros(token, NULL);
-  debug_token(token);
-
   program();
 
+  // Generate Code
   printf(".intel_syntax noprefix\n");
   printf(".global main\n");
   printf("\n");
@@ -64,7 +64,9 @@ int main(int argc, char **argv) {
     }
   }
 
+  debug_token(token);
   debug_scope(global);
+  debug_macros();
   debug_functions();
 
   return 0;
