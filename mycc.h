@@ -105,6 +105,7 @@ typedef enum {
 typedef struct Source Source;
 
 struct Source {
+  char *filename;
   char *head;
   char *cur;
   Source *parent;
@@ -150,6 +151,7 @@ struct Token {
   int val;
   char *str;
   char *at;
+  Source *src;
 };
 
 typedef struct LVar LVar;
@@ -234,7 +236,8 @@ struct Macro {
 char *read_file(char *path);
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
-void error_at(char *loc, char *fmt, ...);
+void error_at(Source *src, char* at, char *fmt, ...);
+void error_at_token(Token *token, char *fmt, ...);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
 void debug_type(Type *type);
@@ -254,8 +257,8 @@ bool is_ident_char(char c);
 Token* preprocess(Source *src);
 Token *apply_macros(Token *token, Token *until);
 
-Token *tokenize();
-Token *new_token(TokenKind kind, Token *cur, char *str, int len);
+Token *tokenize(Source *src, char *begin, char *end);
+Token *new_token(TokenKind kind, Token *cur, Source *src, char *str, int len);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Scope *new_scope(Scope *parent);

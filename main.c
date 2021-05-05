@@ -64,7 +64,6 @@ int main(int argc, char **argv) {
     }
   }
 
-  debug_token(token);
   debug_scope(global);
   debug_macros();
   debug_functions();

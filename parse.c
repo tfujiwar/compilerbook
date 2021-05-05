@@ -83,7 +83,7 @@ Node *parse_typedef() {
   if (consume_token(TK_TYPEDEF)) {
     Type *ty = type();
     Token *ident = consume_ident();
-    if (!ident) error_at(token->at, "identifier expected");
+    if (!ident) error_at_token(token, "identifier expected");
     expect(";");
 
     map_put(scope->types, ident->str, ty);
@@ -148,19 +148,19 @@ int *find_enum_consts(char *name) {
 
 bool expect_token(int kind) {
   if (token->kind != kind)
-    error_at(token->at, "expected %d, but got %d", kind, token->kind);
+    error_at_token(token, "expected %d, but got %d", kind, token->kind);
   token = token->next;
 }
 
 void expect(char *op) {
   if ((token->kind != TK_RESERVED) || strcmp(token->str, op) != 0)
-    error_at(token->at, "not a '%s'", op);
+    error_at_token(token, "not a '%s'", op);
   token = token->next;
 }
 
 int expect_number() {
   if (token->kind != TK_NUM)
-    error_at(token->at, "not a 'number'");
+    error_at_token(token, "not a 'number'");
   int val = token->val;
   token = token->next;
   return val;
@@ -288,7 +288,7 @@ Type *type() {
 
       while (!consume("}")) {
         Token *id = consume_ident();
-        if (!id) error_at(token->at, "identifier expected");
+        if (!id) error_at_token(token, "identifier expected");
 
         if (consume("=")) {
           Token *specified_num;
@@ -351,12 +351,12 @@ Node *function() {
   if (node = parse_typedef()) return node;
 
   Type *ty = type();
-  if (!ty) error_at(token->at, "type expected");
+  if (!ty) error_at_token(token, "type expected");
   if (ty->ty == STRUCT && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
   if (ty->ty == ENUM && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
 
   Token *ident = consume_ident();
-  if (!ident) error_at(ident->at, "identifier expected");
+  if (!ident) error_at_token(ident, "identifier expected");
 
   // Global variable
   if (!consume("(")) {
@@ -384,7 +384,7 @@ Node *function() {
 
       // Initialize with array literal
       if (consume("{")) {
-        if (lvar->type->ty != ARRAY) error_at(token->at, "not an array");
+        if (lvar->type->ty != ARRAY) error_at_token(token, "not an array");
 
         Node *node = new_node(ND_DECLARE_GVAR, NULL, NULL);
         node->lvar = lvar;
@@ -459,7 +459,7 @@ Node *function() {
 
   // Function
   Function *func = map_get(functions, ident->str);
-  if (func && !func->is_proto) error_at(ident->at, "function already defined");
+  if (func && !func->is_proto) error_at_token(ident, "function already defined");
   if (!func) {
     func = new_function(ident->str, ty);
     map_put(functions, func->name, func);
@@ -484,15 +484,15 @@ Node *function() {
 
   // Function body
   if (consume("{")) {
-    if (func->is_proto) error_at(ident->at, "argument name missing");
+    if (func->is_proto) error_at_token(ident, "argument name missing");
 
     if (func->arg_types->len) {
       if (arg_types->len != func->arg_types->len)
-        error_at(ident->at, "inconsistent argument types");
+        error_at_token(ident, "inconsistent argument types");
 
       for (int i = 0; i < arg_types->len; i++)
         if (!same_type(vec_get(arg_types, i), vec_get(func->arg_types, i)))
-          error_at(ident->at, "inconsistent argument types");
+          error_at_token(ident, "inconsistent argument types");
 
     } else {
       func->arg_types = arg_types;
@@ -535,11 +535,11 @@ Node *function() {
 
   if (func->arg_types->len) {
     if (arg_types->len != func->arg_types->len)
-      error_at(ident->at, "inconsistent argument types");
+      error_at_token(ident, "inconsistent argument types");
 
     for (int i = 0; i < arg_types->len; i++)
       if (!same_type(vec_get(arg_types, i), vec_get(func->arg_types, i)))
-        error_at(ident->at, "inconsistent argument types");
+        error_at_token(ident, "inconsistent argument types");
 
   } else {
     func->arg_types = arg_types;
@@ -729,7 +729,7 @@ Node *stmt() {
     }
 
     LVar *lvar = find_lvar_in_scope(ident->str);
-    if (lvar) error_at(ident->at, "already declared");
+    if (lvar) error_at_token(ident, "already declared");
 
     lvar = new_var(ident->str);
     lvar->is_global = false;
@@ -751,7 +751,7 @@ Node *stmt() {
 
       // Initialize with array literal
       if (consume("{")) {
-        if (lvar->type->ty != ARRAY) error_at(token->at, "not an array");
+        if (lvar->type->ty != ARRAY) error_at_token(token, "not an array");
 
         Node *node = new_node(ND_DECLARE, NULL, NULL);
         node->lvar = lvar;
@@ -863,7 +863,7 @@ Node *stmt() {
       return node;
 
     } else if (lvar->type->ty == ARRAY && lvar->type->array_size == 0) {
-      error_at(token->at, "array size or initialization is needed");
+      error_at_token(token, "array size or initialization is needed");
     }
 
     Node *node = new_node(ND_DECLARE, NULL, NULL);
@@ -1114,13 +1114,13 @@ Node *unary_right() {
 
     } else if (consume(".")) {
       Token *ident = consume_ident();
-      if (!ident) error_at(token->at, "identificer expected");
+      if (!ident) error_at_token(token, "identificer expected");
       node = new_node(ND_DOT, node, NULL);
       node->name = ident->str;
 
     } else if (consume("->")) {
       Token *ident = consume_ident();
-      if (!ident) error_at(token->at, "identificer expected");
+      if (!ident) error_at_token(token, "identificer expected");
       node = new_node(ND_ARROW, node, NULL);
       node->name = ident->str;
 
@@ -1160,7 +1160,7 @@ Node *primary() {
 
     // Local or global variable
     LVar *lvar = find_lvar(ident->str);
-    if (!lvar) error_at(ident->at, "not declared");
+    if (!lvar) error_at_token(ident, "not declared");
 
     node->lvar = lvar;
     node->kind = lvar->is_global ? ND_GVAR : ND_LVAR;

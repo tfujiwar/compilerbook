@@ -25,6 +25,7 @@ IfBlock *new_if_block(IfBlock *parent) {
 
 Source *new_source(Source *parent, char* filename) {
   Source *source = calloc(1, sizeof(Source));
+  source->filename = filename;
   source->parent = parent;
   source->head = read_file(filename);
   source->cur = source->head;
@@ -48,6 +49,7 @@ Token *copy_tokens(Token *token) {
   while (src) {
     Token *dst = calloc(1, sizeof(Token));
     dst->kind = src->kind;
+    dst->src = src->src;
     dst->at = src->at;
     dst->str = src->str;
     dst->val = src->val;
@@ -154,12 +156,14 @@ Token *replace_defined(Token *token) {
     Token *replace;
     if (map_get(macros, name)) {
       Token dummy;
-      replace = new_token(TK_NUM, &dummy, "1", 1);
+      replace = new_token(TK_NUM, &dummy, begin->src, "1", 1);
       replace->val = 1;
+      replace->at = begin->at;
     } else {
       Token dummy;
-      replace = new_token(TK_NUM, &dummy, "0", 1);
+      replace = new_token(TK_NUM, &dummy, begin->src, "0", 1);
       replace->val = 0;
+      replace->at = begin->at;
     }
 
     replace_tokens(begin, end, replace, replace);
@@ -199,16 +203,15 @@ Token* preprocess(Source *src) {
       char *eol = strchr(p, '\n');
       if (!eol) break;
 
-      int n = eol - p + 1;
       if (output_enabled) {
-        Token *t = tokenize(substring(p, n));
+        Token *t = tokenize(source, p, eol);
         token_cur->next = apply_macros(t, NULL);
         while (token_cur->next->kind != TK_EOF) {
           token_cur = token_cur->next;
         }
       }
 
-      p += n;
+      p = eol + 1;
       continue;
     }
 
@@ -221,7 +224,7 @@ Token* preprocess(Source *src) {
       p += 7;
       while (*p == ' ') p++;
 
-      char filename[64];
+      char *filename = calloc(256, sizeof(char));
 
       if (*p == '<') {
         p++;
@@ -260,7 +263,7 @@ Token* preprocess(Source *src) {
       char* prev = p;
       while (is_ident_char(*p)) p++;
       Token dummy;
-      macro->from = new_token(TK_IDENT, &dummy, prev, p - prev);
+      macro->from = new_token(TK_IDENT, &dummy, source, prev, p - prev);
       macro->name = macro->from->str;
 
       // Function-like macro
@@ -281,7 +284,7 @@ Token* preprocess(Source *src) {
             break;
           }
           if (*p == ',') p++;
-          else error_at(p, "failed to tokenize function-like macro");
+          else error_at(source, p, "failed to tokenize function-like macro");
         }
       } else {
         macro->ty = OBJECT;
@@ -291,7 +294,7 @@ Token* preprocess(Source *src) {
 
       char *eol = strchr(p, '\n');
       if (!eol) break;
-      macro->to = tokenize(substring(p, eol - p));
+      macro->to = tokenize(source, p, eol);
 
       map_put(macros, macro->name ,macro);
 
@@ -310,7 +313,7 @@ Token* preprocess(Source *src) {
       if (output_enabled) {
         if_block->active = true;
 
-        token = tokenize(substring(p, eol - p + 1));
+        token = tokenize(source, p, eol);
         token = replace_defined(token);
         token = apply_macros(token, NULL);
         Node *node = conditional();
@@ -340,7 +343,7 @@ Token* preprocess(Source *src) {
 
       if (if_block->active) {
         if (!if_block->true_found) {
-          token = tokenize(substring(p, eol - p + 1));
+          token = tokenize(source, p, eol);
           token = replace_defined(token);
           token = apply_macros(token, NULL);
           Node *node = conditional();
@@ -447,7 +450,7 @@ Token* preprocess(Source *src) {
       continue;
     }
 
-    error_at(p, "failed to tokenize macro");
+    error_at(source, p, "failed to tokenize macro");
   }
 
   return head.next;

@@ -37,32 +37,38 @@ void error(char *fmt, ...) {
   exit(1);
 }
 
-void error_at(char *loc, char *fmt, ...) {
+void error_at(Source *src, char* at, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
 
-  // char *begin = loc;
-  // while (user_input < begin && begin[-1] != '\n')
-  //   begin--;
+  char *begin = at;
+  while (src->head < begin && begin[-1] != '\n')
+    begin--;
 
-  // char *end = loc;
-  // while (*end != '\0' && *end != '\n')
-  //   end++;
+  char *end = at;
+  while (*end != '\0' && *end != '\n')
+    end++;
 
-  // int line = 1;
-  // for (char *p = user_input; p < begin; p++)
-  //   if (*p == '\n') line++;
+  int line = 1;
+  for (char *p = src->head; p < begin; p++)
+    if (*p == '\n') line++;
 
-  // int indent = fprintf(stderr, "%s:%d: ", filename, line);
-  // fprintf(stderr, "%.*s\n", (int)(end - begin), begin);
+  int indent = fprintf(stderr, "%s:%d: ", src->filename, line);
+  fprintf(stderr, "%.*s\n", (int)(end - begin), begin);
 
-  // int pos = loc - begin + indent;
-  // fprintf(stderr, "%*s", pos, " ");
-  // fprintf(stderr, "^ ");
+  int pos = at - begin + indent;
+  fprintf(stderr, "%*s", pos, " ");
+  fprintf(stderr, "^ ");
 
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
   exit(1);
+}
+
+void error_at_token(Token *token, char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  error_at(token->src, token->at, fmt, ap);
 }
 
 Vector *new_vec() {
