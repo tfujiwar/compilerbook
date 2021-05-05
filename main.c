@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   if (argc == 2) {
     src = new_source(NULL, argv[1]);
   } else {
-    error("incorrect number of argument");
+    src = new_source(NULL, "test/main.c");
   }
 
   macros = new_map();
@@ -32,11 +32,8 @@ int main(int argc, char **argv) {
   sw_scope = new_switch_scope(NULL, NULL);
   br_scope = new_break_scope(NULL, NULL);
 
-  char *user_input = preprocess(src);
+  token = preprocess(src);
   debug_macros();
-
-  token = tokenize(user_input);
-  debug_token(token);
 
   token = apply_macros(token, NULL);
   debug_token(token);

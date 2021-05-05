@@ -23,11 +23,6 @@
 
 // this is line comment
 
-/*
-this is block comment
-hoge fuga
-*/
-
 int gint_zero;
 int garr_zero[5];
 char gstr_zero[5];

@@ -168,19 +168,18 @@ Token *replace_defined(Token *token) {
   return head.next;
 }
 
-char* preprocess(Source *src) {
+Token* preprocess(Source *src) {
   Vector *include_paths = new_vec();
   vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include");
   vec_push(include_paths, "/usr/local/include");
   vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include-fixed");
   vec_push(include_paths, "/usr/include");
 
-  char *output = calloc(strlen(src->head), sizeof(char));
   char *p = src->head;
-  char *q = output;
 
   Token head;
   head.next = NULL;
+  Token *token_cur = &head;
 
   bool output_enabled = true;
   IfBlock *if_block = NULL;
@@ -202,8 +201,10 @@ char* preprocess(Source *src) {
 
       int n = eol - p + 1;
       if (output_enabled) {
-        memcpy(q, p, n);
-        q += n;
+        token_cur->next = tokenize(substring(p, n));
+        while (token_cur->next->kind != TK_EOF) {
+          token_cur = token_cur->next;
+        }
       }
 
       p += n;
@@ -257,7 +258,8 @@ char* preprocess(Source *src) {
 
       char* prev = p;
       while (is_ident_char(*p)) p++;
-      macro->from = new_token(TK_IDENT, &head, prev, p - prev);
+      Token dummy;
+      macro->from = new_token(TK_IDENT, &dummy, prev, p - prev);
       macro->name = macro->from->str;
 
       // Function-like macro
@@ -446,7 +448,8 @@ char* preprocess(Source *src) {
 
     error_at(p, "failed to tokenize macro");
   }
-  return output;
+
+  return head.next;
 }
 
 Token *replace_macro_params(Token *from, Token *to, Macro *macro) {

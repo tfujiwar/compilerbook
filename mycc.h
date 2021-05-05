@@ -251,7 +251,7 @@ int expect_number();
 bool at_eof();
 bool is_ident_char(char c);
 
-char* preprocess(Source *src);
+Token* preprocess(Source *src);
 Token *apply_macros(Token *token, Token *until);
 
 Token *tokenize();
