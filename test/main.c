@@ -575,6 +575,74 @@ int main() {
     assert("ifdef", ifdef, 565);
   }
 
+  {
+    int if_macro = 0;
+#if 1
+    if_macro += 1;
+#else
+    if_macro += 2;
+#endif
+#if 0
+    if_macro += 4;
+#else
+    if_macro += 8;
+#endif
+    assert("if_macro", if_macro, 9);
+  }
+
+  {
+    int if_macro_calc = 0;
+#if (2+3-1)*5/4%3 == 2
+    if_macro_calc += 1;  // added
+#endif
+#if 0 == 1
+    if_macro_calc += 2;
+#endif
+#if 0 != 1
+    if_macro_calc += 4;  // added
+#endif
+#if 0 < 1
+    if_macro_calc += 8;  // added
+#endif
+#if 0 > 1
+    if_macro_calc += 16;
+#endif
+#if 0 <= 1
+    if_macro_calc += 32;  // added
+#endif
+#if 0 >= 1
+    if_macro_calc += 64;
+#endif
+#if (1 & 2) == 0
+    if_macro_calc += 128;  // added
+#endif
+#if (1 | 2) == 3
+    if_macro_calc += 256;  // added
+#endif
+#if (1 ^ 3) == 2
+    if_macro_calc += 512;  // added
+#endif
+#if (1 << 2) == 4
+    if_macro_calc += 1024;  // added
+#endif
+#if (4 >> 2) == 1
+    if_macro_calc += 2048;  // added
+#endif
+#if 1 && 1
+    if_macro_calc += 4096;  // added
+#endif
+#if 1 || 0
+    if_macro_calc += 8192;  // added
+#endif
+#if !0
+    if_macro_calc += 16384;  // added
+#endif
+#if 1 ? 1 : 0
+    if_macro_calc += 32768;  // added
+#endif
+    assert("if_macro_calc", if_macro_calc, 65453);
+  }
+
   return 0;
 }
 

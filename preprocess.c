@@ -43,6 +43,67 @@ Token *copy_tokens(Token *token) {
   return head.next;
 }
 
+int eval_node(Node *node) {
+  switch (node->kind) {
+  case ND_NUM:
+    return node->val;
+
+  case ND_ADD:
+    return eval_node(node->lhs) + eval_node(node->rhs);
+
+  case ND_SUB:
+    return eval_node(node->lhs) - eval_node(node->rhs);
+
+  case ND_MUL:
+    return eval_node(node->lhs) + eval_node(node->rhs);
+
+  case ND_DIV:
+    return eval_node(node->lhs) / eval_node(node->rhs);
+
+  case ND_MOD:
+    return eval_node(node->lhs) % eval_node(node->rhs);
+
+  case ND_EQ:
+    return eval_node(node->lhs) == eval_node(node->rhs);
+
+  case ND_NE:
+    return eval_node(node->lhs) != eval_node(node->rhs);
+
+  case ND_LE:
+    return eval_node(node->lhs) <= eval_node(node->rhs);
+
+  case ND_LT:
+    return eval_node(node->lhs) < eval_node(node->rhs);
+
+  case ND_BITWISE_AND:
+    return eval_node(node->lhs) & eval_node(node->rhs);
+
+  case ND_BITWISE_OR:
+    return eval_node(node->lhs) | eval_node(node->rhs);
+
+  case ND_BITWISE_XOR:
+    return eval_node(node->lhs) ^ eval_node(node->rhs);
+
+  case ND_SHIFT_LEFT:
+    return eval_node(node->lhs) << eval_node(node->rhs);
+
+  case ND_SHIFT_RIGHT:
+    return eval_node(node->lhs) >> eval_node(node->rhs);
+
+  case ND_LOGICAL_AND:
+    return eval_node(node->lhs) && eval_node(node->rhs);
+
+  case ND_LOGICAL_OR:
+    return eval_node(node->lhs) || eval_node(node->rhs);
+
+  case ND_CONDITIONAL:
+    return eval_node(node->cond) ? eval_node(node->body) : eval_node(node->els);
+
+  default:
+    error("not supported operator in macro conditions");
+  }
+}
+
 char* preprocess(char *user_input) {
   char *output = calloc(strlen(user_input), sizeof(char));
   char *p = user_input;
@@ -117,6 +178,37 @@ char* preprocess(char *user_input) {
       macro->to = tokenize(substring(p, eol - p));
 
       map_put(macros, macro->name ,macro);
+
+      p = eol + 1;
+      continue;
+    }
+
+    // if directive
+    if (strncmp(p, "if", 2) == 0 && *(p+2) == ' ') {
+      p += 2;
+      if_block = new_if_block(if_block);
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+
+      if (output_enabled) {
+        if_block->active = true;
+
+        token = tokenize(substring(p, eol - p + 1));
+        token = apply_macros(token, NULL);
+        Node *node = conditional();
+
+        if (eval_node(node)) {
+          if_block->true_found = true;
+          output_enabled = true;
+        } else {
+          if_block->true_found = false;
+          output_enabled = false;
+        }
+
+      } else {
+        if_block->active = false;
+      }
 
       p = eol + 1;
       continue;
