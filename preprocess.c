@@ -177,6 +177,7 @@ Token* preprocess(Source *src) {
   vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include");
   vec_push(include_paths, "/usr/local/include");
   vec_push(include_paths, "/usr/local/lib/gcc/x86_64-linux-gnu/10.2.0/include-fixed");
+  vec_push(include_paths, "/usr/include/x86_64-linux-gnu");
   vec_push(include_paths, "/usr/include");
 
   char *p = src->head;
@@ -200,18 +201,18 @@ Token* preprocess(Source *src) {
 
     // Not a macro directive
     if (*p != '#') {
-      char *eol = strchr(p, '\n');
-      if (!eol) break;
-
       if (output_enabled) {
-        Token *t = tokenize(source, p, eol);
+        Token *t = tokenize(source, &p);
         token_cur->next = apply_macros(t, NULL);
         while (token_cur->next->kind != TK_EOF) {
           token_cur = token_cur->next;
         }
+      } else {
+        char *eol = strchr(p, '\n');
+        if (!eol) break;
+        p = eol + 1;
       }
 
-      p = eol + 1;
       continue;
     }
 
@@ -229,9 +230,20 @@ Token* preprocess(Source *src) {
       if (*p == '<') {
         p++;
         char *end = strchr(p, '>');
+        bool found = false;
         for (int i = 0; i < include_paths->len; i++) {
           sprintf(filename, "%s/%s", include_paths->data[i], substring(p, end - p));
-          if (file_exists(filename)) break;
+          if (file_exists(filename)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          // TODO
+          debug("source not found: %s", substring(p, end - p));
+          char *eol = strchr(p, '\n');
+          p = eol + 1;
+          continue;
         }
 
       } else if (*p == '"') {
@@ -294,11 +306,10 @@ Token* preprocess(Source *src) {
 
       char *eol = strchr(p, '\n');
       if (!eol) break;
-      macro->to = tokenize(source, p, eol);
+      macro->to = tokenize(source, &p);
 
       map_put(macros, macro->name ,macro);
 
-      p = eol + 1;
       continue;
     }
 
@@ -313,7 +324,7 @@ Token* preprocess(Source *src) {
       if (output_enabled) {
         if_block->active = true;
 
-        token = tokenize(source, p, eol);
+        token = tokenize(source, &p);
         token = replace_defined(token);
         token = apply_macros(token, NULL);
         Node *node = conditional();
@@ -330,7 +341,6 @@ Token* preprocess(Source *src) {
         if_block->active = false;
       }
 
-      p = eol + 1;
       continue;
     }
 
@@ -343,7 +353,7 @@ Token* preprocess(Source *src) {
 
       if (if_block->active) {
         if (!if_block->true_found) {
-          token = tokenize(source, p, eol);
+          token = tokenize(source, &p);
           token = replace_defined(token);
           token = apply_macros(token, NULL);
           Node *node = conditional();
@@ -361,7 +371,6 @@ Token* preprocess(Source *src) {
         }
       }
 
-      p = eol + 1;
       continue;
     }
 

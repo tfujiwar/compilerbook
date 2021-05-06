@@ -10,7 +10,8 @@
 
 #define FUNC(A,B,C) A+B+C+X_PLUS_Y
 
-#define rep(i, n) for (int i = 0; i < (n); i++)
+#define rep(i, n)\
+        for (int i = 0; i < (n); i++)
 
 // #define foo foo a bar b baz c
 // #define bar foo 1
@@ -22,6 +23,10 @@
 // % foo(bar, (1, 2, 3)) %  // foo foo bar 1 foo bar 1 str((1, 2, 3))
 
 // this is line comment
+
+/*
+this is block comment
+*/
 
 int gint_zero;
 int garr_zero[5];
