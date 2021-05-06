@@ -710,8 +710,10 @@ int main() {
   {
 #if 0
 #error "this is an error example"
+#error
 #endif
 #warning "this is a warning example"
+#warning
   }
 
   {

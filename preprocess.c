@@ -514,7 +514,7 @@ Token* preprocess(Source *src) {
     }
 
     // error directive
-    if (strncmp(p, "error", 5) == 0 && is_space(*(p+5))) {
+    if (strncmp(p, "error", 5) == 0 && isspace(*(p+5))) {
       p += 5;
       p = skip_spaces(p);
 
@@ -530,7 +530,7 @@ Token* preprocess(Source *src) {
     }
 
     // warning directive
-    if (strncmp(p, "warning", 7) == 0 && is_space(*(p+7))) {
+    if (strncmp(p, "warning", 7) == 0 && isspace(*(p+7))) {
       p += 7;
       p = skip_spaces(p);
 
