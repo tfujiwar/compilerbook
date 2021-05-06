@@ -703,6 +703,12 @@ int main() {
     assert("undef", undef, 1);
   }
 
+  {
+#if 0
+#error "error occurred"
+#endif
+  }
+
   return 0;
 }
 

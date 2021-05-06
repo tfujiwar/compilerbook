@@ -199,9 +199,6 @@ Token* preprocess(Source *src) {
       continue;
     }
 
-    char *eol = strchr(p, '\n');
-    debug("%p: %s", if_block, substring(p, eol-p));
-
     // Not a macro directive
     if (*p != '#') {
       if (output_enabled) {
@@ -474,6 +471,22 @@ Token* preprocess(Source *src) {
       if (!eol) break;
       p = eol + 1;
 
+      continue;
+    }
+
+    // error directive
+    if (strncmp(p, "error", 5) == 0 && *(p+5) == ' ') {
+      p += 5;
+      while (*p == ' ') p++;
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+
+      if (output_enabled) {
+        error_at(source, p, substring(p, eol - p));
+      }
+
+      p = eol + 1;
       continue;
     }
 
