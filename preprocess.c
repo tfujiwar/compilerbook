@@ -228,6 +228,9 @@ Token* preprocess(Source *src) {
       continue;
     }
 
+    char *eol = strchr(p, '\n');
+    debug("%s, %s", source->filename, substring(p, eol-p));
+
     // Not a macro directive
     if (*p != '#') {
       if (output_enabled) {
@@ -637,20 +640,24 @@ Token *apply_macros(Token *token, Token *until) {
       }
 
       Token *replace_end = replace_begin;
-      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
 
-      // Apply macros to replacing tokens
-      m->used = true;
-      replace_begin = apply_macros(replace_begin, replace_end);
-      m->used = false;
+      // If macro is not empty
+      if (replace_end->next) {
+        while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
 
-      replace_end = replace_begin;
-      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+        // Apply macros to replacing tokens
+        m->used = true;
+        replace_begin = apply_macros(replace_begin, replace_end);
+        m->used = false;
 
-      replace_tokens(begin, end, replace_begin, replace_end);
-      tok = replace_end;
+        replace_end = replace_begin;
 
-      replaced = true;
+        while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+        replace_tokens(begin, end, replace_begin, replace_end);
+        tok = replace_end;
+
+        replaced = true;
+      }
       break;
     }
     if (replaced) continue;
