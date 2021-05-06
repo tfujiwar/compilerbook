@@ -48,6 +48,19 @@ char *next_ident(char *cur) {
   return substring(begin, cur - begin);
 }
 
+char *next_eol(char *cur) {
+  while (*cur != '\n') {
+    if (memcmp(cur, "/*", 2) == 0) {
+      cur += 2;
+      while (memcmp(cur, "*/", 2) != 0 && *cur != '\0') cur++;
+      if (*cur) cur += 2;
+      continue;
+    }
+    cur++;
+  }
+  return cur;
+}
+
 Token *copy_tokens(Token *token) {
   Token head;
   head.next = NULL;
@@ -228,19 +241,19 @@ Token* preprocess(Source *src) {
       continue;
     }
 
-    char *eol = strchr(p, '\n');
+    char *eol = next_eol(p);
     debug("%s, %s", source->filename, substring(p, eol-p));
 
     // Not a macro directive
     if (*p != '#') {
       if (output_enabled) {
-        Token *t = tokenize(source, &p);
+        Token *t = tokenize(source, &p, false);
         token_cur->next = apply_macros(t, NULL);
         while (token_cur->next->kind != TK_EOF) {
           token_cur = token_cur->next;
         }
       } else {
-        char *eol = strchr(p, '\n');
+        char *eol = next_eol(p);
         if (!eol) break;
         p = eol + 1;
       }
@@ -258,7 +271,7 @@ Token* preprocess(Source *src) {
       p = skip_spaces(p);
 
       if (!output_enabled) {
-        char *eol = strchr(p, '\n');
+        char *eol = next_eol(p);
         p = eol + 1;
         continue;
       }
@@ -279,7 +292,7 @@ Token* preprocess(Source *src) {
         if (!found) {
           // TODO
           debug("source not found: %s", substring(p, end - p));
-          char *eol = strchr(p, '\n');
+          char *eol = next_eol(p);
           p = eol + 1;
           continue;
         }
@@ -293,7 +306,7 @@ Token* preprocess(Source *src) {
         error("failed to parse include directive");
       }
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       p = eol + 1;
       source->cur = p;
 
@@ -341,9 +354,9 @@ Token* preprocess(Source *src) {
         macro->ty = OBJECT;
       }
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
-      macro->to = tokenize(source, &p);
+      macro->to = tokenize(source, &p, true);
 
       map_put(macros, macro->name ,macro);
 
@@ -358,7 +371,7 @@ Token* preprocess(Source *src) {
       char *name = next_ident(p);
       if (map_get(macros, name)) map_delete(macros, name);
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
 
       p = eol + 1;
@@ -370,13 +383,13 @@ Token* preprocess(Source *src) {
       p += 2;
       if_block = new_if_block(if_block);
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
 
       if (output_enabled) {
         if_block->active = true;
 
-        token = tokenize(source, &p);
+        token = tokenize(source, &p, true);
         token = replace_defined(token);
         token = apply_macros(token, NULL);
         token = replace_undefined(token);
@@ -402,12 +415,12 @@ Token* preprocess(Source *src) {
       if (!if_block) error_at(source, p, "not in if macro");
 
       p += 4;
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
 
       if (if_block->active) {
         if (!if_block->true_found) {
-          token = tokenize(source, &p);
+          token = tokenize(source, &p, true);
           token = replace_defined(token);
           token = apply_macros(token, NULL);
           token = replace_undefined(token);
@@ -449,7 +462,7 @@ Token* preprocess(Source *src) {
         if_block->active = false;
       }
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
       p = eol + 1;
 
@@ -476,7 +489,7 @@ Token* preprocess(Source *src) {
         if_block->active = false;
       }
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
       p = eol + 1;
 
@@ -490,7 +503,7 @@ Token* preprocess(Source *src) {
         output_enabled = !if_block->true_found;
       }
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
       p = eol + 1;
 
@@ -506,7 +519,7 @@ Token* preprocess(Source *src) {
 
       if_block = if_block->parent;
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
       p = eol + 1;
 
@@ -518,7 +531,7 @@ Token* preprocess(Source *src) {
       p += 5;
       p = skip_spaces(p);
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
 
       if (output_enabled) {
@@ -534,7 +547,7 @@ Token* preprocess(Source *src) {
       p += 7;
       p = skip_spaces(p);
 
-      char *eol = strchr(p, '\n');
+      char *eol = next_eol(p);
       if (!eol) break;
 
       if (output_enabled) {
@@ -576,8 +589,11 @@ Token *replace_macro_params(Token *from, Token *to, Macro *macro) {
       else if (depth == 0 && (strcmp(from_cur->next->str, ")") == 0 || strcmp(from_cur->next->str, ",") == 0)) break;
       from_cur = from_cur->next;
     }
+
     Token *param_end = from_cur;
-    from_cur = from_cur->next->next;  // ... -> , -> PARAM2 -> ...
+
+    if (i != macro->params->len - 1)
+      from_cur = from_cur->next->next;  // ... -> , -> PARAM2 -> ...
 
     // Replace the param
     Token *to_cur = &head;
@@ -641,23 +657,34 @@ Token *apply_macros(Token *token, Token *until) {
 
       Token *replace_end = replace_begin;
 
-      // If macro is not empty
-      if (replace_end->next) {
-        while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
-
-        // Apply macros to replacing tokens
-        m->used = true;
-        replace_begin = apply_macros(replace_begin, replace_end);
-        m->used = false;
-
-        replace_end = replace_begin;
-
-        while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
-        replace_tokens(begin, end, replace_begin, replace_end);
-        tok = replace_end;
-
+      // Skip the macro if macro is empty
+      if (replace_end->kind == TK_EOF) {
+        begin->next = end;
         replaced = true;
+        break;
       }
+
+      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+
+      // Apply macros to replacing tokens
+      m->used = true;
+      replace_begin = apply_macros(replace_begin, replace_end);
+      m->used = false;
+
+      replace_end = replace_begin;
+
+      // Skip the macro if macro is empty
+      if (replace_end->kind == TK_EOF) {
+        begin->next = end;
+        replaced = true;
+        break;
+      }
+
+      while (replace_end->next->kind != TK_EOF) replace_end = replace_end->next;
+      replace_tokens(begin, end, replace_begin, replace_end);
+      tok = replace_end;
+
+      replaced = true;
       break;
     }
     if (replaced) continue;

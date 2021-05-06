@@ -17,7 +17,7 @@ Token *new_token(TokenKind kind, Token *cur, Source *src, char *str, int len) {
   return tok;
 }
 
-Token *tokenize(Source *src, char **p) {
+Token *tokenize(Source *src, char **p, bool is_macro) {
   Token head;
   head.next = NULL;
   Token *cur = &head;
@@ -34,7 +34,10 @@ Token *tokenize(Source *src, char **p) {
     "&", "|", "^", "~", "!", "?", ":",
   };
 
-  while (**p && **p != '\n') {
+  while (**p) {
+    if (is_macro && **p == '\n') break;
+    if (!is_macro && **p == '\n' && *(*p+1) == '#') break;
+
     if (isspace(**p)) {
       (*p)++;
       continue;

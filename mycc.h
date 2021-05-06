@@ -259,7 +259,7 @@ bool is_ident_char(char c);
 Token* preprocess(Source *src);
 Token *apply_macros(Token *token, Token *until);
 
-Token *tokenize(Source *src, char **ptr_to_cursor);
+Token *tokenize(Source *src, char **p, bool is_macro);
 Token *new_token(TokenKind kind, Token *cur, Source *src, char *str, int len);
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);

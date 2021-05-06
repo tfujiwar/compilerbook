@@ -724,7 +724,8 @@ int main() {
 #define REPLACE_UNDEFINED 123
 #if defined REPLACE_UNDEFINED && REPLACE_UNDEFINED == 123
     replace_undefined += 2;
-#endif
+#endif /* must be ignore
+must be ignore */
     assert("replace_undefined", replace_undefined, 3);
   }
 
