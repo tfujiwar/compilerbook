@@ -104,6 +104,7 @@ Token *tokenize(Source *src, char **p) {
       int val = strtol(*p, p, 10);
       cur = new_token(TK_NUM, cur, src, prev, *p - prev);
       cur->val = val;
+      if (**p == 'l' || **p == 'L') (*p)++;  // TODO
       continue;
     }
 

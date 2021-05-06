@@ -76,6 +76,26 @@ void replace_tokens(Token *begin, Token *end, Token *replace_begin, Token *repla
   replace_end->next = end;
 }
 
+Token *replace_undefined(Token *token) {
+  Token head;
+  head.next = token;
+  Token *tok = &head;
+
+  // For all tokens
+  while (tok->next) {
+    if (tok->next->kind == TK_IDENT) {
+      Token *ident = tok->next;
+      Token *replace = new_token(TK_NUM, tok, tok->src, "0", 1);
+      replace->val = 0;
+      replace->at = ident->at;
+      replace->next = ident->next;
+    }
+    tok = tok->next;
+  }
+
+  return head.next;
+}
+
 int eval_node(Node *node) {
   switch (node->kind) {
   case ND_NUM:
@@ -349,6 +369,7 @@ Token* preprocess(Source *src) {
         token = tokenize(source, &p);
         token = replace_defined(token);
         token = apply_macros(token, NULL);
+        token = replace_undefined(token);
         Node *node = conditional();
 
         if (eval_node(node)) {
@@ -379,6 +400,7 @@ Token* preprocess(Source *src) {
           token = tokenize(source, &p);
           token = replace_defined(token);
           token = apply_macros(token, NULL);
+          token = replace_undefined(token);
           Node *node = conditional();
 
           if (eval_node(node)) {

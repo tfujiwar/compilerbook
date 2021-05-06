@@ -711,6 +711,18 @@ int main() {
 #warning "this is a warning example"
   }
 
+  {
+    int replace_undefined = 0;
+#if REPLACE_UNDEFINED == 0
+    replace_undefined += 1;
+#endif
+#define REPLACE_UNDEFINED 123
+#if defined REPLACE_UNDEFINED && REPLACE_UNDEFINED == 123
+    replace_undefined += 2;
+#endif
+    assert("replace_undefined", replace_undefined, 3);
+  }
+
   return 0;
 }
 
