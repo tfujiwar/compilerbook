@@ -326,9 +326,7 @@ Token* preprocess(Source *src) {
       p = skip_spaces(p);
 
       char *name = next_ident(p);
-
-      if (!map_get(macros, name)) error_at(source, p-5, "macro not defined");
-      map_delete(macros, name);
+      if (map_get(macros, name)) map_delete(macros, name);
 
       char *eol = strchr(p, '\n');
       if (!eol) break;

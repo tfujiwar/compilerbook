@@ -691,6 +691,7 @@ int main() {
   }
 
   {
+#undef UNDEF_TEST
     int undef = 0;
 #define UNDEF_TEST
 #ifdef UNDEF_TEST
