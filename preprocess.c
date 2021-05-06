@@ -17,6 +17,15 @@ bool file_exists(char *filename) {
   return false;
 }
 
+bool is_space(char c) {
+  return (c == ' ') || (c == '\t');
+}
+
+char *skip_spaces(char *cur) {
+  while (is_space(*cur)) cur++;
+  return cur;
+}
+
 IfBlock *new_if_block(IfBlock *parent) {
   IfBlock *if_block = calloc(1, sizeof(IfBlock));
   if_block->parent = parent;
@@ -33,7 +42,7 @@ Source *new_source(Source *parent, char* filename) {
 }
 
 char *next_ident(char *cur) {
-  while (*cur == ' ') cur++;
+  cur = skip_spaces(cur);
   char* begin = cur;
   while (is_ident_char(*cur)) cur++;
   return substring(begin, cur - begin);
@@ -218,12 +227,12 @@ Token* preprocess(Source *src) {
 
     // Read # and spaces
     p++;
-    while (*p == ' ') p++;
+    p = skip_spaces(p);
 
     // Include directive
-    if (strncmp(p, "include", 7) == 0 && (*(p+7) == ' ' || *(p+7) == '<' || *(p+7) == '"')) {
+    if (strncmp(p, "include", 7) == 0 && (is_space(*(p+7)) || *(p+7) == '<' || *(p+7) == '"')) {
       p += 7;
-      while (*p == ' ') p++;
+      p = skip_spaces(p);
 
       char *filename = calloc(256, sizeof(char));
 
@@ -266,9 +275,9 @@ Token* preprocess(Source *src) {
     }
 
     // Define directive
-    if (strncmp(p, "define", 6) == 0 && *(p+6) == ' ') {
+    if (strncmp(p, "define", 6) == 0 && is_space(*(p+6))) {
       p += 6;
-      while (*p == ' ') p++;
+      p = skip_spaces(p);
 
       Macro *macro = calloc(1, sizeof(Macro));
 
@@ -285,12 +294,12 @@ Token* preprocess(Source *src) {
         macro->params = new_vec();
 
         while (true) {
-          while (*p == ' ') p++;
+          p = skip_spaces(p);
           char* prev = p;
           while (is_ident_char(*p)) p++;
           vec_push(macro->params, substring(prev, p - prev));
 
-          while (*p == ' ') p++;
+          p = skip_spaces(p);
           if (*p == ')') {
             p++;
             break;
@@ -312,9 +321,9 @@ Token* preprocess(Source *src) {
     }
 
     // undef directive
-    if (strncmp(p, "undef", 5) == 0 && *(p+5) == ' ') {
+    if (strncmp(p, "undef", 5) == 0 && is_space(*(p+5))) {
       p += 5;
-      while (*p == ' ') p++;
+      p = skip_spaces(p);
 
       char *name = next_ident(p);
 
@@ -329,7 +338,7 @@ Token* preprocess(Source *src) {
     }
 
     // if directive
-    if (strncmp(p, "if", 2) == 0 && *(p+2) == ' ') {
+    if (strncmp(p, "if", 2) == 0 && is_space(*(p+2))) {
       p += 2;
       if_block = new_if_block(if_block);
 
@@ -360,7 +369,7 @@ Token* preprocess(Source *src) {
     }
 
     // elif directive
-    if (strncmp(p, "elif", 4) == 0 && *(p+4) == ' ') {
+    if (strncmp(p, "elif", 4) == 0 && is_space(*(p+4))) {
       if (!if_block) error_at(source, p, "not in if macro");
 
       p += 4;
@@ -391,7 +400,7 @@ Token* preprocess(Source *src) {
     }
 
     // ifdef directive
-    if (strncmp(p, "ifdef", 5) == 0 && *(p+5) == ' ') {
+    if (strncmp(p, "ifdef", 5) == 0 && is_space(*(p+5))) {
       p += 5;
       if_block = new_if_block(if_block);
 
@@ -418,7 +427,7 @@ Token* preprocess(Source *src) {
     }
 
     // ifndef directive
-    if (strncmp(p, "ifndef", 6) == 0 && *(p+6) == ' ') {
+    if (strncmp(p, "ifndef", 6) == 0 && is_space(*(p+6))) {
       p += 6;
       if_block = new_if_block(if_block);
 
@@ -475,9 +484,9 @@ Token* preprocess(Source *src) {
     }
 
     // error directive
-    if (strncmp(p, "error", 5) == 0 && *(p+5) == ' ') {
+    if (strncmp(p, "error", 5) == 0 && is_space(*(p+5))) {
       p += 5;
-      while (*p == ' ') p++;
+      p = skip_spaces(p);
 
       char *eol = strchr(p, '\n');
       if (!eol) break;
