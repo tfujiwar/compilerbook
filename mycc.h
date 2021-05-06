@@ -237,6 +237,7 @@ struct Macro {
 char *read_file(char *path);
 void debug(char *fmt, ...);
 void error(char *fmt, ...);
+void warning_at(Source *src, char* at, char *fmt, ...);
 void error_at(Source *src, char* at, char *fmt, ...);
 void error_at_token(Token *token, char *fmt, ...);
 void debug_token(Token *tok);

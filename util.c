@@ -37,7 +37,7 @@ void error(char *fmt, ...) {
   exit(1);
 }
 
-void error_at(Source *src, char* at, char *fmt, ...) {
+void warning_at(Source *src, char* at, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
 
@@ -62,6 +62,12 @@ void error_at(Source *src, char* at, char *fmt, ...) {
 
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
+}
+
+void error_at(Source *src, char* at, char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  warning_at(src, at, fmt, ap);
   exit(1);
 }
 

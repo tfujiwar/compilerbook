@@ -497,6 +497,22 @@ Token* preprocess(Source *src) {
       continue;
     }
 
+    // warning directive
+    if (strncmp(p, "warning", 7) == 0 && is_space(*(p+7))) {
+      p += 7;
+      p = skip_spaces(p);
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+
+      if (output_enabled) {
+        warning_at(source, p, substring(p, eol - p));
+      }
+
+      p = eol + 1;
+      continue;
+    }
+
     error_at(source, p, "failed to tokenize macro");
   }
 

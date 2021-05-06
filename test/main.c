@@ -706,8 +706,9 @@ int main() {
 
   {
 #if 0
-#error "error occurred"
+#error "this is an error example"
 #endif
+#warning "this is a warning example"
   }
 
   return 0;
