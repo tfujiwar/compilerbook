@@ -254,6 +254,12 @@ Token* preprocess(Source *src) {
       p += 7;
       p = skip_spaces(p);
 
+      if (!output_enabled) {
+        char *eol = strchr(p, '\n');
+        p = eol + 1;
+        continue;
+      }
+
       char *filename = calloc(256, sizeof(char));
 
       if (*p == '<') {
@@ -291,6 +297,7 @@ Token* preprocess(Source *src) {
       source = new_source(source, filename);
       p = source->cur;
 
+      debug("%s", filename);
       continue;
     }
 

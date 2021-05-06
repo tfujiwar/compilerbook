@@ -1,4 +1,7 @@
 #include "/src/test/common.h"
+#if 0
+#include "nothing.h"
+#endif
 
 #define ONE 1
 #define X_PLUS_Y (x+y)
