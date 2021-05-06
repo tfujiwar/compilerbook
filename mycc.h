@@ -28,6 +28,7 @@ Map *new_map();
 void *vec_get(Vector *vec, int i);
 void map_put(Map *map, char *key, void *val);
 void *map_get(Map *map, char *key);
+void map_delete(Map *map, char *key);
 
 typedef enum {
   TK_RESERVED,

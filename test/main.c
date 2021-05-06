@@ -690,6 +690,19 @@ int main() {
     assert("if_elif_macro", if_elif_macro, 4);
   }
 
+  {
+    int undef = 0;
+#define UNDEF_TEST
+#ifdef UNDEF_TEST
+    undef += 1;
+#endif
+#undef UNDEF_TEST
+#ifdef UNDEF_TEST
+    undef += 2;
+#endif
+    assert("undef", undef, 1);
+  }
+
   return 0;
 }
 

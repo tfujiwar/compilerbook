@@ -199,6 +199,9 @@ Token* preprocess(Source *src) {
       continue;
     }
 
+    char *eol = strchr(p, '\n');
+    debug("%p: %s", if_block, substring(p, eol-p));
+
     // Not a macro directive
     if (*p != '#') {
       if (output_enabled) {
@@ -302,14 +305,29 @@ Token* preprocess(Source *src) {
         macro->ty = OBJECT;
       }
 
-      while (isspace(*p)) p++;
-
       char *eol = strchr(p, '\n');
       if (!eol) break;
       macro->to = tokenize(source, &p);
 
       map_put(macros, macro->name ,macro);
 
+      continue;
+    }
+
+    // undef directive
+    if (strncmp(p, "undef", 5) == 0 && *(p+5) == ' ') {
+      p += 5;
+      while (*p == ' ') p++;
+
+      char *name = next_ident(p);
+
+      if (!map_get(macros, name)) error_at(source, p-5, "macro not defined");
+      map_delete(macros, name);
+
+      char *eol = strchr(p, '\n');
+      if (!eol) break;
+
+      p = eol + 1;
       continue;
     }
 
@@ -346,8 +364,9 @@ Token* preprocess(Source *src) {
 
     // elif directive
     if (strncmp(p, "elif", 4) == 0 && *(p+4) == ' ') {
-      p += 4;
+      if (!if_block) error_at(source, p, "not in if macro");
 
+      p += 4;
       char *eol = strchr(p, '\n');
       if (!eol) break;
 
@@ -430,7 +449,7 @@ Token* preprocess(Source *src) {
 
     // else directive
     if (strncmp(p, "else", 4) == 0 && isspace(*(p+4))) {
-      p += 4;
+      if (!if_block) error_at(source, p, "not in if macro");
       if (if_block->active) {
         output_enabled = !if_block->true_found;
       }
@@ -444,8 +463,7 @@ Token* preprocess(Source *src) {
 
     // endif directive
     if (strncmp(p, "endif", 5) == 0 && isspace(*(p+5))) {
-      p += 5;
-
+      if (!if_block) error_at(source, p, "not in if macro");
       if (if_block->active) {
         output_enabled = true;
       }
@@ -523,6 +541,9 @@ Token *apply_macros(Token *token, Token *until) {
     bool replaced = false;
     for (int i = 0; i < macros->keys->len; i++) {
       Macro *m = macros->vals->data[i];
+
+      // Skip if macro is deleted
+      if (!m) continue;
 
       // Skip if macro is already applied
       if (m->used) continue;

@@ -163,6 +163,7 @@ void gen(Node *node) {
   Node *cur;
   char name[64];
   int bytes;
+  int str_id;
 
   switch (node->kind) {
   case ND_NUM:
@@ -453,8 +454,11 @@ void gen(Node *node) {
     return;
 
   case ND_STRING:
+    for (str_id = 0; str_id < strings->keys->len; str_id++) {
+      if (strcmp(strings->keys->data[str_id], node->name) == 0) break;
+    }
     printf("# ND_STRING\n");
-    printf("  mov rax, OFFSET FLAT:.Lstr%03d\n", node->val);
+    printf("  mov rax, OFFSET FLAT:.Lstr%03d\n", str_id);
     printf("  push rax\n");
     return;
 

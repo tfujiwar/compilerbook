@@ -99,6 +99,12 @@ Map *new_map() {
 }
 
 void map_put(Map *map, char *key, void *val) {
+  for (int i = 0; i < map->keys->len; i++) {
+    if (strcmp(map->keys->data[i], key) == 0) {
+      map->vals->data[i] = val;
+      return;
+    }
+  }
   vec_push(map->keys, key);
   vec_push(map->vals, val);
 }
@@ -110,6 +116,15 @@ void *map_get(Map *map, char *key) {
     }
   }
   return NULL;
+}
+
+void map_delete(Map *map, char *key) {
+  for (int i = 0; i < map->keys->len; i++) {
+    if (strcmp(map->keys->data[i], key) == 0) {
+      map->vals->data[i] = NULL;
+      return;
+    }
+  }
 }
 
 char *substring(char *str, int len) {
@@ -546,6 +561,7 @@ void debug_functions() {
 void debug_macros() {
   for (int i = 0; i < macros->keys->len; i++) {
     Macro *macro = macros->vals->data[i];
+    if (!macro) continue;
     debug("%s:", macros->keys->data[i]);
     fprintf(stderr, "- from : ");
     debug_token(macro->from);

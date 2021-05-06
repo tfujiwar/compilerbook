@@ -187,7 +187,7 @@ Node *new_node_num(int val) {
 
 Node *new_node_string(char* str) {
   Node *node = new_node(ND_STRING, NULL, NULL);
-  node->val = strings->keys->len;
+  node->name = str;
   map_put(strings, str, NULL);
   return node;
 }
