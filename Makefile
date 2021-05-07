@@ -15,7 +15,10 @@ test_queue: mycc
 	./mycc test/queue.c > tmp.s && cc tmp.s -o tmp && ./tmp;
 	cc test/queue.c -o tmp && ./tmp;
 
+test_std: mycc
+	./mycc test/std.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+
 clean:
 	rm -f mycc *.o *~ tmp*
 
-.PHONY: test test_queue clean
+.PHONY: test test_queue test_std clean

@@ -324,11 +324,7 @@ Token* preprocess(Source *src) {
           }
         }
         if (!found) {
-          // TODO
-          debug("source not found: %s", substring(p, end - p));
-          char *eol = next_eol(p);
-          p = eol + 1;
-          continue;
+          error("source not found: %s", substring(p, end - p));
         }
 
       } else if (*p == '"') {
