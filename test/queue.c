@@ -1,3 +1,5 @@
+#include "/src/test/common.h"
+
 struct Node {
   int value;
   struct Node *next;
@@ -44,8 +46,8 @@ int main() {
   enqueue(&q, &n2);
   enqueue(&q, &n3);
 
-  printf("%d\n", dequeue(&q)->value);
-  printf("%d\n", dequeue(&q)->value);
-  printf("%d\n", dequeue(&q)->value);
+  assert("dequeue(&q)->value", dequeue(&q)->value, 1);
+  assert("dequeue(&q)->value", dequeue(&q)->value, 2);
+  assert("dequeue(&q)->value", dequeue(&q)->value, 3);
   return 0;
 }

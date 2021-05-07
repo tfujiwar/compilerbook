@@ -32,9 +32,6 @@ int main(int argc, char **argv) {
   Scope *global = new_scope(NULL);
   scope = global;
 
-  // Walkaround until reading stdio.h
-  map_put(functions, "printf", new_function("printf", type_int()));
-
   // Construct AST
   token = preprocess(src);
   program();

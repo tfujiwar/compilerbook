@@ -5,15 +5,15 @@ OBJS=$(SRCS:.c=.o)
 mycc: $(OBJS)
 	$(CC) -o mycc $(OBJS) $(LDFLAGS)
 
-$(OBJS): mycc.h
+$(OBJS): mycc.h standard_libs.h
 
 test: mycc
 	./mycc test/main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
-	cc test/main.c -o tmp && ./tmp;
+	cc test/main.c -o tmp -Wno-builtin-declaration-mismatch -Wno-cpp -Wno-switch-unreachable && ./tmp;
 
 test_queue: mycc
 	./mycc test/queue.c > tmp.s && cc tmp.s -o tmp && ./tmp;
-	cc test/queue.c -o tmp && ./tmp;
+	cc test/queue.c -o tmp -Wno-builtin-declaration-mismatch && ./tmp;
 
 test_std: mycc
 	./mycc test/std.c > tmp.s && cc tmp.s -o tmp && ./tmp;

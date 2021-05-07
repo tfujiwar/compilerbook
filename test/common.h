@@ -1,4 +1,4 @@
-// #include <stdio.h>
+int printf();
 
 int assert(char *msg, int a, int b) {
   if (a != b) printf("%s: %d != %d\n", msg, a, b);
