@@ -60,6 +60,12 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
       continue;
     }
 
+    if (memcmp(*p, "...", 3) == 0) {
+      cur = new_token(TK_ELLIPSIS, cur, src, *p, 3);
+      *p += 3;
+      continue;
+    }
+
     if (memcmp(*p, "//", 2) == 0) {
       *p += 2;
       while (**p != '\n' && **p != '\0') (*p)++;

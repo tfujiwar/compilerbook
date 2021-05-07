@@ -233,6 +233,9 @@ void debug_token(Token *token) {
     case TK_STRINGIFY:
       fprintf(stderr, "# ");
       break;
+    case TK_ELLIPSIS:
+      fprintf(stderr, "... ");
+      break;
     }
     tok = tok->next;
   }

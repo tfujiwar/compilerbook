@@ -333,6 +333,8 @@ Type *type() {
     } else if (consume_token(TK_INT)) {
       ty->ty = INT;
       ty->size = 4;
+    } else if (consume_token(TK_ELLIPSIS)) {
+      ty->ty = ELLIPSIS;
     } else {
       return NULL;
     }

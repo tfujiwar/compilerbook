@@ -60,6 +60,7 @@ typedef enum {
   TK_DEFINED,
   TK_CONCAT,
   TK_STRINGIFY,
+  TK_ELLIPSIS,
 } TokenKind;
 
 typedef enum {
@@ -143,7 +144,7 @@ struct Enum {
 typedef struct Type Type;
 
 struct Type {
-  enum { VOID, CHAR, INT, PTR, ARRAY, STRUCT, ENUM } ty;
+  enum { VOID, CHAR, INT, PTR, ARRAY, STRUCT, ENUM, ELLIPSIS } ty;
   struct Type *ptr_to;
   size_t size;
   size_t array_size;
