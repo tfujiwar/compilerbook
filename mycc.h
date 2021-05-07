@@ -257,6 +257,7 @@ void debug_scope(Scope *scope);
 void debug_functions();
 void debug_macros();
 char *substring(char *str, int len);
+char *convert_escaped_str(char *str);
 
 Source *new_source(Source *parent, char* cur);
 

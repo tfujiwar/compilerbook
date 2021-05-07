@@ -431,6 +431,7 @@ Node *function() {
         node->lvar = lvar;
 
         Node *cur = node;
+        str->str = convert_escaped_str(str->str);
 
         for (int i = 0; i < strlen(str->str) + 1; i++) {
           Node *child = new_node_num(str->str[i]);
@@ -821,6 +822,8 @@ Node *stmt() {
 
         int index = 0;
         Node *cur = node;
+
+        str->str = convert_escaped_str(str->str);
 
         for (int i = 0; i < strlen(str->str); i++) {
           Node *nd = new_node(ND_LVAR, NULL, NULL);

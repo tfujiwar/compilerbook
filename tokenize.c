@@ -222,7 +222,7 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
 
     if (**p == '"') {
       char *prev = ++(*p);
-      while (**p != '"' || **p == '\\') (*p)++;
+      while (**p != '"' || *(*p-1) == '\\') (*p)++;
       cur = new_token(TK_STRING, cur, src, prev, *p - prev);
       (*p)++;
       continue;

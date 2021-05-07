@@ -40,7 +40,7 @@ char gstr_zero[5];
 
 int gint = 1;
 int garr[5] = {1, 2, 3};
-char gstr[5] = "ABC";
+char gstr[5] = "ABC\"";
 
 struct Struct {
   int i;
@@ -220,10 +220,11 @@ int main() {
   { char a; char b; a=128; b=-128; assert("a==b", a==b, 1); }
   { int a; int b; a=128; b=-128; assert("a!=b", a!=b, 1); }
 
-  { char *s; s="ABC"; assert("s[0]", s[0], 65); }
-  { char *s; s="ABC"; assert("s[1]", s[1], 66); }
-  { char *s; s="ABC"; assert("s[2]", s[2], 67); }
-  { char *s; s="ABC"; assert("s[3]", s[3], 0); }
+  { char *s; s="ABC\""; assert("s[0]", s[0], 65); }
+  { char *s; s="ABC\""; assert("s[1]", s[1], 66); }
+  { char *s; s="ABC\""; assert("s[2]", s[2], 67); }
+  { char *s; s="ABC\""; assert("s[3]", s[3], '"'); }
+  { char *s; s="ABC\""; assert("s[3]", s[4], 0); }
 
   { int a; a=10; { int a; a=100; a=a+1; } a=a+1; assert("a", a, 11); }
 
@@ -255,7 +256,8 @@ int main() {
   assert("garr[0]", garr[0], 1);
   assert("garr[4]", garr[4], 0);
   assert("gstr[0]", gstr[0], 65);
-  assert("gstr[4]", gstr[4], 0);
+  assert("gstr[4]", gstr[3], '"');
+  assert("gstr[5]", gstr[4], 0);
 
   assert("sizeof(gint)", sizeof(gint), 4);
   assert("sizeof(garr)", sizeof(garr), 20);

@@ -156,6 +156,33 @@ char *substring(char *str, int len) {
   return sub;
 }
 
+char *convert_escaped_str(char *str) {
+  char *converted = malloc(sizeof(char) * (strlen(str) + 1));
+  int j = 0;
+  for (int i = 0; i < strlen(str); i++) {
+    if (str[i] == '\\') {
+      i++;
+      if (str[i] == 'a')  converted[j] = '\a';
+      if (str[i] == 'b')  converted[j] = '\b';
+      if (str[i] == 'f')  converted[j] = '\f';
+      if (str[i] == 'n')  converted[j] = '\n';
+      if (str[i] == 'r')  converted[j] = '\r';
+      if (str[i] == 't')  converted[j] = '\t';
+      if (str[i] == 'v')  converted[j] = '\v';
+      if (str[i] == '\\') converted[j] = '\\';
+      if (str[i] == '\?') converted[j] = '\?';
+      if (str[i] == '\'') converted[j] = '\'';
+      if (str[i] == '\"') converted[j] = '\"';
+      if (str[i] == '\0') converted[j] = '\0';
+    } else {
+      converted[i] = str[j];
+    }
+    j++;
+  }
+  converted[j] = '\0';
+  return converted;
+}
+
 void debug_token(Token *token) {
   Token *tok = token;
   while (tok) {
