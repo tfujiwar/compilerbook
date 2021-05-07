@@ -131,6 +131,7 @@ typedef struct Struct Struct;
 struct Struct {
   char *name;
   Map *member;
+  bool is_proto;
 };
 
 typedef struct Enum Enum;

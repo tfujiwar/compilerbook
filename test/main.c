@@ -354,6 +354,12 @@ int main() {
     mystruct.i = 1;
     assert("mystruct.i", mystruct.i, 1);
 
+    typedef struct MyStruct2 MyStruct2;
+    struct MyStruct2 { int i; };
+    MyStruct2 mystruct2;
+    mystruct2.i = 2;
+    assert("mystruct2.i", mystruct2.i, 2);
+
     typedef int MyInt;
     MyInt myint = 10;
     assert("myint", myint, 10);

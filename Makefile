@@ -18,6 +18,9 @@ test_queue: mycc
 test_std: mycc
 	./mycc test/std.c > tmp.s && cc tmp.s -o tmp && ./tmp;
 
+test_self: mycc
+	./mycc main.c > tmp.s && cc tmp.s -o tmp && ./tmp;
+
 clean:
 	rm -f mycc *.o *~ tmp*
 

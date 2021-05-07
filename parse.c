@@ -230,13 +230,13 @@ void program() {
 }
 
 Type *type() {
-  Type *ty;
-  Token *ident;
+  Type *ty = NULL;
+  Token *ident = NULL;
   Token *tok = token;
 
   if (consume_token(TK_STRUCT)) {
     ident = consume_ident();
-    if (!ident || !(ty = find_struct(ident->str))) {
+    if (!ident || !(ty = find_struct(ident->str)) || ty->strct->is_proto) {
       char* st_name;
       if (ident) {
         st_name = ident->str;
@@ -245,25 +245,29 @@ Type *type() {
         sprintf(st_name, "struct%03d", struct_label++);
       }
 
-      expect("{");
-      Type *st_type = calloc(1, sizeof(Type));
-      st_type->ty = STRUCT;
-      st_type->strct = new_struct(st_name);
-      map_put(scope->structs, st_type->strct->name, st_type);
-
-      int offset = 0;
-
-      while (!consume("}")) {
-        Type *ty = type();
-        Token *mem = consume_ident();
-        Member *member = new_member(mem->str, ty, offset);
-        map_put(st_type->strct->member, member->name, member);
-        offset += ty->size;
-        expect(";");
+      if (!ty) {
+        ty = calloc(1, sizeof(Type));
+        ty->ty = STRUCT;
+        ty->strct = new_struct(st_name);
+        ty->strct->is_proto = true;
+        map_put(scope->structs, ty->strct->name, ty);
       }
 
-      st_type->size = (offset + 3) / 4 * 4;
-      ty = st_type;
+      if (consume("{")) {
+        int offset = 0;
+
+        while (!consume("}")) {
+          Type *mem_ty = type();
+          Token *mem = consume_ident();
+          Member *member = new_member(mem->str, mem_ty, offset);
+          map_put(ty->strct->member, member->name, member);
+          offset += mem_ty->size;
+          expect(";");
+        }
+
+        ty->size = (offset + 3) / 4 * 4;
+        ty->strct->is_proto = false;
+      }
     }
 
   } else if (consume_token(TK_ENUM)) {
