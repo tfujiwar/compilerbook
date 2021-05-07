@@ -71,9 +71,23 @@ int sum(int *a, int len) {
 }
 
 int main() {
-  { assert("0", 0, 0); }
-  { assert("42", 42, 42); }
-  { assert("'A'", 'A', 65); }
+  {
+    assert("0", 0, 0);
+    assert("42", 42, 42);
+    assert("'A'", 'A', 65);
+    assert("'\a'", '\a', 7);
+    assert("'\b'", '\b', 8);
+    assert("'\f'", '\f', 12);
+    assert("'\n'", '\n', 10);
+    assert("'\r'", '\r', 13);
+    assert("'\t'", '\t', 9);
+    assert("'\v'", '\v', 11);
+    assert("'\\'", '\\', 92);
+    assert("'\?'", '\?', 63);
+    assert("'\''", '\'', 39);
+    assert("'\"'", '\"', 34);
+    assert("'\0'", '\0', 0);
+  }
 
   { assert("5+20-4", 5+20-4, 21); }
   { assert("12 + 34 - 5 ", 12 + 34 - 5 , 41); }

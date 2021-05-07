@@ -229,9 +229,15 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
     }
 
     if (**p == '\'' ) {
-      cur = new_token(TK_NUM, cur, src, *p + 1, 1);
-      cur->val = *(*p + 1);
-      *p += 3;
+      if (*(*p+1) == '\\') {
+        cur = new_token(TK_NUM, cur, src, *p + 1, 2);
+        cur->val = convert_escaped_str(cur->str)[0];
+        *p += 4;
+      } else {
+        cur = new_token(TK_NUM, cur, src, *p + 1, 1);
+        cur->val = *(*p + 1);
+        *p += 3;
+      }
       continue;
     }
 
