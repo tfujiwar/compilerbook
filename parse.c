@@ -352,6 +352,8 @@ Type *type() {
 }
 
 Node *function() {
+  bool is_extern = consume_token(TK_EXTERN);  // TODO
+
   // Struct Definition
   Node *node;
   if (node = parse_typedef()) return node;

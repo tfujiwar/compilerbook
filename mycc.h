@@ -61,6 +61,7 @@ typedef enum {
   TK_CONCAT,
   TK_STRINGIFY,
   TK_ELLIPSIS,
+  TK_EXTERN,
 } TokenKind;
 
 typedef enum {

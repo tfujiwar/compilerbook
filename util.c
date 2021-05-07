@@ -236,6 +236,9 @@ void debug_token(Token *token) {
     case TK_ELLIPSIS:
       fprintf(stderr, "... ");
       break;
+    case TK_EXTERN:
+      fprintf(stderr, "EXTERN ");
+      break;
     }
     tok = tok->next;
   }
@@ -555,8 +558,7 @@ void debug_scope(Scope *scope) {
 
     debug("enum:");
     for (int i = 0; i < sc->enums->keys->len; i++) {
-      fprintf(stderr, "- %s: ", sc->enums->keys->data[i]);
-      debug_type(sc->enums->vals->data[i]);
+      fprintf(stderr, "- %s\n", sc->enums->keys->data[i]);
     }
 
     debug("variable:");

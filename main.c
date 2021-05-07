@@ -2,7 +2,7 @@
 
 // Define global variables
 Token *token;
-Node *code[100];
+Node *code[1024];
 LVar *locals;
 Map *functions;
 Map *strings;

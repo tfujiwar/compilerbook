@@ -202,8 +202,14 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
     }
 
     if (memcmp(*p, "enum", 4) == 0 && !is_ident_char((*p)[4])) {
-      cur = new_token(TK_ENUM, cur, src, *p, 6);
+      cur = new_token(TK_ENUM, cur, src, *p, 4);
       *p += 4;
+      continue;
+    }
+
+    if (memcmp(*p, "extern", 6) == 0 && !is_ident_char((*p)[6])) {
+      cur = new_token(TK_EXTERN, cur, src, *p, 6);
+      *p += 6;
       continue;
     }
 
