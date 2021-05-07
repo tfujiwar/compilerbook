@@ -1137,11 +1137,13 @@ Node *unary_right() {
     } else if (consume("(")) {
       node = new_node(ND_CALL, node, NULL);
       node->children = new_vec();
-      while (true) {
-        vec_push(node->children, assign());
-        if (!consume(",")) break;
+      if (!consume(")")) {
+        while (true) {
+          vec_push(node->children, assign());
+          if (!consume(",")) break;
+        }
+        expect(")");
       }
-      expect(")");
 
     } else if (consume(".")) {
       Token *ident = consume_ident();
