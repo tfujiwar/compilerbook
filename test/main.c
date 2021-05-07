@@ -174,16 +174,29 @@ int main() {
   { int x; int *y; y=&x; *y=3; assert("x", x, 3); }
   { int x; int *y; int **z; y=&x; z=&y; **z=3; assert("x", x, 3); }
 
-  { int x; assert("sizeof(x)", sizeof(x), 4); }
-  { int x; assert("sizeof(x+1)", sizeof(x+1), 4); }
-  { int x; assert("sizeof(1+x)", sizeof(1+x), 4); }
-  { int *x; assert("sizeof(x)", sizeof(x), 8); }
-  { int *x; assert("sizeof(x+1)", sizeof(x+1), 8); }
-  { int *x; assert("sizeof(1+x)", sizeof(1+x), 8); }
-  { int a[10]; assert("sizeof(a[0])", sizeof(a[0]), 4); }
-  { int a[10]; assert("sizeof(&a)", sizeof(&a), 8); }
-  { int a[10]; assert("sizeof(a+1)", sizeof(a+1), 8); }
-  { int a[10]; assert("sizeof(a)", sizeof(a), 40); }
+  {
+    int x;
+    assert("sizeof(x)", sizeof(x), 4);
+    assert("sizeof(x+1)", sizeof(x+1), 4);
+    assert("sizeof(1+x)", sizeof(1+x), 4);
+  
+    int *p;
+    assert("sizeof(x)", sizeof(p), 8);
+    assert("sizeof(x+1)", sizeof(p+1), 8);
+    assert("sizeof(1+x)", sizeof(1+p), 8);
+
+    int a[10]; assert("sizeof(a[0])", sizeof(a[0]), 4);
+    assert("sizeof(&a)", sizeof(&a), 8);
+    assert("sizeof(a+1)", sizeof(a+1), 8);
+    assert("sizeof(a)", sizeof(a), 40);
+
+    assert("sizeof(int)", sizeof(int), 4);
+    assert("sizeof(int *)", sizeof(int *), 8);
+    assert("sizeof(struct { int i; int j; int k; })", sizeof(struct { int i; int j; int k; }), 12);
+
+    assert("sizeof(x)", sizeof x, 4);
+    assert("sizeof(x)", sizeof x+1, 5);
+  }
 
   { int a[2]; *a=1; *(a+1)=2; int *p; p=a; assert("*p+*(p+1)", *p+*(p+1), 3); }
   { int a[2]; *a=1; *(a+1)=2; int *p; p=a+1; assert("*p+*(p-1)", *p+*(p-1), 3); }

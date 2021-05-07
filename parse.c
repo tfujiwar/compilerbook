@@ -1071,8 +1071,31 @@ Node *unary_left() {
   if (consume("&"))
     return new_node(ND_ADDR, unary_left(), NULL);
 
-  if (consume_token(TK_SIZEOF))
-    return new_node(ND_SIZEOF, unary_left(), NULL);
+  if (consume_token(TK_SIZEOF)) {
+    Node *node;
+    bool is_paren_open = consume("(");
+
+    Type *ty = type();
+    if (ty) {
+      LVar *lvar = calloc(1, sizeof(LVar));
+      lvar->name = "dummy_for_sizeof";
+      lvar->type = ty;
+
+      Node *lvar_node = new_node(ND_LVAR, NULL, NULL);
+      lvar_node->lvar = lvar;
+
+      node = new_node(ND_SIZEOF, lvar_node, NULL);
+
+    } else {
+      if (is_paren_open)
+        node = new_node(ND_SIZEOF, expr(), NULL);
+      else
+        node = new_node(ND_SIZEOF, unary_left(), NULL);
+    }
+
+    if (is_paren_open) expect(")");
+    return node;
+  }
 
   if (consume("++")) {
     Node *nd = unary_left();
