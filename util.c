@@ -146,6 +146,7 @@ void debug_token(Token *token) {
     switch (tok->kind) {
     case TK_RESERVED:
       fprintf(stderr, "%s ", tok->str);
+      if (tok->str[0] == ';') fprintf(stderr, "\n");
       break;
     case TK_IDENT:
       fprintf(stderr, "IDENT(%s) ", tok->str);
@@ -202,13 +203,19 @@ void debug_token(Token *token) {
       fprintf(stderr, "DEFINED ");
       break;
     case TK_STRING:
-      fprintf(stderr, "STRING ");
+      fprintf(stderr, "\"%s\" ", tok->str);
       break;
     case TK_STRUCT:
       fprintf(stderr, "STRUCT ");
       break;
     case TK_TYPEDEF:
       fprintf(stderr, "TYPEDEF ");
+      break;
+    case TK_CONCAT:
+      fprintf(stderr, "## ");
+      break;
+    case TK_STRINGIFY:
+      fprintf(stderr, "# ");
       break;
     }
     tok = tok->next;

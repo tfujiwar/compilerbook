@@ -109,6 +109,41 @@ Token *replace_undefined(Token *token) {
   return head.next;
 }
 
+Token *apply_concat(Token *token) {
+  Token head;
+  head.next = token;
+  Token *tok = &head;
+
+  while (tok->next) {
+    if (tok->next->kind == TK_CONCAT) {
+      tok->kind = TK_IDENT;
+      sprintf(tok->str, "%s%s", tok->str, tok->next->next->str);
+      tok->next = tok->next->next->next;
+      continue;
+    }
+    tok = tok->next;
+  }
+
+  return head.next;
+}
+
+Token *apply_stringify(Token *token) {
+  Token head;
+  head.next = token;
+  Token *tok = &head;
+
+  while (tok->next) {
+    if (tok->next->kind == TK_STRINGIFY) {
+      tok->next->next->kind = TK_STRING;
+      tok->next = tok->next->next;
+      continue;
+    }
+    tok = tok->next;
+  }
+
+  return head.next;
+}
+
 int eval_node(Node *node) {
   switch (node->kind) {
   case ND_NUM:
@@ -241,14 +276,13 @@ Token* preprocess(Source *src) {
       continue;
     }
 
-    char *eol = next_eol(p);
-    debug("%s, %s", source->filename, substring(p, eol-p));
-
     // Not a macro directive
     if (*p != '#') {
       if (output_enabled) {
         Token *t = tokenize(source, &p, false);
         token_cur->next = apply_macros(t, NULL);
+        apply_concat(token_cur->next);
+        apply_stringify(token_cur->next);
         while (token_cur->next->kind != TK_EOF) {
           token_cur = token_cur->next;
         }
@@ -313,7 +347,6 @@ Token* preprocess(Source *src) {
       source = new_source(source, filename);
       p = source->cur;
 
-      debug("%s", filename);
       continue;
     }
 

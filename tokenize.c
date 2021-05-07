@@ -48,9 +48,15 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
       continue;
     }
 
+    if (memcmp(*p, "##", 2) == 0) {
+      cur = new_token(TK_CONCAT, cur, src, *p, 2);
+      *p += 2;
+      continue;
+    }
+
     if (**p == '#') {
-      (*p)++;
-      while (**p != '\n' && **p != '\0') (*p)++;
+      cur = new_token(TK_STRINGIFY, cur, src, *p, 1);
+      *p += 1;
       continue;
     }
 

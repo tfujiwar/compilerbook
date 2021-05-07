@@ -16,6 +16,9 @@
 #define rep(i, n)\
         for (int i = 0; i < (n); i++)
 
+#define CONCAT(X, Y) X ## Y
+#define STRINGIFY(X) #X
+
 // #define foo foo a bar b baz c
 // #define bar foo 1
 // #define baz bar 2
@@ -727,6 +730,16 @@ int main() {
 #endif /* must be ignore
 must be ignore */
     assert("replace_undefined", replace_undefined, 3);
+  }
+
+  {
+    int xy = 123;
+    assert("CONCAT(x, y)", CONCAT(x, y), 123);
+  }
+
+  {
+    char stringify[] = STRINGIFY(abc);
+    assert("stringify[0]", stringify[0], 'a');
   }
 
   return 0;
