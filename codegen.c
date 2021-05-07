@@ -426,8 +426,11 @@ void gen(Node *node) {
     return;
 
   case ND_DECLARE_GVAR:
+    if (node->lvar->is_extern) return;
+
     printf("# ND_DECLARE_GVAR\n");
     printf("%s:\n", node->lvar->name);
+    printf("	.globl	%s\n", node->lvar->name);
 
     bytes = 0;
     cur = node->rhs;

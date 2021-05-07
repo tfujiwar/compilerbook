@@ -352,7 +352,7 @@ Type *type() {
 }
 
 Node *function() {
-  bool is_extern = consume_token(TK_EXTERN);  // TODO
+  bool is_extern = consume_token(TK_EXTERN);
 
   // Struct Definition
   Node *node;
@@ -386,6 +386,7 @@ Node *function() {
     LVar *lvar = new_var(ident->str);
     lvar->is_global = true;
     lvar->type = ty;
+    lvar->is_extern = is_extern;
 
     // Initialize variable
     if (consume("=")) {
@@ -1184,7 +1185,7 @@ Node *primary() {
     }
 
     // Enum constants
-    int *enum_const = map_get(scope->enum_consts, name);
+    int *enum_const = find_enum_consts(name);
     if (enum_const) {
       node->kind = ND_NUM;
       node->val = *enum_const;

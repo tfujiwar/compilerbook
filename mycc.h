@@ -172,6 +172,7 @@ struct LVar {
   int offset;
   Type *type;
   bool is_global;
+  bool is_extern;
 };
 
 typedef struct Function Function;
