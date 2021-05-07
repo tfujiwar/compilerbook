@@ -37,10 +37,7 @@ void error(char *fmt, ...) {
   exit(1);
 }
 
-void warning_at(Source *src, char* at, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
+void print_error_cursor(Source *src, char *at) {
   char *begin = at;
   while (src->head < begin && begin[-1] != '\n')
     begin--;
@@ -59,22 +56,41 @@ void warning_at(Source *src, char* at, char *fmt, ...) {
   int pos = at - begin + indent;
   fprintf(stderr, "%*s", pos, " ");
   fprintf(stderr, "^ ");
+}
 
+void warning_at(Source *src, char* at, char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+
+  print_error_cursor(src, at);
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
+
+  va_end(ap);
 }
 
 void error_at(Source *src, char* at, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  warning_at(src, at, fmt, ap);
+
+  print_error_cursor(src, at);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+
+  va_end(ap);
   exit(1);
 }
 
 void error_at_token(Token *token, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  error_at(token->src, token->at, fmt, ap);
+
+  print_error_cursor(token->src, token->at);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+
+  va_end(ap);
+  exit(1);
 }
 
 Vector *new_vec() {
