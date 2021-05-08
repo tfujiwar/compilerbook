@@ -90,6 +90,27 @@ Node *sub_ptr_node(Node *ptr, Node *num) {
   return sub;
 }
 
+Node *sub_ptr_and_ptr_node(Node *ptr1, Node *ptr2) {
+  Node *size = calloc(1, sizeof(Node));
+  size->kind = ND_NUM;
+  size->val = ptr1->type->ptr_to->size;
+  size->type = type_int();
+
+  Node *sub = calloc(1, sizeof(Node));
+  sub->kind = ND_SUB;
+  sub->lhs = ptr1;
+  sub->rhs = ptr2;
+  sub->type = type_int();
+
+  Node *div = calloc(1, sizeof(Node));
+  div->kind = ND_DIV;
+  div->lhs = sub;
+  div->rhs = size;
+  div->type = type_int();
+
+  return div;
+}
+
 Node *int_node(int val) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_NUM;
@@ -156,7 +177,7 @@ Node *analyze(Node *node, bool cast_array) {
       error("invalid operands for sub: num, ptr");
 
     if (is_ptr_like(node->lhs) && is_ptr_like(node->rhs))
-      error("not supported operands for sub: ptr, ptr");  // TODO
+      return sub_ptr_and_ptr_node(node->lhs, node->rhs);
 
     if (is_ptr_like(node->lhs) && !is_ptr_like(node->rhs))
       return sub_ptr_node(node->lhs, node->rhs);
