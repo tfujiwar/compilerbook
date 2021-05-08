@@ -81,7 +81,7 @@ Token *consume_num() {
 
 Node *parse_typedef() {
   if (consume_token(TK_TYPEDEF)) {
-    Type *ty = type();
+    Type *ty = consume_type();
     Token *ident = consume_ident();
     if (!ident) error_at_token(token, "identifier expected");
     expect(";");
@@ -229,7 +229,7 @@ void program() {
   code[i] = NULL;
 }
 
-Type *type() {
+Type *consume_type() {
   Type *ty = NULL;
   Token *ident = NULL;
   Token *tok = token;
@@ -257,7 +257,7 @@ Type *type() {
         int offset = 0;
 
         while (!consume("}")) {
-          Type *mem_ty = type();
+          Type *mem_ty = consume_type();
           Token *mem = consume_ident();
           Member *member = new_member(mem->str, mem_ty, offset);
           map_put(ty->strct->member, member->name, member);
@@ -358,7 +358,7 @@ Node *function() {
   Node *node;
   if (node = parse_typedef()) return node;
 
-  Type *ty = type();
+  Type *ty = consume_type();
   if (!ty) error_at_token(token, "type expected");
   if (ty->ty == STRUCT && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
   if (ty->ty == ENUM && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
@@ -481,7 +481,7 @@ Node *function() {
   Vector *arg_types = new_vec();
   Type *arg_ty;
 
-  while (arg_ty = type()) {
+  while (arg_ty = consume_type()) {
     vec_push(arg_types, arg_ty);
 
     Token *ident = consume_ident();
@@ -718,7 +718,7 @@ Node *stmt() {
 
   // Declare local variable
   Type *ty;
-  if (ty = type()) {
+  if (ty = consume_type()) {
     if (ty->ty == STRUCT && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
     if (ty->ty == ENUM && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
 
@@ -1080,7 +1080,7 @@ Node *unary_left() {
     Node *node;
     bool is_paren_open = consume("(");
 
-    Type *ty = type();
+    Type *ty = consume_type();
     if (ty) {
       LVar *lvar = calloc(1, sizeof(LVar));
       lvar->name = "dummy_for_sizeof";

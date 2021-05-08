@@ -281,7 +281,7 @@ Function *new_function(char *name, Type *type);
 Struct *new_struct(char *name);
 Member *new_member(char *name, Type *type, int offset);
 Enum *new_enum(char *name);
-Type *type();
+Type *consume_type();
 Type *find_type(char *name);
 Type *find_struct(char *name);
 Type *find_enum(char *name);

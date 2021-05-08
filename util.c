@@ -359,7 +359,7 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     return;
 
   case ND_FUNC_NAME:
-    fprintf(stderr, "%sFUNC_NAME\n", pre1);
+    fprintf(stderr, "%sFUNC_NAME(%s)\n", pre1, node->func->name);
     return;
 
   case ND_CASE:
