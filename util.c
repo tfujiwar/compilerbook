@@ -31,10 +31,8 @@ char *read_file(char *path) {
   return buf;
 }
 
-void debug(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
+void debug(char *msg) {
+  fprintf(stderr, msg);
   fprintf(stderr, "\n");
 }
 
@@ -647,7 +645,7 @@ void debug_macros() {
   for (int i = 0; i < macros->keys->len; i++) {
     Macro *macro = macros->vals->data[i];
     if (!macro) continue;
-    debug("%s:", macros->keys->data[i]);
+    fprintf(stderr, "%s:\n", macros->keys->data[i]);
     fprintf(stderr, "- from : ");
     debug_token(macro->from);
     debug("");
