@@ -51,7 +51,8 @@ void print_error_cursor(Source *src, char *at) {
     if (*p == '\n') line++;
 
   int indent = fprintf(stderr, "%s:%d: ", src->filename, line);
-  fprintf(stderr, "%.*s\n", (int)(end - begin), begin);
+  int length = end - begin;
+  fprintf(stderr, "%.*s\n", length, begin);
 
   int pos = at - begin + indent;
   fprintf(stderr, "%*s", pos, " ");
@@ -152,7 +153,7 @@ void map_delete(Map *map, char *key) {
 char *substring(char *str, int len) {
   char *sub = malloc(sizeof(char) * (len + 1));
   strncpy(sub, str, len);
-  sub[len] = '\x0';
+  sub[len] = '\0';
   return sub;
 }
 
@@ -273,7 +274,14 @@ void debug_token(Token *token) {
 
 void debug_node(Node *node, char *pre1, char *pre2) {
   Node *cur;
-  char p11[255], p21[255], p31[255], p41[255], p12[255], p22[255], p32[255], p42[255];
+  char p11[255];
+  char p21[255];
+  char p31[255];
+  char p41[255];
+  char p12[255];
+  char p22[255];
+  char p32[255];
+  char p42[255];
   char *label;
   char *type;
 
@@ -598,8 +606,9 @@ void debug_scope(Scope *scope) {
 
     debug("variable:");
     for (int i = 0; i < sc->vars->keys->len; i++) {
+      LVar *lvar = sc->vars->vals->data[i];
       fprintf(stderr, "- %s: ", sc->vars->keys->data[i]);
-      debug_type(((LVar *)(sc->vars->vals->data[i]))->type);
+      debug_type(lvar->type);
     }
 
     debug("");

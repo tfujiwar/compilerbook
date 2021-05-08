@@ -486,6 +486,7 @@ Node *function() {
 
     Token *ident = consume_ident();
     if (ident) vec_push(arg_names, ident->str);
+    else if (arg_ty->ty == ELLIPSIS) vec_push(arg_names, "ELLIPSIS");
     else func->is_proto = true;
 
     if (!consume(",")) break;

@@ -26,7 +26,7 @@ char *reg_a(Node *node) {
     case 8:
       return "rax";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_a");
   }
 }
 
@@ -41,7 +41,7 @@ char *reg_b(Node *node) {
     case 8:
       return "rbx";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_b");
   }
 }
 
@@ -56,7 +56,7 @@ char *reg_c(Node *node) {
     case 8:
       return "rcx";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_c");
   }
 }
 
@@ -71,7 +71,7 @@ char *reg_d(Node *node) {
     case 8:
       return "rdx";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_d");
   }
 }
 
@@ -86,7 +86,7 @@ char *reg_di(Node *node) {
     case 8:
       return "rdi";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_di");
   }
 }
 
@@ -101,7 +101,7 @@ char *reg_si(Node *node) {
     case 8:
       return "rsi";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_si");
   }
 }
 
@@ -116,7 +116,7 @@ char *reg_8(Node *node) {
     case 8:
       return "r8";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_8");
   }
 }
 
@@ -131,7 +131,7 @@ char *reg_9(Node *node) {
     case 8:
       return "r9";
     default:
-      error("invalid type size");
+      error("invalid type size in reg_9");
   }
 }
 
@@ -146,7 +146,7 @@ char *byte(Type *type) {
     case 8:
       return ".quad";
     default:
-      error("invalid type size");
+      error("invalid type size in byte");
   }
 }
 

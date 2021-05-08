@@ -26,7 +26,7 @@ bool same_type(Type *t1, Type *t2) {
   if (t1->ty != t2->ty)
     return false;
 
-  if (t1->ty == CHAR || t1->ty == INT)
+  if (t1->ty == CHAR || t1->ty == INT || t1->ty == ELLIPSIS || t1->ty == VOID)
     return true;
 
   if (t1->ty == PTR)

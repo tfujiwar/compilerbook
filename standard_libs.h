@@ -11,9 +11,16 @@ typedef struct {} FILE;
 
 int printf();
 int sprintf();
+int vfprintf();
+int fprintf();
 void *calloc();
+void *malloc();
+void *realloc();
 int strcmp();
+int strncmp();
 size_t strlen();
+char *strchr();
+int strncpy();
 int memcmp();
 bool isspace();
 FILE *fopen();
@@ -22,5 +29,15 @@ int fseek();
 size_t ftell();
 size_t fread();
 char* strerror();
+bool isdigit();
+int strtol();
+void exit();
 
+typedef void *va_list;
+void va_start();
+void va_end();
+
+#define FOPEN_MAX 1024
 extern int errno;
+extern FILE __streams[FOPEN_MAX];
+#define stderr &__streams[2]
