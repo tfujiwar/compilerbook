@@ -358,6 +358,10 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     fprintf(stderr, "%sBREAK\n", pre1);
     return;
 
+  case ND_CONTINUE:
+    fprintf(stderr, "%sCONTINUE\n", pre1);
+    return;
+
   case ND_FUNC_NAME:
     fprintf(stderr, "%sFUNC_NAME(%s)\n", pre1, node->func->name);
     return;

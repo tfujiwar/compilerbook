@@ -263,6 +263,8 @@ void gen(Node *node) {
     }
     gen(node->body);
     printf("  pop rax\n");
+
+    printf(".Lcont%03d:\n", node->val);
     if (node->inc) {
       gen(node->inc);
       printf("  pop rax\n");
@@ -281,6 +283,7 @@ void gen(Node *node) {
     printf("  je .Lend%03d\n", node->val);
     gen(node->body);
     printf("  pop rax\n");
+    printf(".Lcont%03d:\n", node->val);
     printf("  jmp .Lbegin%03d\n", node->val);
     printf(".Lend%03d:\n", node->val);
     printf("  push 0\n");  // dummy
@@ -291,6 +294,7 @@ void gen(Node *node) {
     printf(".Lbegin%03d:\n", node->val);
     gen(node->body);
     printf("  pop rax\n");
+    printf(".Lcont%03d:\n", node->val);
     gen(node->cond);
     printf("  pop rax\n");
     printf("  cmp rax, 0\n");
@@ -330,6 +334,11 @@ void gen(Node *node) {
 
   case ND_BREAK:
     printf("  jmp .Lend%03d\n", node->val);
+    return;
+
+  case ND_CONTINUE:
+    printf("  #ND_CONTINUE\n");
+    printf("  jmp .Lcont%03d\n", node->val);
     return;
 
   case ND_BLOCK:

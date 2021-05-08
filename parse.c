@@ -699,6 +699,14 @@ Node *stmt() {
     return node;
   }
 
+  // Continue statement
+  if (consume_token(TK_CONTINUE)) {
+    Node *node = new_node(ND_CONTINUE, NULL, NULL);
+    node->val = br_scope->node->val;
+    expect(";");
+    return node;
+  }
+
   // Block
   if (consume("{")) {
     scope = new_scope(scope);

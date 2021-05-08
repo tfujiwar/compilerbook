@@ -183,6 +183,12 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
       continue;
     }
 
+    if (memcmp(*p, "continue", 8) == 0 && !is_ident_char((*p)[8])) {
+      cur = new_token(TK_CONTINUE, cur, src, *p, 8);
+      *p += 8;
+      continue;
+    }
+
     if (memcmp(*p, "sizeof", 6) == 0 && !is_ident_char((*p)[6])) {
       cur = new_token(TK_SIZEOF, cur, src, *p, 6);
       *p += 6;

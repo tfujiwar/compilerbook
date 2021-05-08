@@ -287,6 +287,7 @@ Node *analyze(Node *node, bool cast_array) {
   case ND_CASE:
   case ND_DEFAULT:
   case ND_BREAK:
+  case ND_CONTINUE:
     return node;
 
   case ND_BLOCK:

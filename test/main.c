@@ -564,6 +564,29 @@ int main() {
   }
 
   {
+    int for_continue = 0;
+    for (int i = 1; i <= 10; i++) {
+      if (i % 3) continue;
+      for (int j = 1; j <= 10; j++) {
+        if (j % 2) continue;
+        for_continue++;
+      }
+    }
+    assert("for_continue", for_continue, 15);
+  }
+
+  {
+    int while_continue = 0;
+    int i = 0;
+    while (i < 10) {
+      i++;
+      if (i % 3) continue;
+      while_continue++;
+    }
+    assert("while_continue", while_continue, 3);
+  }
+
+  {
     int i = 0;
     int break_for_ans = 0;
     switch (i) {
