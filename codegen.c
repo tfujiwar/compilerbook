@@ -455,7 +455,9 @@ void gen(Node *node) {
           bytes += node->type->size;
         }
       } else {
-        error("cannot initialize global variable: %s", node->lvar->name);
+        char str[256];
+        sprintf(str, "cannot initialize global variable: %s", node->lvar->name);
+        error(str);
       }
       cur = cur->next;
     }

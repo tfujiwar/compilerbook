@@ -324,7 +324,9 @@ Token* preprocess(Source *src) {
           }
         }
         if (!found) {
-          error("source not found: %s", substring(p, end - p));
+          char str[256];
+          sprintf(str, "source not found: %s", substring(p, end - p));
+          error(str);
         }
 
       } else if (*p == '"') {

@@ -391,7 +391,7 @@ Node *analyze(Node *node, bool cast_array) {
 
   case ND_DOT:
     node->lhs = analyze(node->lhs, true);
-    if (node->lhs->type->ty != STRUCT) error("struct expected: %d", node->lhs->type->ty);
+    if (node->lhs->type->ty != STRUCT) error("struct expected");
 
     Type *type = find_struct(node->lhs->type->strct->name);
     if (!type) error("type not found");
@@ -415,7 +415,7 @@ Node *analyze(Node *node, bool cast_array) {
   case ND_ARROW:
     node->lhs = analyze(node->lhs, true);
     if (node->lhs->type->ty != PTR || node->lhs->type->ptr_to->ty != STRUCT)
-      error("struct expected: %d", node->lhs->type->ty);
+      error("struct expected");
 
     type = find_struct(node->lhs->type->ptr_to->strct->name);
     if (!type) error("type not found");
@@ -436,6 +436,6 @@ Node *analyze(Node *node, bool cast_array) {
     return nd;
 
   default:
-    error("failed to analyze node: %d", node->kind);
+    error("failed to analyze node");
   }
 }
