@@ -6,4 +6,8 @@
 #define NULL 0
 
 int printf();
+int sprintf();
 void *calloc();
+int strcmp();
+int strlen();
+int isspace();

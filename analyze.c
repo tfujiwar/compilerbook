@@ -38,6 +38,9 @@ bool same_type(Type *t1, Type *t2) {
   if (t1->ty == STRUCT)
     return t1->strct == t2->strct;
 
+  if (t1->ty == ENUM)
+    return t1->enm == t2->enm;
+
   error("unsupported type");
 }
 

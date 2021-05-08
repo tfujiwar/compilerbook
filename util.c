@@ -358,6 +358,10 @@ void debug_node(Node *node, char *pre1, char *pre2) {
     fprintf(stderr, "%sBREAK\n", pre1);
     return;
 
+  case ND_FUNC_NAME:
+    fprintf(stderr, "%sFUNC_NAME\n", pre1);
+    return;
+
   case ND_CASE:
     sprintf(p11, "%sCASE ----- ", pre1);
     sprintf(p12, "%s           ", pre2);

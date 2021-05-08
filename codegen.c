@@ -159,7 +159,8 @@ void gen_lval(Node *node) {
 }
 
 void gen(Node *node) {
-  int l, num;
+  int l;
+  int num;
   Node *cur;
   char name[64];
   int bytes;
@@ -345,6 +346,7 @@ void gen(Node *node) {
   case ND_FUNC:
     printf("# ND_FUNC\n");
     printf("%s:\n", node->func->name);
+    printf("  .globl %s\n", node->func->name);
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
     printf("  sub rsp, %d\n", (node->val + 15) / 16 * 16);

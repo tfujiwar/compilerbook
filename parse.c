@@ -542,6 +542,7 @@ Node *function() {
 
   // Function prototype
   expect(";");
+  func->is_proto = true;
 
   if (func->arg_types->len) {
     if (arg_types->len != func->arg_types->len)
