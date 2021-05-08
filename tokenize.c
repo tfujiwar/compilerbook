@@ -90,25 +90,25 @@ Token *tokenize(Source *src, char **p, bool is_macro) {
     }
     if (found) continue;
 
-    if (memcmp(*p, "void", 4) == 0) {
+    if (memcmp(*p, "void", 4) == 0 && !is_ident_char((*p)[4])) {
       cur = new_token(TK_VOID, cur, src, *p, 4);
       *p += 4;
       continue;
     }
 
-    if (memcmp(*p, "char", 4) == 0) {
+    if (memcmp(*p, "char", 4) == 0 && !is_ident_char((*p)[4])) {
       cur = new_token(TK_CHAR, cur, src, *p, 4);
       *p += 4;
       continue;
     }
 
-    if (memcmp(*p, "int", 3) == 0) {
+    if (memcmp(*p, "int", 3) == 0 && !is_ident_char((*p)[3])) {
       cur = new_token(TK_INT, cur, src, *p, 3);
       *p += 3;
       continue;
     }
 
-    if (memcmp(*p, "typedef", 7) == 0) {
+    if (memcmp(*p, "typedef", 7) == 0 && !is_ident_char((*p)[7])) {
       cur = new_token(TK_TYPEDEF, cur, src, *p, 7);
       *p += 7;
       continue;

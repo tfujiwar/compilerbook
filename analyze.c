@@ -161,7 +161,7 @@ Node *analyze(Node *node, bool cast_array) {
     if (is_ptr_like(node->lhs) && !is_ptr_like(node->rhs))
       return sub_ptr_node(node->lhs, node->rhs);
 
-    node->type = bigger_type(node->lhs, node->rhs);;
+    node->type = bigger_type(node->lhs, node->rhs);
     return node;
 
   case ND_MUL:
