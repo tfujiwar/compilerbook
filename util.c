@@ -64,15 +64,10 @@ void print_error_cursor(Source *src, char *at) {
   fprintf(stderr, "^ ");
 }
 
-void warning_at(Source *src, char* at, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
+void warning_at(Source *src, char* at, char *msg) {
   print_error_cursor(src, at);
-  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, msg);
   fprintf(stderr, "\n");
-
-  va_end(ap);
 }
 
 void error_at(Source *src, char* at, char *fmt, ...) {
