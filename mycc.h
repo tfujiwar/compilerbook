@@ -251,7 +251,7 @@ void debug(char *msg);
 void error(char *msg);
 void warning_at(Source *src, char* at, char *msg);
 void error_at(Source *src, char* at, char *msg);
-void error_at_token(Token *token, char *fmt, ...);
+void error_at_token(Token *token, char *msg);
 void debug_token(Token *tok);
 void debug_node(Node *node, char *pre1, char *pre2);
 void debug_type(Type *type);

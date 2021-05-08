@@ -147,14 +147,20 @@ int *find_enum_consts(char *name) {
 }
 
 bool expect_token(int kind) {
-  if (token->kind != kind)
-    error_at_token(token, "expected %d, but got %d", kind, token->kind);
+  if (token->kind != kind) {
+    char str[256];
+    sprintf(str, "expected %d, but got %d", kind, token->kind);
+    error_at_token(token, str);
+  }
   token = token->next;
 }
 
 void expect(char *op) {
-  if ((token->kind != TK_RESERVED) || strcmp(token->str, op) != 0)
-    error_at_token(token, "not a '%s'", op);
+  if ((token->kind != TK_RESERVED) || strcmp(token->str, op) != 0) {
+    char str[256];
+    sprintf(str, "not a '%s'", op);
+    error_at_token(token, str);
+  }
   token = token->next;
 }
 

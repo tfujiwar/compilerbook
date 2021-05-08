@@ -77,15 +77,10 @@ void error_at(Source *src, char* at, char *msg) {
   exit(1);
 }
 
-void error_at_token(Token *token, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
+void error_at_token(Token *token, char *msg) {
   print_error_cursor(token->src, token->at);
-  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, msg);
   fprintf(stderr, "\n");
-
-  va_end(ap);
   exit(1);
 }
 
