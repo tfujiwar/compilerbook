@@ -1136,7 +1136,7 @@ Node *unary_right() {
       node = new_node(ND_COMMA, lhs, rhs);
 
     } else if (consume("[")) {
-      node = new_node(ND_DEREF, new_node(ND_ADD, node, unary_right()), NULL);
+      node = new_node(ND_DEREF, new_node(ND_ADD, node, expr()), NULL);
       expect("]");
 
     } else if (consume("(")) {

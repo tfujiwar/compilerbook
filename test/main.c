@@ -215,6 +215,7 @@ int main() {
   { int a[2]; *a=1; *(a+1)=2; int *p; p=a; assert("*p+*(p+1)", *p+*(p+1), 3); }
   { int a[2]; *a=1; *(a+1)=2; int *p; p=a+1; assert("*p+*(p-1)", *p+*(p-1), 3); }
   { int a[2]; a[0]=1; a[1]=2; assert("a[0]+a[1]", a[0]+a[1], 3); }
+  { int a[2]; a[0]=1; a[1]=2; assert("a[0]+a[1]", a[fii(3, 2) - 4], 2); }
 
   { int a[2]; *(a+1)=1; assert("3", 3, 3); }
   { int a[2]; a[1]=1; assert("3", 3, 3); }
