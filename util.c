@@ -70,15 +70,10 @@ void warning_at(Source *src, char* at, char *msg) {
   fprintf(stderr, "\n");
 }
 
-void error_at(Source *src, char* at, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
+void error_at(Source *src, char* at, char *msg) {
   print_error_cursor(src, at);
-  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, msg);
   fprintf(stderr, "\n");
-
-  va_end(ap);
   exit(1);
 }
 
