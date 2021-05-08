@@ -364,7 +364,7 @@ Node *function() {
   if (ty->ty == ENUM && consume(";")) return new_node(ND_DECLARE, NULL, NULL);
 
   Token *ident = consume_ident();
-  if (!ident) error_at_token(ident, "identifier expected");
+  if (!ident) error_at_token(token, "identifier expected");
 
   // Global variable
   if (!consume("(")) {
