@@ -1,6 +1,6 @@
 #include "mycc.h"
 
-int offset = 0;
+int func_offset = 0;
 int struct_label = 0;
 int enum_label = 0;
 
@@ -509,7 +509,7 @@ Node *function() {
     }
 
     scope = new_scope(scope);
-    offset = 0;
+    func_offset = 0;
 
     for (int i = 0; i < func->arg_types->len; i++) {
       Node *arg = new_node(ND_LVAR, NULL, NULL);
@@ -517,8 +517,8 @@ Node *function() {
       lvar->is_global = false;
       lvar->next = locals;
       lvar->type = vec_get(func->arg_types, i);
-      offset += lvar->type->size;
-      lvar->offset = offset;
+      func_offset += lvar->type->size;
+      lvar->offset = func_offset;
       locals = lvar;
       arg->lvar = lvar;
       vec_push(func->args, arg);
@@ -533,7 +533,7 @@ Node *function() {
     }
 
     scope = scope->parent;
-    node->val = offset;
+    node->val = func_offset;
 
     node->func = func;
     node->body = block;
@@ -747,11 +747,11 @@ Node *stmt() {
     lvar->next = locals;
 
     if (ty->ty == ARRAY) {
-      offset += ty->size * ty->array_size;
-      lvar->offset = offset;
+      func_offset += ty->size * ty->array_size;
+      lvar->offset = func_offset;
     } else {
-      offset += ty->size;
-      lvar->offset = offset;
+      func_offset += ty->size;
+      lvar->offset = func_offset;
     }
 
     lvar->type = ty;
@@ -792,8 +792,8 @@ Node *stmt() {
           node->lvar->type->size = node->lvar->type->ptr_to->size * index;
         }
 
-        offset += node->lvar->type->size;
-        lvar->offset = offset;
+        func_offset += node->lvar->type->size;
+        lvar->offset = func_offset;
 
         for (;index <= node->lvar->type->array_size; index++) {
           Node *nd = new_node(ND_LVAR, NULL, NULL);
@@ -846,8 +846,8 @@ Node *stmt() {
           node->lvar->type->size = node->lvar->type->ptr_to->size * (index + 1);
         }
 
-        offset += node->lvar->type->size;
-        lvar->offset = offset;
+        func_offset += node->lvar->type->size;
+        lvar->offset = func_offset;
 
         for (;index < node->lvar->type->array_size; index++) {
           Node *nd = new_node(ND_LVAR, NULL, NULL);
